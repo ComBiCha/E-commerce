@@ -7,7 +7,7 @@ namespace E_commerce.Models
     public class ProductModel
     {
 		[Key]
-		public int Id { get; set; }
+		public long Id { get; set; }
 		[Required, MinLength(4, ErrorMessage = "Name is required")]
 		public string Name { get; set; }
 		public string Slug { get; set; }
