@@ -1,21 +1,21 @@
 ﻿
 @{
     ViewData["title"] = "User Listed";
-    Paginate pager = new Paginate();
+    // Paginate pager = new Paginate();
 
-    int pageNo = 0;
+    // int pageNo = 0;
 
-    if (ViewBag.Pager != null)
-    {
-        pager = ViewBag.Pager;
+    // if (ViewBag.Pager != null)
+    // {
+    //     pager = ViewBag.Pager;
 
-        pageNo = pager.CurrentPage;
-    }
+    //     pageNo = pager.CurrentPage;
+    // }
 }
 <h3>List User</h3>
 <a asp-action="Create" asp-controller="User">Add User</a>
 
-<table class="table">
+<table class="table" id="userTable">
     <thead>
         <tr>
             <th scope="col">#</th>
@@ -24,6 +24,7 @@
             <th scope="col">PasswordHash</th>
             <th scope="col">Phone</th>
             <th scope="col">Role</th>
+            <th scope="col">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -46,4 +47,15 @@
 
     </tbody>
 </table>
-<partial name="_paging" model="@pager" />
+@* <partial name="_paging" model="@pager" /> *@
+@section Scripts {
+    <script>
+        let table = new DataTable('#userTable', {
+        layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                }
+            }
+        });
+    </script>
+}

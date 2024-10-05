@@ -1,4 +1,4 @@
-﻿
+﻿@model ProductDetailsViewModel
 <div>
 	<div class="col-sm-3">
 		@Html.Partial("_SideBarPartical")
@@ -9,7 +9,7 @@
 			<!--product-details-->
 			<div class="col-sm-5">
 				<div class="view-product">
-					<img src="~/media/products/@Model.Image" alt="" />
+					<img src="~/media/products/@Model.ProductDetails.Image" alt="" />
 					<h3>ZOOM</h3>
 				</div>
 				<div id="similar-product" class="carousel slide" data-ride="carousel">
@@ -48,24 +48,24 @@
 				<div class="product-information">
 					<!--/product-information-->
 					<img src="images/product-details/new.jpg" class="newarrival" alt="" />
-					<h2>@Model.Name</h2>
-					<p>Product ID: @Model.Id</p>
+					<h2>@Model.ProductDetails.Name</h2>
+					<p>Product ID: @Model.ProductDetails.Id</p>
 					<img src="images/product-details/rating.png" alt="" />
 					<span>
-						<span>US $@Model.Price</span>
+						<span>US $@Model.ProductDetails.Price</span>
 						<label>Quantity:</label>
 						<input type="text" value="1" />
-						<a asp-action="Add" asp-controller="Cart" asp-route-Id="@Model.Id">
-						<button  type="button" class="btn btn-fefault cart">
+						@* <a asp-action="Add" asp-controller="Cart" asp-route-Id="@Model.Id"> *@
+						<button class="btn btn-fefault add-to-cart" data-product_id="@Model.ProductDetails.Id">
 							<i class="fa fa-shopping-cart"></i>
 							Add to cart
 						</button>
-						</a>
+						@* </a> *@
 					</span>
 					<p><b>Availability:</b> In Stock</p>
 					<p><b>Condition:</b> New</p>
-					<p><b>Brand:</b> @Model.Brand.Name</p>
-					<p><b>Category:</b> @Model.Category.Name</p>
+					<p><b>Brand:</b> @Model.ProductDetails.Brand.Name</p>
+					<p><b>Category:</b> @Model.ProductDetails.Category.Name</p>
 					<a href=""><img src="images/product-details/share.png" class="share img-responsive" alt="" /></a>
 				</div><!--/product-information-->
 			</div>
@@ -75,15 +75,15 @@
 			<!--category-tab-->
 			<div class="col-sm-12">
 				<ul class="nav nav-tabs">
-					<li class="active"><a href="#details" data-toggle="tab">Details</a></li>
+					<li ><a href="#details" data-toggle="tab">Details</a></li>
 					<li><a href="#companyprofile" data-toggle="tab">Company Profile</a></li>
 					<li><a href="#tag" data-toggle="tab">Tag</a></li>
-					<li><a href="#reviews" data-toggle="tab">Reviews (5)</a></li>
+					<li class="active"><a href="#reviews" data-toggle="tab">Reviews (5)</a></li>
 				</ul>
 			</div>
 			<div class="tab-content">
 				<div class="tab-pane fade active in" id="details">
-					@Model.Description
+					@Model.ProductDetails.Description
 				</div>
 
 				<div class="tab-pane fade" id="companyprofile">
@@ -94,7 +94,7 @@
 									<img src="images/home/gallery1.jpg" alt="" />
 									<h2>$56</h2>
 									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
+									<button class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
 								</div>
 							</div>
 						</div>
@@ -198,14 +198,19 @@
 						<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
 						<p><b>Write Your Review</b></p>
 
-						<form action="#">
+						<form autocomplete="off" asp-action="CommentProduct" asp-controller="Product" method="post">
 							<span>
-								<input type="text" placeholder="Your Name" />
-								<input type="email" placeholder="Email Address" />
+								<input type="hidden" asp-for="@Model.ProductDetails.Id" name="ProductId" />
+								<input type="hidden" name="Star" value="5"/>
+								<input asp-for="@Model.Name" type="text" placeholder="Your Name" />
+								<span asp-validation-for="@Model.Name" class="text-danger"></span>
+								<input asp-for="@Model.Email" type="text" placeholder="Your Name" />
+								<span asp-validation-for="@Model.Email" class="text-danger"></span>
 							</span>
-							<textarea name=""></textarea>
+							<textarea asp-for="@Model.Comment"></textarea>
+							<span asp-validation-for="@Model.Comment" class="text-danger"></span>
 							<b>Rating: </b> <img src="images/product-details/rating.png" alt="" />
-							<button type="button" class="btn btn-default pull-right">
+							<button type="submit" class="btn btn-default pull-right">
 								Submit
 							</button>
 						</form>
@@ -217,85 +222,34 @@
 
 		<div class="recommended_items">
 			<!--recommended_items-->
-			<h2 class="title text-center">recommended items</h2>
+			<h2 class="title text-center">Related Products</h2>
 
 			<div id="recommended-item-carousel" class="carousel slide" data-ride="carousel">
 				<div class="carousel-inner">
 					<div class="item active">
-						<div class="col-sm-4">
-							<div class="product-image-wrapper">
-								<div class="single-products">
-									<div class="productinfo text-center">
-										<img src="images/home/recommend1.jpg" alt="" />
-										<h2>$56</h2>
-										<p>Easy Polo Black Edition</p>
-										<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
+						@foreach (var relatedProduct in @ViewBag.RelatedProducts as IEnumerable<ProductModel>)
+						{
+							<div class="col-sm-4">
+								<div class="product-image-wrapper">
+									<div class="single-products">
+										<div class="productinfo text-center">
+											<img src="~/media/products/@relatedProduct.Image" alt="@relatedProduct.Name" width="100%" />
+											<h2>$@relatedProduct.Price</h2>
+											<p>@relatedProduct.Name</p>
+											<p>Category: @relatedProduct.Category.Name</p>
+											<p>Brand: @relatedProduct.Brand.Name</p>
+											<a asp-action="Details" asp-controller="Product" asp-route-Id="@relatedProduct.Id" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>View Details</a>
+										</div>
+									</div>
+									<div class="choose">
+										<ul class="nav nav-pills nav-justified">
+											<li><a href="#"><i class="fa fa-plus-square"></i>Add to wishlist</a></li>
+											<li><a href="#"><i class="fa fa-plus-square"></i>Add to compare</a></li>
+										</ul>
 									</div>
 								</div>
 							</div>
-						</div>
-						<div class="col-sm-4">
-							<div class="product-image-wrapper">
-								<div class="single-products">
-									<div class="productinfo text-center">
-										<img src="images/home/recommend2.jpg" alt="" />
-										<h2>$56</h2>
-										<p>Easy Polo Black Edition</p>
-										<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-sm-4">
-							<div class="product-image-wrapper">
-								<div class="single-products">
-									<div class="productinfo text-center">
-										<img src="images/home/recommend3.jpg" alt="" />
-										<h2>$56</h2>
-										<p>Easy Polo Black Edition</p>
-										<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="item">
-						<div class="col-sm-4">
-							<div class="product-image-wrapper">
-								<div class="single-products">
-									<div class="productinfo text-center">
-										<img src="images/home/recommend1.jpg" alt="" />
-										<h2>$56</h2>
-										<p>Easy Polo Black Edition</p>
-										<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-sm-4">
-							<div class="product-image-wrapper">
-								<div class="single-products">
-									<div class="productinfo text-center">
-										<img src="images/home/recommend2.jpg" alt="" />
-										<h2>$56</h2>
-										<p>Easy Polo Black Edition</p>
-										<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="col-sm-4">
-							<div class="product-image-wrapper">
-								<div class="single-products">
-									<div class="productinfo text-center">
-										<img src="images/home/recommend3.jpg" alt="" />
-										<h2>$56</h2>
-										<p>Easy Polo Black Edition</p>
-										<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-									</div>
-								</div>
-							</div>
-						</div>
+						}								
 					</div>
 				</div>
 				<a class="left recommended-item-control" href="#recommended-item-carousel" data-slide="prev">
@@ -309,3 +263,27 @@
 
 	</div>
 </div>
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+			$('.add-to-cart').click(function () {
+				var Id = $(this).data("product_id");
+
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("Add", "Cart")",
+					data: { Id: Id },
+
+					success: function (result) {
+						if (result) {
+							Swal.fire("Added to cart successfully.");
+						}
+					},
+					error: function () {
+						Swal.fire("Có lỗi xảy ra khi thêm vào giỏ hàng.");
+					}
+				});
+			});
+		});
+	</script>
+}

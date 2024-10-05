@@ -27,6 +27,7 @@ namespace E_commerce.Controllers
 		{
 			return View("~/Views/Checkout/Index.cshtml");
 		}
+		[HttpPost]
 		public async Task<IActionResult> Add(long Id)
 		{
 			ProductModel product = await _dataContext.Products.FindAsync(Id);

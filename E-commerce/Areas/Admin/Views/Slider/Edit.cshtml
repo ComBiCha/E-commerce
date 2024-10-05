@@ -1,8 +1,8 @@
-﻿@model ProductModel
+﻿@model SliderModel
 @{
-    ViewData["title"] = "Edit Product";
+    ViewData["title"] = "Edit Slider";
 }
-<h4>Edit Product</h4>
+<h4>Edit Slider</h4>
 <div class="col-md-9">
     <form asp-action="Edit" method="post" enctype="multipart/form-data">
         <input type="hidden" asp-for="Id"/>
@@ -19,36 +19,34 @@
             <span asp-validation-for="Description" class="text-danger" />
         </div>
         <div class="form-group">
-            <label>Price</label>
-            <input asp-for="Price" class="form-control" />
-            <span asp-validation-for="Price" class="text-danger" />
-        </div>
-        <div class="form-group">
-            <label>Category</label>
-            <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
-                <option>--Choose a Category</option>
+            <label>Status</label>
+            <select asp-for="Status" class="form-control">
+                @if(@Model.Status == 1)
+                {
+                    <option selected value="1">Hiển thị</option>
+                    <option value="0">Ẩn</option>
+                }
+                else
+                {
+                    <option value="1">Hiển thị</option>
+                    <option selected value="0">Ẩn</option>
+                }
+
             </select>
-            <span asp-validation-for="CategoryId" class="text-danger" />
-        </div>
-        <div class="form-group">
-            <label>Brand</label>
-            <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands">
-                <option>--Choose a Brand</option>
-            </select>
-            <span asp-validation-for="BrandId" class="text-danger" />
+            <span asp-validation-for="Status" class="text-danger" />
         </div>
         <div class="form-group">
             <label>Image</label>
             <input asp-for="ImageUpload" class="form-control-file" />
             <span asp-validation-for="ImageUpload" class="text-danger" />
-            <img id="imgpreview" src="@Url.Content("~/media/products/" + ViewBag.OldImage)" alt="Current Image" class="pt-2" style="max-width: 200px; max-height: 200px;" />
+            <img id="imgpreview" src="@Url.Content("~/media/sliders/" + ViewBag.OldImage)" alt="Current Image" class="pt-2" style="max-width: 400px; max-height: 200px;" />
         </div>
         <div class="form-group">
             <button class="btn btn-primary">Update</button>
         </div>
 
     </form>
-    <a asp-action="Index">Back to List Product</a>
+    <a asp-action="Index">Back to List Slider</a>
 </div>
 @section Scripts {
     @{

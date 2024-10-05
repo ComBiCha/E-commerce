@@ -1,20 +1,20 @@
 ﻿@model IEnumerable<OrderModel>
 @{
     ViewData["title"] = "Order Listed";
-    Paginate pager = new Paginate();
+    // Paginate pager = new Paginate();
 
-    int pageNo = 0;
+    // int pageNo = 0;
 
-    if (ViewBag.Pager != null)
-    {
-        pager = ViewBag.Pager;
+    // if (ViewBag.Pager != null)
+    // {
+    //     pager = ViewBag.Pager;
 
-        pageNo = pager.CurrentPage;
-    }
+    //     pageNo = pager.CurrentPage;
+    // }
 }
 <h3>List Order</h3>
 
-<table class="table">
+<table class="table" id="orderTable">
     <thead>
         <tr>
             <th scope="col">#</th>
@@ -22,6 +22,7 @@
             <th scope="col">Order Username</th>
             <th scope="col">Order Date</th>
             <th scope="col">Order Status</th>
+            <th scope="col">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -52,4 +53,15 @@
 
     </tbody>
 </table>
-<partial name="_paging" model="@pager" />
+@* <partial name="_paging" model="@pager" /> *@
+@section Scripts {
+    <script>
+        let table = new DataTable('#orderTable', {
+        layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                }
+            }
+        });
+    </script>
+}

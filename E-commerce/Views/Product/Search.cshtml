@@ -1,0 +1,51 @@
+﻿@model IEnumerable<ProductModel>
+@{
+	ViewData["Title"] = @ViewBag.Keyword;
+}
+<div>
+	<div class="col-sm-3">
+		@Html.Partial("_SideBarPartical")
+	</div>
+	<style>
+		.product-image-wrapper {
+			height:450px;
+		}
+	</style>
+	<div class="col-sm-9 padding-right">
+		<div class="features_items">
+			<!--features_items-->
+			<h2 class="title text-center">@ViewBag.Keyword</h2>
+			@foreach (var item in Model)
+			{
+				<div class="col-sm-4">
+					<div class="product-image-wrapper">
+						<div class="single-products">
+							<div class="productinfo text-center">
+								<img src="~/media/products/@item.Image" alt="@item.Name" width="100%" />
+								<h2>$@item.Price</h2>
+								<p>@item.Name</p>
+								<p>Category: @item.Category.Name</p>
+								<p>Brand: @item.Brand.Name</p>
+								<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>View Details</a>
+							</div>
+							<div class="product-overlay">
+								<div class="overlay-content">
+									<h2>$@item.Price</h2>
+									<p>@item.Name</p>
+									<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>View Details</a>
+								</div>
+							</div>
+						</div>
+						<div class="choose">
+							<ul class="nav nav-pills nav-justified">
+								<li><a href="#"><i class="fa fa-plus-square"></i>Add to wishlist</a></li>
+								<li><a href="#"><i class="fa fa-plus-square"></i>Add to compare</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			}
+
+		</div><!--features_items-->
+	</div>
+</div>
