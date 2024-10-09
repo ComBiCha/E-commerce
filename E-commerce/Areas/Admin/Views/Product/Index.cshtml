@@ -21,6 +21,9 @@
             <th scope="col">#</th>
             <th scope="col">Product Name</th>
             <th scope="col">Product Description</th>
+            
+            <th scope="col">Product Quantity</th>
+            <th scope="col">Product Sold</th>
             <th scope="col">Product Price</th>
             <th scope="col">Product Image</th>
             <th scope="col">Product Slug</th>
@@ -36,6 +39,12 @@
                 <th scope="row">@item.Id</th>
                 <td>@item.Name</td>
                 <td>@Html.Raw(@item.Description)</td>
+                <td><b>@item.Quantity | </b>
+                    @* <br /> *@
+                    <a class="btn btn-success btn-sm" asp-controller="Product" asp-action="AddQuantity" asp-route-Id="@item.Id">+</a>
+                </td>
+                <td><b>@item.Sold</b></td>
+                
                 <td>@item.Price</td>
                 <td><img src="~/media/products/@item.Image" width="120"/></td>
                 <td>@item.Slug</td>

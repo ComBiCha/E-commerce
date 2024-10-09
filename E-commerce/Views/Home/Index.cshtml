@@ -24,7 +24,14 @@
 							<p>@item.Name</p>
 @* 							<p>Category: @item.Category.Name</p> *@
 							<p>Brand: @item.Brand.Name</p>
-							<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>View Details</a>
+								@if (item.Quantity > 0)
+								{
+									<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>View Details</a>
+								}
+								else
+								{
+									<a class="btn btn-default add-to-cart"><i class="fa fa-minus-square"></i>Sold Out</a>
+								}
 								@if (User.Identity?.IsAuthenticated ?? false)
 								{
 									<ul class="nav nav-pills nav-justified">

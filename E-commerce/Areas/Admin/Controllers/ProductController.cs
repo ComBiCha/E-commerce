@@ -211,5 +211,33 @@ namespace E_commerce.Areas.Admin.Controllers
             TempData["success"] = "Product removed successfully";
             return RedirectToAction("Index");
         }
+        [HttpGet]
+        public async Task<IActionResult> AddQuantity(int Id)
+        {
+            var productbyquantity = await _dataContext.ProductQuantities.Where(pq => pq.ProductId == Id).ToListAsync();
+            ViewBag.ProductByQuantity = productbyquantity;
+            ViewBag.Id = Id;
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult StoreProductQuantity(ProductQuantityModel productQuantityModel)
+        {
+            var product = _dataContext.Products.Find(productQuantityModel.ProductId);
+            if(product==null)
+            {
+                return NotFound();
+            }
+            product.Quantity += productQuantityModel.Quantity;
+
+            productQuantityModel.Quantity = productQuantityModel.Quantity;
+            productQuantityModel.ProductId = productQuantityModel.ProductId;
+            productQuantityModel.DateCreated = DateTime.Now;
+
+            _dataContext.Add(productQuantityModel);
+            _dataContext.SaveChangesAsync();
+            TempData["success"] = "Quantity added successfully";
+            return RedirectToAction("AddQuantity", "Product", new { Id = productQuantityModel.ProductId });
+        }
     }
 }

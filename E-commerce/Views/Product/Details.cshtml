@@ -56,10 +56,21 @@
 						<label>Quantity:</label>
 						<input type="text" value="1" />
 						@* <a asp-action="Add" asp-controller="Cart" asp-route-Id="@Model.Id"> *@
-						<button class="btn btn-fefault add-to-cart" data-product_id="@Model.ProductDetails.Id">
-							<i class="fa fa-shopping-cart"></i>
-							Add to cart
-						</button>
+						@if(@Model.ProductDetails.Quantity > 0)
+						{
+							<button class="btn btn-fefault add-to-cart" data-product_id="@Model.ProductDetails.Id">
+								<i class="fa fa-shopping-cart"></i>
+								Add to cart
+							</button>
+						}
+						else
+						{
+							<button class="btn btn-fefault">
+								<i class="fa fa-minus-square"></i>
+								Out of stock
+							</button>
+						}
+
 						@* </a> *@
 					</span>
 					<p><b>Availability:</b> In Stock</p>
