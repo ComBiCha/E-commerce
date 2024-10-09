@@ -32,7 +32,7 @@
                 <th scope="row">@item.Id</th>
                 <td>@item.OrderCode</td>
                 <td>@item.UserName</td>
-                <td>@item.CreatedDate</td>
+                <td>@item.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
                 <td>
                     @if (@item.Status == 1)
                     {

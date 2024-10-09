@@ -2,6 +2,7 @@
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace E_commerce.Controllers
 {
@@ -75,17 +76,19 @@ namespace E_commerce.Controllers
 		}
 		public async Task<IActionResult> Increase(long Id)
 		{
+			ProductModel product = await _dataContext.Products.Where(p => p.Id == Id).FirstOrDefaultAsync();
 			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart");
 
 			CartItemModel cartitem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
 
-			if (cartitem.Quantity >= 1)
+			if (cartitem.Quantity >= 1 && product.Quantity > cartitem.Quantity)
 			{
 				++cartitem.Quantity;
 			}
 			else
 			{
-				cart.RemoveAll(p => p.ProductId == Id);
+				cartitem.Quantity = product.Quantity;
+				TempData["success"] = "The Maximum Quantity available for this Product is " + product.Quantity;
 			}
 			if (cart.Count == 0)
 			{
