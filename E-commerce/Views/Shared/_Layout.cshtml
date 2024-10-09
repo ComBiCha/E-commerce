@@ -63,7 +63,7 @@
 						<div class="logo pull-left">
 							<a href="index.html"><img src="images/home/logo.png" alt="" /></a>
 						</div>
-						<div class="btn-group pull-right">
+						@* <div class="btn-group pull-right">
 							<div class="btn-group">
 								<button type="button" class="btn btn-default dropdown-toggle usa" data-toggle="dropdown">
 									USA
@@ -85,7 +85,7 @@
 									<li><a href="#">Pound</a></li>
 								</ul>
 							</div>
-						</div>
+						</div> *@
 					</div>
 					<div class="col-sm-8">
 						<div class="shop-menu pull-right">
@@ -95,19 +95,20 @@
 								@if(User.Identity?.IsAuthenticated ?? false)
 								{
 									<li><a href="#"><i class="fa fa-user"></i> Account</a></li>
-									<li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>
+									<li><a asp-controller="Home" asp-action="Wishlist"><i class="fa fa-star"></i> Wishlist</a></li>
+									<li><a asp-controller="Home" asp-action="Compare"><i class="fa fa-star"></i> Compare</a></li>
 									@* <li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li> *@
 									@if (User.IsInRole("Admin"))
 									{
-										<li><a asp-controller="Admin"><i class="fa fa-lock"></i>Admin Panel</a></li>
+										<li><a asp-controller="Admin" asp-action="Index"><i class="fa fa-lock"></i>Admin Panel</a></li>
 									}
 
-									<li><a asp-controller="Account" asp-action="Logout"><i class="fa fa-lock"></i>Hi, @User.Identity.Name, Logout</a></li>
+									<li><a asp-controller="Account" asp-action="Logout"><i class="fa fa-sign-out"></i>Hi, @User.Identity.Name, Logout</a></li>
 
 								}
 								else
 								{
-									<li><a asp-controller="Account" asp-action="Login"><i class="fa fa-lock"></i>Login</a></li>
+									<li><a asp-controller="Account" asp-action="Login"><i class="fa fa-sign-in"></i>Login</a></li>
 								}
 							</ul>
 						</div>

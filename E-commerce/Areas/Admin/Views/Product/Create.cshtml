@@ -18,7 +18,8 @@
         </div>
         <div class="form-group">
             <label>Price</label>
-            <input asp-for="Price" class="form-control" />
+            <input asp-for="Price" pattern="[0-9.,]+" class="form-control typing-price" />
+            <span style="color:orange;" id="price-convert"></span>
             <span asp-validation-for="Price" class="text-danger" />
         </div>
         <div class="form-group">
@@ -60,5 +61,14 @@
     </script>
     <script>
         CKEDITOR.replace('Description');
+    </script>
+    <script>
+        $(".typing-price").on("keyup", function () {
+            var currency_input = $(this).val();
+
+            $("#price-convert").html(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
+                currency_input)
+            );
+        });
     </script>
 }
