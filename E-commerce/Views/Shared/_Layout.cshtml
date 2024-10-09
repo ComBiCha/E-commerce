@@ -95,11 +95,12 @@
 								@if(User.Identity?.IsAuthenticated ?? false)
 								{
 									<li><a href="#"><i class="fa fa-user"></i> Account</a></li>
-									<li><a href="#"><i class="fa fa-star"></i> Wishlist</a></li>
+									<li><a asp-controller="Home" asp-action="Wishlist"><i class="fa fa-star"></i> Wishlist</a></li>
+									<li><a asp-controller="Home" asp-action="Compare"><i class="fa fa-star"></i> Compare</a></li>
 									@* <li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li> *@
 									@if (User.IsInRole("Admin"))
 									{
-										<li><a asp-controller="Admin"><i class="fa fa-lock"></i>Admin Panel</a></li>
+										<li><a asp-controller="Admin" asp-action="Index"><i class="fa fa-lock"></i>Admin Panel</a></li>
 									}
 
 									<li><a asp-controller="Account" asp-action="Logout"><i class="fa fa-lock"></i>Hi, @User.Identity.Name, Logout</a></li>

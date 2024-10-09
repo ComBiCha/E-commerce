@@ -1,5 +1,6 @@
 using E_commerce.Models;
 using E_commerce.Repository;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
@@ -10,12 +11,14 @@ namespace E_commerce.Controllers
     {
         private readonly DataContext _datacontext;
         private readonly ILogger<HomeController> _logger;
+        private readonly UserManager<AppUserModel> _userManager;
 
-        public HomeController(ILogger<HomeController> logger, DataContext context)
+        public HomeController(ILogger<HomeController> logger, DataContext context, UserManager<AppUserModel> userManager)
         {
             _logger = logger;
             _datacontext = context;
-        }
+			_userManager = userManager;
+		}
 
         public IActionResult Index()
         {
@@ -46,6 +49,142 @@ namespace E_commerce.Controllers
             {
                 return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
             }
+        }
+        /*public async Task<IActionResult> AddWishList(long Id, WishlistModel wishlistmodel)
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            var wishlistProduct = new WishlistModel
+            {
+                ProductId = Id,
+                UserId = user.Id
+            };
+
+            _datacontext.Wishlists.Add(wishlistProduct);
+
+            try
+            {
+                await _datacontext.SaveChangesAsync();
+                return Ok(new { success = true, message = "Add to wishlist successfully!" });
+            }
+            catch(Exception)
+            {
+                return StatusCode(500, "An error occurred while adding to wishlist.");
+            }
+        }*/
+        public async Task<IActionResult> AddWishList(long Id)
+        {
+            // Get the current user (assume you have a way to retrieve the logged-in user's Id)
+            var userId = await _userManager.GetUserAsync(User);  // Modify based on how you get UserId
+
+            // Check if the product is already in the wishlist for this user
+            var existingWishlist = await _datacontext.Wishlists
+                .FirstOrDefaultAsync(w => w.ProductId == Id && w.UserId == userId.Id);
+
+            if (existingWishlist != null)
+            {
+                TempData["error"] = "Product is already in your wishlist.";
+                return RedirectToAction("Wishlist", "Home");
+            }
+
+            // If not, add the product to the wishlist
+            var newWishlist = new WishlistModel
+            {
+                ProductId = Id,
+                UserId = userId.Id
+            };
+
+            _datacontext.Wishlists.Add(newWishlist);
+            await _datacontext.SaveChangesAsync();
+            TempData["success"] = "Product added to wishlist successfully.";
+
+            return RedirectToAction("Wishlist", "Home");
+        }
+
+        /*public async Task<IActionResult> AddCompare(long Id)
+		{
+			var user = await _userManager.GetUserAsync(User);
+
+			var compareProduct = new CompareModel
+			{
+				ProductId = Id,
+				UserId = user.Id
+			};
+
+			_datacontext.Compares.Add(compareProduct);
+
+			try
+			{
+				await _datacontext.SaveChangesAsync();
+				return Ok(new { success = true, message = "Add to compare successfully!" });
+			}
+			catch (Exception)
+			{
+				return StatusCode(500, "An error occurred while adding to wishlist.");
+			}
+		}*/
+        public async Task<IActionResult> AddCompare(long Id)
+        {
+            // Get the current user (assume you have a way to retrieve the logged-in user's Id)
+            var userId = await _userManager.GetUserAsync(User);
+
+            // Check if the product is already in the compare list for this user
+            var existingCompare = await _datacontext.Compares
+                .FirstOrDefaultAsync(c => c.ProductId == Id && c.UserId == userId.Id);
+
+            if (existingCompare != null)
+            {
+                TempData["error"] = "Product is already in your compare list.";
+                return RedirectToAction("Compare", "Home");
+            }
+
+            // If not, add the product to the compare list
+            var newCompare = new CompareModel
+            {
+                ProductId = Id,
+                UserId = userId.Id
+            };
+
+            _datacontext.Compares.Add(newCompare);
+            await _datacontext.SaveChangesAsync();
+            TempData["success"] = "Product added to compare successfully.";
+
+            return RedirectToAction("Compare", "Home");
+        }
+
+        public async Task<IActionResult> Compare()
+        {
+            var compare_product = await (from c in _datacontext.Compares
+                                         join p in _datacontext.Products on c.ProductId equals p.Id
+                                         join u in _datacontext.Users on c.UserId equals u.Id
+                                         select new { User = u, Product = p, Compares = c }).ToListAsync();
+
+            return View(compare_product);
+        }
+		public async Task<IActionResult> Wishlist()
+		{
+			var wishlist_product = await (from w in _datacontext.Wishlists
+										 join p in _datacontext.Products on w.ProductId equals p.Id
+										 join u in _datacontext.Users on w.UserId equals u.Id
+										 select new { User = u, Product = p, Wishlists = w }).ToListAsync();
+
+			return View(wishlist_product);
+		}
+        public async Task<IActionResult> DeleteCompare(int Id)
+        {
+            CompareModel compare = await _datacontext.Compares.FindAsync(Id);
+            _datacontext.Compares.Remove(compare);
+            await _datacontext.SaveChangesAsync();
+            TempData["success"] = "Compare removed successfully";
+            return RedirectToAction("Compare","Home");
+        }
+        public async Task<IActionResult> DeleteWishlist(int Id)
+        {
+            WishlistModel wishlist = await _datacontext.Wishlists.FindAsync(Id);
+            _datacontext.Wishlists.Remove(wishlist);
+            await _datacontext.SaveChangesAsync();
+            TempData["success"] = "Wishlist removed successfully";
+            return RedirectToAction("Wishlist","Home");
         }
     }
 }

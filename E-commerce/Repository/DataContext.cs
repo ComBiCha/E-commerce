@@ -18,5 +18,7 @@ namespace E_commerce.Repository
 		public DbSet<OrderDetails> OrderDetails { get; set; }
 		public DbSet<SliderModel> Sliders { get; set; }
 		public DbSet<ContactModel> Contacts { get; set; }
+		public DbSet<WishlistModel> Wishlists { get; set; }
+		public DbSet<CompareModel> Compares { get; set; }
 	}
 }

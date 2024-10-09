@@ -22,23 +22,17 @@
 							<img src="~/media/products/@item.Image" alt="@item.Name" width="100%" />
 							<h2>$@item.Price</h2>
 							<p>@item.Name</p>
-							<p>Category: @item.Category.Name</p>
+@* 							<p>Category: @item.Category.Name</p> *@
 							<p>Brand: @item.Brand.Name</p>
 							<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>View Details</a>
+								@if (User.Identity?.IsAuthenticated ?? false)
+								{
+									<ul class="nav nav-pills nav-justified">
+										<li><button class="btn btn-default add-btn-wishlist" data-product_id="@item.Id"><i class="fa fa-plus-square"></i> to wishlist</button></li>
+										<li><button class="btn btn-default add-btn-compare" data-product_id="@item.Id"><i class="fa fa-plus-square"></i> to compare</button></li>
+									</ul>
+								}
 						</div>
-						<div class="product-overlay">
-							<div class="overlay-content">
-								<h2>$@item.Price</h2>
-								<p>@item.Name</p>
-									<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>View Details</a>
-							</div>
-						</div>
-					</div>
-					<div class="choose">
-						<ul class="nav nav-pills nav-justified">
-							<li><a href="#"><i class="fa fa-plus-square"></i>Add to wishlist</a></li>
-							<li><a href="#"><i class="fa fa-plus-square"></i>Add to compare</a></li>
-						</ul>
 					</div>
 				</div>
 			</div>
@@ -47,3 +41,49 @@
 	</div><!--features_items-->
 </div>
 </div>
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+			$('.add-btn-wishlist').click(function () {
+				var Id = $(this).data("product_id");
+
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("AddWishList", "Home")",
+					data: { Id: Id },
+
+					success: function (result) {
+						if (result) {
+							Swal.fire("Added to wishlist successfully.");
+						}
+					},
+					error: function () {
+						Swal.fire("Error when adding to wishlist!");
+					}
+				});
+			});
+		});
+	</script>
+	<script>
+		$(document).ready(function () {
+			$('.add-btn-compare').click(function () {
+				var Id = $(this).data("product_id");
+
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("AddCompare", "Home")",
+					data: { Id: Id },
+
+					success: function (result) {
+						if (result) {
+							Swal.fire("Added to compare successfully.");
+						}
+					},
+					error: function () {
+						Swal.fire("Error when adding to compare!");
+					}
+				});
+			});
+		});
+	</script>
+}
