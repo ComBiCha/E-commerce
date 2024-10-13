@@ -1,0 +1,59 @@
+﻿@model IEnumerable<ContactModel>
+@{
+    ViewData["title"] = "Contact Info";
+    // Paginate pager = new Paginate();
+
+    // int pageNo = 0;
+
+    // if (ViewBag.Pager != null)
+    // {
+    //     pager = ViewBag.Pager;
+
+    //     pageNo = pager.CurrentPage;
+    // }
+}
+<h3>Contact Info</h3>
+
+<table class="table" id="contactTable">
+    <thead>
+        <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Description</th>
+            <th scope="col">Map</th>
+            <th scope="col">Phone</th>
+            <th scope="col">Email</th>
+            <th scope="col">LogoImg</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var item in Model)
+        {
+            <tr>
+                <td>@item.Name</td>
+                <td>@Html.Raw(@item.Description)</td>
+                <td>@Html.Raw(@item.Map)</td>
+                <td>@item.Phone</td>
+                <td>@item.Email</td>
+                <td><img src="~/media/contact/@item.LogoImg" width="120" /></td>
+                <td>
+                    <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Contact">Edit</a>
+                </td>
+            </tr>
+        }
+        
+
+    </tbody>
+</table>
+@* <partial name="_paging" model="@pager" /> *@
+@section Scripts{
+    <script>
+        let table = new DataTable('#productTable', {
+        layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                }
+            }
+        });
+    </script>
+}

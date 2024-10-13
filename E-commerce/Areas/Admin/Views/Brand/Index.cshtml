@@ -1,11 +1,21 @@
 ﻿@model IEnumerable<BrandModel>
 @{
     ViewData["title"] = "Brand Listed";
+    // Paginate pager = new Paginate();
+
+    // int pageNo = 0;
+
+    // if (ViewBag.Pager != null)
+    // {
+    //     pager = ViewBag.Pager;
+
+    //     pageNo = pager.CurrentPage;
+    // }
 }
 <h3>List Brand</h3>
 <a asp-action="Create" asp-controller="Brand">Add Brand</a>
 
-<table class="table">
+<table class="table" id="brandTable">
     <thead>
         <tr>
             <th scope="col">#</th>
@@ -13,6 +23,7 @@
             <th scope="col">Brand Description</th>
             <th scope="col">Brand Slug</th>
             <th scope="col">Brand Status</th>
+            <th scope="col">Brand Manage</th>
         </tr>
     </thead>
     <tbody>
@@ -21,7 +32,7 @@
             <tr>
                 <th scope="row">@item.Id</th>
                 <td>@item.Name</td>
-                <td>@item.Description</td>
+                <td>@Html.Raw(@item.Description)</td>
                 <td>@item.Slug</td>
                 <td>
                     @if(@item.Status==1)
@@ -43,3 +54,9 @@
 
     </tbody>
 </table>
+@* <partial name="_paging" model="@pager" /> *@
+@section Scripts {
+    <script>
+        let table = new DataTable('#brandTable');
+    </script>
+}

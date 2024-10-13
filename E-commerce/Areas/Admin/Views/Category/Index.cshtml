@@ -1,11 +1,22 @@
 ﻿@model IEnumerable<CategoryModel>
 @{
     ViewData["title"] = "Category Listed";
+
+    // Paginate pager = new Paginate();
+
+    // int pageNo = 0;
+
+    // if(ViewBag.Pager != null)
+    // {
+    //     pager = ViewBag.Pager;
+
+    //     pageNo = pager.CurrentPage;
+    // }
 }
 <h3>List Category</h3>
 <a asp-action="Create" asp-controller="Category">Add Category</a>
 
-<table class="table">
+<table class="table" id="categoryTable">
     <thead>
         <tr>
             <th scope="col">#</th>
@@ -13,6 +24,7 @@
             <th scope="col">Category Description</th>
             <th scope="col">Category Slug</th>
             <th scope="col">Category Status</th>
+            <th scope="col">Category Manage</th>
         </tr>
     </thead>
     <tbody>
@@ -21,7 +33,7 @@
             <tr>
                 <th scope="row">@item.Id</th>
                 <td>@item.Name</td>
-                <td>@item.Description</td>
+                <td>@Html.Raw(@item.Description)</td>
                 <td>@item.Slug</td>
                 <td>
                     @if(@item.Status==1)
@@ -39,7 +51,11 @@
                 </td>
             </tr>
         }
-
-
     </tbody>
 </table>
+@* <partial name="_paging" model="@pager" /> *@
+@section Scripts {
+    <script>
+        let table = new DataTable('#categoryTable');
+    </script>
+}

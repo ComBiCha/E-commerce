@@ -1,3 +1,4 @@
+using E_commerce.Areas.Admin.Repository;
 using E_commerce.Models;
 using E_commerce.Repository;
 using Microsoft.AspNetCore.Identity;
@@ -10,6 +11,9 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration["ConnectionStrings:ConnectedDb"]);
 });
+
+//Email
+builder.Services.AddTransient<IEmailSender, EmailSender>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
@@ -61,7 +65,6 @@ app.UseStaticFiles();
 app.UseRouting();
 
 app.UseAuthentication();
-app.UseAuthorization();
 
 app.UseAuthorization();
 

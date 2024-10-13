@@ -8,6 +8,11 @@
 	<title>@ViewData["title"] - Admin Areas</title>
 	<link href="~/css/bootstrap.min.css" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.min.css" rel="stylesheet">
+	<link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.dataTables.css" rel="stylesheet">
+	
+	
+	<link href="//cdn.datatables.net/2.1.7/css/dataTables.dataTables.min.css" rel="stylesheet">
 	<link href="~/css/prettyPhoto.css" rel="stylesheet">
 	<link href="~/css/price-range.css" rel="stylesheet">
 	<link href="~/css/animate.css" rel="stylesheet">
@@ -22,6 +27,7 @@
 	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+
 </head><!--/head-->
 
 <body>
@@ -67,10 +73,15 @@
 						</div>
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a asp-controller="Home" class="active">Home</a></li>
+								<li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
 								<li><a asp-controller="Product" asp-action="Index">Products</a></li>
 								<li><a asp-controller="Category" asp-action="Index">Categories</a></li>
 								<li><a asp-controller="Brand" asp-action="Index">Brands</a></li>
+								<li><a asp-controller="Order" asp-action="Index">Orders</a></li>
+								<li><a asp-controller="User" asp-action="Index">Users</a></li>
+								<li><a asp-controller="Role" asp-action="Index">Roles</a></li>
+								<li><a asp-controller="Slider" asp-action="Index">Sliders</a></li>
+								<li><a asp-controller="Contact" asp-action="Index">Contact</a></li>
 							</ul>
 						</div>
 					</div>
@@ -114,6 +125,37 @@
 	<script src="~/js/jquery.prettyPhoto.js"></script>
 	<script src="~/js/main.js"></script>
 	<script src="~/backend/js/site.js"></script>
+	<script src="//cdn.datatables.net/2.1.7/js/dataTables.min.js"></script>
+
+	<script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
+	<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.dataTables.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+	<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.print.min.js"></script>
+	
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.all.min.js"></script>
+	<script>
+		$(function () {
+			var message = '@TempData["success"]';
+			if(message != '')
+				Swal.fire({
+				icon: "success",
+				title: "Yayyy",
+				text: message,
+				});
+		});
+		$(function () {
+			var message = '@TempData["error"]';
+			if(message != '')
+				Swal.fire({
+				icon: "error",
+				title: "Oops...",
+				text: message,
+				});
+		});
+	</script>
 	@await RenderSectionAsync("Scripts",required:false)
 </body>
 </html>

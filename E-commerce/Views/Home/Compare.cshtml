@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["title"] = "Compare Listed";
+    // Paginate pager = new Paginate();
+
+    // int pageNo = 0;
+
+    // if (ViewBag.Pager != null)
+    // {
+    //     pager = ViewBag.Pager;
+
+    //     pageNo = pager.CurrentPage;
+    // }
+}
+<h3>List Compare</h3>
+
+<table class="table" id="productTable">
+    <thead>
+        <tr>
+            <th scope="col">Product Name</th>
+            <th scope="col">Product Description</th>
+            <th scope="col">Product Price</th>
+            <th scope="col">Product Image</th>
+            <th scope="col">Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var compare_product in Model)
+        {
+            <tr>
+                <td>@compare_product.Product.Name</td>
+                <td>@Html.Raw(@compare_product.Product.Description)</td>
+                <td>@compare_product.Product.Price</td>
+                <td><img src="~/media/products/@compare_product.Product.Image" width="120" /></td>
+                <td>
+                    <a asp-action="DeleteCompare" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Home" asp-route-Id="@compare_product.Compares.Id">Delete</a>
+                </td>
+            </tr>
+        }
+
+
+    </tbody>
+</table>
+@* <partial name="_paging" model="@pager" /> *@
+@section Scripts {
+    <script>
+        let table = new DataTable('#productTable', {
+        layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                }
+            }
+        });
+    </script>
+}
