@@ -75,6 +75,7 @@
 							<ul class="nav navbar-nav collapse navbar-collapse">
 								<li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
 								<li><a asp-controller="Product" asp-action="Index">Products</a></li>
+								<li><a asp-controller="Shipping" asp-action="Index">Shippings</a></li>
 								<li><a asp-controller="Category" asp-action="Index">Categories</a></li>
 								<li><a asp-controller="Brand" asp-action="Index">Brands</a></li>
 								<li><a asp-controller="Order" asp-action="Index">Orders</a></li>
@@ -82,6 +83,7 @@
 								<li><a asp-controller="Role" asp-action="Index">Roles</a></li>
 								<li><a asp-controller="Slider" asp-action="Index">Sliders</a></li>
 								<li><a asp-controller="Contact" asp-action="Index">Contact</a></li>
+								
 							</ul>
 						</div>
 					</div>
@@ -154,6 +156,15 @@
 				title: "Oops...",
 				text: message,
 				});
+		});
+	</script>
+	<script>
+		let table = new DataTable('#myTable', {
+		layout: {
+				topStart: {
+					buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+				}
+			}
 		});
 	</script>
 	@await RenderSectionAsync("Scripts",required:false)
