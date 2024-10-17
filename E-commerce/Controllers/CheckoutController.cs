@@ -11,8 +11,7 @@ namespace E_commerce.Controllers
 	{
 		private readonly DataContext _datacontext;
 		private readonly IEmailSender _emailSender;
-
-        public CheckoutController(DataContext context, IEmailSender emailSender)
+		public CheckoutController(DataContext context, IEmailSender emailSender)
 		{
 			_datacontext = context;
 			_emailSender = emailSender;

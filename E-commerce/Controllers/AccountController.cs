@@ -1,10 +1,7 @@
-﻿using E_commerce.Areas.Admin.Repository;
-using E_commerce.Models;
+﻿using E_commerce.Models;
 using E_commerce.Models.ViewModel;
-using E_commerce.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace E_commerce.Controllers
 {
@@ -12,63 +9,16 @@ namespace E_commerce.Controllers
     {
         private UserManager<AppUserModel> _userManager;
         private SignInManager<AppUserModel> _signInManager;
-        private readonly DataContext _dataContext;
-        private readonly IEmailSender _emailSender;
-        public AccountController(SignInManager<AppUserModel> signInManager, UserManager<AppUserModel> userManager, DataContext dataContext, IEmailSender emailSender) 
+        public AccountController(SignInManager<AppUserModel> signInManager, UserManager<AppUserModel> userManager) 
         {
             _signInManager = signInManager;
             _userManager = userManager;
-            _dataContext = dataContext;
-            _emailSender = emailSender;
         }
         public IActionResult Login(string returnUrl)
         {
             return View(new LoginViewModel { ReturnUrl = returnUrl});
         }
-        public async Task<IActionResult> NewPassword(string returnUrl)
-        {
-            return View();
-        }
-        public async Task<IActionResult> SendEmailForgotPassword(AppUserModel user)
-        {
-            var checkMail = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == user.Email);
-            if(checkMail == null)
-            {
-                TempData["error"] = "Email not found";
-                return RedirectToAction("ForgotPassword", "Account");
-            }
-            else
-            {
-                string token = Guid.NewGuid().ToString();
-                //update token to user
-                checkMail.Token = token;
-                _dataContext.Update(checkMail);
-                await _dataContext.SaveChangesAsync();
-                //update token to user
-                var receiver = checkMail.Email;
-                var subject = "Change password for user " + checkMail.Email;
-                var message ="Click on link to change password " + "<a href='" + $"{Request.Scheme}: //{Request.Host}/Account/NewPassword?email=" + checkMail.Email + "&token=" + token + "'>";
-                await _emailSender.SendEmailAsync(receiver, subject, message);
-            }
-            TempData["success"] = "An email has been send to your registered email address with password reset instructions.";
-            return RedirectToAction("ForgetPassword", "Account");
-        }
-        public async Task<IActionResult> ForgetPassword(AppUserModel user, string token)
-        {
-            var checkUser = await _userManager.Users.Where(u => u.Email == user.Email).Where(u => u.Token == user.Token).FirstOrDefaultAsync();
-            if (checkUser != null)
-            {
-                ViewBag.Email = checkUser.Email;
-                ViewBag.Token = token;
-            }
-            else
-            {
-                TempData["error"] = "Email not found or token is not right";
-                return RedirectToAction("ForgotPassword", "Account");
-            }
-            return View();
-        }
-        [HttpPost]
+		[HttpPost]
 		public async Task<IActionResult> Login(LoginViewModel loginVM)
         {
             if (ModelState.IsValid)
