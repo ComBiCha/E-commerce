@@ -2,37 +2,47 @@
 @{
     ViewData["Title"] = "Register User";
 }
-	<section id=""><!--form-->
-		<div class="container">
-		<div class="col-sm-8 col-sm-offset-1">
-			<div class="signup-form">
-				<!--sign up form-->
-				<h2>New User Signup!</h2>
-				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-				<form asp-action="Create" asp-controller="Account">
-					<div class="form-group">
-						<label>Username</label>
-						<input asp-for="UserName" class="form-control" />
-						<span asp-validation-for="UserName" class="text-danger" />
-					</div>
-					<div class="form-group">
-						<label>Email</label>
-						<input asp-for="Email" class="form-control" />
-						<span asp-validation-for="Email" class="text-danger" />
-					</div>
-					<div class="form-group">
-						<label>Password</label>
-						<input asp-for="Password" class="form-control" />
-						<span asp-validation-for="Password" class="text-danger" />
-					</div>
-					<button type="submit" class="btn btn-default">Create</button>
-				</form>
-			</div><!--/sign up form-->
-		</div>
-		</div>
-	</section><!--/form-->
+<section class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg p-4">
+                <h2 class="text-center mb-4">Welcome to E-Shop!</h2>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <form asp-action="Create" asp-controller="Account" novalidate>
+                    <div class="mb-3">
+                        <label asp-for="UserName" class="form-label">Username</label>
+                        <input asp-for="UserName" class="form-control" placeholder="Enter your username" />
+                        <div class="text-danger">
+                            <span asp-validation-for="UserName"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">Email</label>
+                        <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+                        <div class="text-danger">
+                            <span asp-validation-for="Email"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label">Password</label>
+                        <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password" />
+                        <div class="text-danger">
+                            <span asp-validation-for="Password"></span>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <a asp-action="Login" asp-controller="Account" class="link-secondary">Already have an account? Login</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
 @section Scripts {
-	@{
-		await Html.RenderPartialAsync("_ValidationScriptsPartial");
-	}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

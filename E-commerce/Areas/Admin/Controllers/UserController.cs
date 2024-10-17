@@ -22,7 +22,9 @@ namespace E_commerce.Areas.Admin.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
 		}
-        /*public async Task<IActionResult> Index()
+        [HttpGet]
+        [Route("Index")]
+        public async Task<IActionResult> Index()
         {
             var usersWithRoles = await (from u in _dataContext.Users
                                         join ur in _dataContext.UserRoles on u.Id equals ur.UserId
@@ -30,69 +32,68 @@ namespace E_commerce.Areas.Admin.Controllers
                                         select new { User = u, RoleName = r.Name }).ToListAsync();
             return View(usersWithRoles);
         }
-        public async Task<IActionResult> Index(int pg = 1)
-        {
-            List<CategoryModel> category = _dataContext.Categories.ToList(); //33 datas
+        //public async Task<IActionResult> Index(int pg = 1)
+        //{
+        //    List<CategoryModel> category = _dataContext.Categories.ToList(); //33 datas
 
+        //    const int pageSize = 10; //10 items/trang
 
-            const int pageSize = 10; //10 items/trang
+        //    if (pg < 1) //page < 1;
+        //    {
+        //        pg = 1; //page ==1
+        //    }
+        //    int recsCount = category.Count(); //33 items;
 
-            if (pg < 1) //page < 1;
-            {
-                pg = 1; //page ==1
-            }
-            int recsCount = category.Count(); //33 items;
+        //    var pager = new Paginate(recsCount, pg, pageSize);
 
-            var pager = new Paginate(recsCount, pg, pageSize);
+        //    int recSkip = (pg - 1) * pageSize; //(3 - 1) * 10; 
 
-            int recSkip = (pg - 1) * pageSize; //(3 - 1) * 10; 
+        //    //category.Skip(20).Take(10).ToList()
 
-            //category.Skip(20).Take(10).ToList()
+        //    var data = category.Skip(recSkip).Take(pager.PageSize).ToList();
 
-            var data = category.Skip(recSkip).Take(pager.PageSize).ToList();
+        //    ViewBag.Pager = pager;
 
-            ViewBag.Pager = pager;
+        //    return View(data);
+        //}
+        //public async Task<IActionResult> Index(int pg = 1)
+        //{
+        //    // Step 1: Retrieve users and their roles
+        //    var usersWithRoles = await (from u in _dataContext.Users
+        //                                join ur in _dataContext.UserRoles on u.Id equals ur.UserId
+        //                                join r in _dataContext.Roles on ur.RoleId equals r.Id
+        //                                select new { User = u, RoleName = r.Name }).ToListAsync();
 
-            return View(data);
-        }*/
-        public async Task<IActionResult> Index(int pg = 1)
-        {
-            // Step 1: Retrieve users and their roles
-            var usersWithRoles = await (from u in _dataContext.Users
-                                        join ur in _dataContext.UserRoles on u.Id equals ur.UserId
-                                        join r in _dataContext.Roles on ur.RoleId equals r.Id
-                                        select new { User = u, RoleName = r.Name }).ToListAsync();
+        //    // Step 2: Retrieve categories and paginate them
+        //    List<AppUserModel> user = _dataContext.Users.ToList(); // Assume 33 datas
 
-            // Step 2: Retrieve categories and paginate them
-            List<AppUserModel> user = _dataContext.Users.ToList(); // Assume 33 datas
+        //    const int pageSize = 10; // Items per page
+        //    if (pg < 1)
+        //    {
+        //        pg = 1; // Ensuring that page is at least 1
+        //    }
 
-            const int pageSize = 10; // Items per page
-            if (pg < 1)
-            {
-                pg = 1; // Ensuring that page is at least 1
-            }
+        //    int recsCount = user.Count(); // Total categories count (33 items in this case)
 
-            int recsCount = user.Count(); // Total categories count (33 items in this case)
+        //    var pager = new Paginate(recsCount, pg, pageSize);
 
-            var pager = new Paginate(recsCount, pg, pageSize);
+        //    int recSkip = (pg - 1) * pageSize; // Calculate how many records to skip
 
-            int recSkip = (pg - 1) * pageSize; // Calculate how many records to skip
+        //    // Paginate categories
+        //    var data = user.Skip(recSkip).Take(pager.PageSize).ToList();
 
-            // Paginate categories
-            var data = user.Skip(recSkip).Take(pager.PageSize).ToList();
+        //    // Step 3: Pass both results to the View using a ViewModel
+        //    ViewBag.Pager = pager;
 
-            // Step 3: Pass both results to the View using a ViewModel
-            ViewBag.Pager = pager;
+        //    // Create a combined ViewModel to pass both sets of data
+        //    var viewModel = new CombinedViewModel
+        //    {
+        //        UsersWithRoles = usersWithRoles,
+        //        Users = data
+        //    };
 
-            // Create a combined ViewModel to pass both sets of data
-            var viewModel = new CombinedViewModel
-            {
-                UsersWithRoles = usersWithRoles,
-                Users = data
-            };
-
-            return View(viewModel);
-        }
+        //    return View(viewModel);
+        //}
 
         [HttpGet]
 		public async Task<IActionResult> Create()
@@ -191,6 +192,7 @@ namespace E_commerce.Areas.Admin.Controllers
             return View(user);
         }
         [HttpPost]
+        [Route("Edit")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, AppUserModel user)
         {

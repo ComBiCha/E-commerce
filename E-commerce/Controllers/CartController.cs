@@ -1,6 +1,8 @@
-﻿using E_commerce.Models;
+﻿using E_commerce.Areas.Admin.Repository;
+using E_commerce.Models;
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,7 +11,7 @@ namespace E_commerce.Controllers
 	public class CartController : Controller
 	{
 		private readonly DataContext _dataContext;
-		public CartController(DataContext dataContext)
+        public CartController(DataContext dataContext)
 		{
 			_dataContext = dataContext;
 		}
@@ -24,6 +26,8 @@ namespace E_commerce.Controllers
 			};
 			return View(cartVM);
 		}
+		[Authorize]
+		[HttpGet]
 		public IActionResult Checkout()
 		{
 			return View("~/Views/Checkout/Index.cshtml");
@@ -123,5 +127,9 @@ namespace E_commerce.Controllers
             TempData["success"] = "Clear cart Successfully";
             return RedirectToAction("Index");
 		}
-	}
+		public IActionResult PaymentSuccess()
+		{
+			return View("Success");
+		}
+    }
 }

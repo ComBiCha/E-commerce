@@ -28,6 +28,18 @@ namespace E_commerce.Controllers
             return View(products);
         }
 
+        public async Task<IActionResult> Account()
+        {
+            var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var userModel = new UserModel { UserName = user.UserName, Email = user.Email };
+            return View(userModel);
+        }
+
         public IActionResult Privacy()
         {
             return View();

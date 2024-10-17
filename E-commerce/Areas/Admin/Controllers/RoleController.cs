@@ -18,6 +18,7 @@ namespace E_commerce.Areas.Admin.Controllers
             _dataContext = context;
             _roleManager = roleManager;
         }
+        [Route("Index")]
         public async Task<IActionResult> Index(int pg = 1)
         {
             List<IdentityRole> role = _dataContext.Roles.ToList(); //33 datas
@@ -43,23 +44,29 @@ namespace E_commerce.Areas.Admin.Controllers
 
             return View(data);
         }
+        
         [HttpGet]
+        [Route("Create")]
         public IActionResult Create()
         {
             return View();
         }
+        
         [HttpPost]
+        [Route("Create")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(IdentityRole role)
         {
             if (!_roleManager.RoleExistsAsync(role.Name).GetAwaiter().GetResult())
             {
                 _roleManager.CreateAsync(new IdentityRole(role.Name)).GetAwaiter().GetResult();
-				TempData["success"] = "Role added successfully!";
-			}
+                TempData["success"] = "Role added successfully!";
+            }
             return Redirect("Index");
         }
+        
         [HttpGet]
+        [Route("Edit")]
         public async Task<IActionResult> Edit(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -69,7 +76,9 @@ namespace E_commerce.Areas.Admin.Controllers
             var role = await _roleManager.FindByIdAsync(id);
             return View(role);
         }
-        [HttpPost]
+		
+		[HttpPost]
+        [Route("Edit")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, IdentityRole model)
         {
@@ -102,7 +111,8 @@ namespace E_commerce.Areas.Admin.Controllers
 
             return View(model ?? new IdentityRole { Id = id });
         }
-        [HttpGet]
+		[Route("Delete")]
+		[HttpGet]
         public async Task<IActionResult> Delete(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -120,7 +130,6 @@ namespace E_commerce.Areas.Admin.Controllers
             {
                 await _roleManager.DeleteAsync(role);
                 TempData["success"] = "Role deleted successfully!";
-
             }
             catch (Exception ex)
             {

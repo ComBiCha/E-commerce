@@ -1,7 +1,6 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @model IEnumerable<IdentityRole>
 
-
 @{
     ViewData["title"] = "Role Listed";
     Paginate pager = new Paginate();
@@ -37,8 +36,6 @@
                 </td>
             </tr>
         }
-
-
     </tbody>
 </table>
 <partial name="_paging" model="@pager" />

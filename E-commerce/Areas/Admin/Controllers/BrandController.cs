@@ -55,10 +55,8 @@ namespace E_commerce.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(BrandModel brand)
         {
-
             if (ModelState.IsValid)
             {
-
                 brand.Slug = brand.Name.Replace(" ", "-");
                 var slug = await _dataContext.Brands.FirstOrDefaultAsync(p => p.Slug == brand.Slug);
                 if (slug != null)
