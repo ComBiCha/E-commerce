@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 namespace E_commerce.Areas.Admin.Controllers
 {
     [Area("Admin")]
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class ProductController : Controller
     {
         private readonly DataContext _dataContext;
@@ -18,9 +18,34 @@ namespace E_commerce.Areas.Admin.Controllers
             _dataContext = context;
             _webHostEnvironment = webHostEnvironment;
         }
-        public async Task<IActionResult> Index()
+        /*public async Task<IActionResult> Index()
         {
             return View(await _dataContext.Products.OrderByDescending(p => p.Id).Include(p => p.Category).Include(p => p.Brand).ToListAsync());
+        }*/
+        public async Task<IActionResult> Index(int pg = 1)
+        {
+            List<ProductModel> product = _dataContext.Products.Include(p => p.Category).Include(p => p.Brand).ToList(); //33 datas
+
+
+            const int pageSize = 10; //10 items/trang
+
+            if (pg < 1) //page < 1;
+            {
+                pg = 1; //page ==1
+            }
+            int recsCount = product.Count(); //33 items;
+
+            var pager = new Paginate(recsCount, pg, pageSize);
+
+            int recSkip = (pg - 1) * pageSize; //(3 - 1) * 10; 
+
+            //category.Skip(20).Take(10).ToList()
+
+            var data = product.Skip(recSkip).Take(pager.PageSize).ToList();
+
+            ViewBag.Pager = pager;
+
+            return View(data);
         }
         [HttpGet]
         public IActionResult Create()
@@ -80,7 +105,7 @@ namespace E_commerce.Areas.Admin.Controllers
                 return BadRequest(errorMessage);
             }
         }
-        public async Task<IActionResult> Edit(int Id)
+        public async Task<IActionResult> Edit(long Id)
         {
             ProductModel product = await _dataContext.Products.FindAsync(Id);
             ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name", product.CategoryId);
@@ -90,7 +115,7 @@ namespace E_commerce.Areas.Admin.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(ProductModel product, int Id)
+        public async Task<IActionResult> Edit(ProductModel product, long Id)
         {
             ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name", product.BrandId);
@@ -139,7 +164,7 @@ namespace E_commerce.Areas.Admin.Controllers
                 return BadRequest(errorMessage);
             }
         }
-        public async Task<IActionResult> Delete(int Id)
+        public async Task<IActionResult> Delete(long Id)
         {
             ProductModel product = await _dataContext.Products.FindAsync(Id);
             if(!string.Equals(product.Image, "noname.jpg"))

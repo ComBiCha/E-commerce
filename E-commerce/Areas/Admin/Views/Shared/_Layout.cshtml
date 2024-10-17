@@ -8,6 +8,7 @@
 	<title>@ViewData["title"] - Admin Areas</title>
 	<link href="~/css/bootstrap.min.css" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.min.css" rel="stylesheet">
 	<link href="~/css/prettyPhoto.css" rel="stylesheet">
 	<link href="~/css/price-range.css" rel="stylesheet">
 	<link href="~/css/animate.css" rel="stylesheet">
@@ -22,6 +23,7 @@
 	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+
 </head><!--/head-->
 
 <body>
@@ -67,10 +69,13 @@
 						</div>
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a asp-controller="Home" class="active">Home</a></li>
+								<li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
 								<li><a asp-controller="Product" asp-action="Index">Products</a></li>
 								<li><a asp-controller="Category" asp-action="Index">Categories</a></li>
 								<li><a asp-controller="Brand" asp-action="Index">Brands</a></li>
+								<li><a asp-controller="Order" asp-action="Index">Orders</a></li>
+								<li><a asp-controller="User" asp-action="Index">Users</a></li>
+								<li><a asp-controller="Role" asp-action="Index">Roles</a></li>
 							</ul>
 						</div>
 					</div>
@@ -114,6 +119,27 @@
 	<script src="~/js/jquery.prettyPhoto.js"></script>
 	<script src="~/js/main.js"></script>
 	<script src="~/backend/js/site.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.all.min.js"></script>
+	<script>
+		$(function () {
+			var message = '@TempData["success"]';
+			if(message != '')
+				Swal.fire({
+				icon: "success",
+				title: "Yayyy",
+				text: message,
+				});
+		});
+		$(function () {
+			var message = '@TempData["error"]';
+			if(message != '')
+				Swal.fire({
+				icon: "error",
+				title: "Oops...",
+				text: message,
+				});
+		});
+	</script>
 	@await RenderSectionAsync("Scripts",required:false)
 </body>
 </html>

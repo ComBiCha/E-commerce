@@ -17,47 +17,55 @@
 			<table class="table table-condensed">
 				<thead>
 					<tr class="cart_menu">
-						<td class="image">Item</td>
-						<td class="description"></td>
-						<td class="price">Price</td>
-						<td class="quantity">Quantity</td>
-						<td class="total">Total</td>
-						<td></td>
+						<td class="name" style="width: 40%;">Product Name</td>
+						<td class="image" style="width: 20%;">Image</td>
+						<td class="price" style="width: 10%;">Price</td>
+						<td class="quantity" style="width: 20%;">Quantity</td>
+						<td class="total" style="width: 10%;">Total</td>
 					</tr>
 				</thead>
 				<tbody>
 					@if(Model.CartItems.Count > 0){
 						@foreach(var item in Model.CartItems){
-					<tr>
-						<td class="cart_product">
-							<a href=""><img src="~images/@item.Image" alt=""></a>
-						</td>
-						<td class="cart_description">
-							<h4><a href="">@item.ProductName</a></h4>
-						</td>
-						<td class="cart_price">
-							<p>$@item.Price</p>
-						</td>
-								<td >
-								<a class="btn btn-success btn-sm" asp-controller="Cart" asp-action="Increase" asp-route-Id="@item.ProductId"> + </a>
-								<input class="cart_quantity_input" type="text" name="quantity" value="@item.Quantity" autocomplete="off" size="2">
-								<a class="btn btn-success btn-sm" asp-controller="Cart" asp-action="Decrease" asp-route-Id="@item.ProductId"> - </a>
-								<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Remove" asp-route-Id="@item.ProductId"> Remove </a>
-								</td>
-						<td class="cart_total">
-							<p class="cart_total_price">$@Model.CartItems.Where(x => x.ProductId == item.ProductId).Sum(x => x.Quantity*x.Price).ToString()</p>
-						</td>
-@* 						<td class="cart_delete">
-							<a class="cart_quantity_delete" href=""><i class="fa fa-times"></i></a>
-						</td> *@
+						<tr>
+							<td class="cart_description">
+								<h4><a href="">@item.ProductName</a></h4>
+							</td>
+							<td class="cart_product">
+								<img src="~/media/products/@item.Image" alt="" style="max-width:100px">
+							</td>				
+							<td class="cart_price">
+								<p>$@item.Price</p>
+							</td>
+									<td>
+									<a class="btn btn-success btn-sm" asp-controller="Cart" asp-action="Increase" asp-route-Id="@item.ProductId"> + </a>
+									<input class="cart_quantity_input" type="text" name="quantity" value="@item.Quantity" autocomplete="off" size="2">
+									<a class="btn btn-success btn-sm" asp-controller="Cart" asp-action="Decrease" asp-route-Id="@item.ProductId"> - </a>
+									<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Remove" asp-route-Id="@item.ProductId"> Remove </a>
+									</td>
+							<td class="cart_total">
+								<p class="cart_total_price">$@Model.CartItems.Where(x => x.ProductId == item.ProductId).Sum(x => x.Quantity*x.Price).ToString()</p>
+							</td>
+	@* 						<td class="cart_delete">
+								<a class="cart_quantity_delete" href=""><i class="fa fa-times"></i></a>
+							</td> *@
 						</tr>
 						}
-						<tr rowspan="5">
-							<td colspan="6">Grand Total: <p class="cart_total_price">@Model.GrandTotal.ToString()</p></td>
-							<td><a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Clear"> Clear </a></td>
-							@if (User.Identity?.IsAuthenticated ?? false) {
-							<td><a class="btn btn-danger btn-sm" asp-controller="Checkout" asp-action="CheckOut"> Checkout </a></td>
-							}
+						<tr>
+							<td colspan="3"></td>
+							<td colspan="2" class="text-right">
+								<strong>Grand Total: $@Model.GrandTotal.ToString()</strong>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="3"></td>
+							<td colspan="2" class="text-right">
+								<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Clear"> Clear Cart </a>
+								@if (User.Identity?.IsAuthenticated ?? false)
+								{
+									<a style="margin-top:0px" class="btn btn-primary btn-sm" asp-controller="Checkout" asp-action="CheckOut"> Checkout </a>
+								}
+							</td>
 						</tr>
 					}
 					else
@@ -71,3 +79,12 @@
 		</div>
 	</div>
 </section> <!--/#cart_items-->
+<style>
+	.text-right {
+		text-align: right;
+	}
+
+	.btn-sm {
+		margin-left: 10px;
+	}
+</style>

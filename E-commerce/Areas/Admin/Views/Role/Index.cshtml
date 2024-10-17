@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNetCore.Identity
+@model IEnumerable<IdentityRole>
+
+
+@{
+    ViewData["title"] = "Role Listed";
+    Paginate pager = new Paginate();
+
+    int pageNo = 0;
+
+    if (ViewBag.Pager != null)
+    {
+        pager = ViewBag.Pager;
+
+        pageNo = pager.CurrentPage;
+    }
+}
+<h3>List Role</h3>
+<a asp-action="Create" asp-controller="Role">Add Role</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">Role Id</th>
+            <th scope="col">Role Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <th scope="row">@item.Id</th>
+                <td>@item.Name</td>
+                <td>
+                    <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Role" asp-route-Id="@item.Id">Edit</a>
+                    <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Role" asp-route-Id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+
+
+    </tbody>
+</table>
+<partial name="_paging" model="@pager" />
