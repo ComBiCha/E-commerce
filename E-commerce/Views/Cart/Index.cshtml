@@ -54,17 +54,50 @@
 						<tr>
 							<td colspan="3"></td>
 							<td colspan="2" class="text-right">
-								<strong>Grand Total: $@Model.GrandTotal.ToString()</strong>
+								<strong>Grand Total: <span style="color:#FE980F">$@Model.GrandTotal.ToString()</span></strong>
+								<strong>Shipping Cost: <span style="color:#FE980F">$@Model.ShippingCost.ToString()</span></strong>
+								<p><a asp-action="DeleteShippingPrice" asp-controller="Cart">Recalculate ShippingCost</a></p>
 							</td>
 						</tr>
+
+						<tr>
+							<div class="form-group">
+								<label>Choose City</label>
+								<select class="css_select" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
+									<option value="0">Tỉnh Thành</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label>Choose District</label>
+								<select class="css_select" id="quan" name="quan" title="Chọn Quận Huyện">
+									<option value="0">Quận Huyện</option>
+								</select>
+							</div>
+							<div class="form-group">
+								<label>Choose Sub-district</label>
+								<select class="css_select" id="phuong" name="phuong" title="Chọn Phường Xã">
+									<option value="0">Phường Xã</option>
+								</select>
+							</div>
+							<button style="margin-bottom:10px" type="button" class="btn btn-warning btn-add-shipping">Submit</button>
+						</tr>
+						
 						<tr>
 							<td colspan="3"></td>
 							<td colspan="2" class="text-right">
 								<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Clear"> Clear Cart </a>
 								@if (User.Identity?.IsAuthenticated ?? false)
 								{
-									<a style="margin-top:0px" class="btn btn-primary btn-sm" asp-controller="Checkout" asp-action="CheckOut"> Checkout </a>
-								}
+									@if(@Model.ShippingCost <= 0)
+									{
+										<a disabled="disabled" style="margin-top:0px" class="btn btn-primary btn-sm" asp-controller="Checkout" asp-action="CheckOut"> Checkout </a>
+										<p style="color:red">Please enter your shipping information first!</p>
+									} else
+									{
+										<a style="margin-top:0px" class="btn btn-primary btn-sm" asp-controller="Checkout" asp-action="CheckOut"> Checkout </a>
+									}
+
+							}
 							</td>
 						</tr>
 					}
@@ -88,3 +121,67 @@
 		margin-left: 10px;
 	}
 </style>
+@section Scripts {
+	<script>
+		$(".btn-add-shipping").click(function () {
+			var tinh = $("#tinh").find('option:selected').text();
+			var quan = $("#quan").find('option:selected').text();
+			var phuong = $("#phuong").find('option:selected').text();
+
+			if (tinh == '' || quan == '' || phuong == '') {
+				Swal.fire("Please choose all options.");
+			} else {
+				$.ajax({
+					type: "POST",
+					url: "@Url.Action("GetShippingPrice", "Cart")",
+					data: { tinh: tinh, quan: quan, phuong: phuong},
+
+					success: function (result) {
+						if (result) {
+							location.reload();
+						}
+					}
+				});
+			}
+		})
+	</script>
+	<script>
+		$(document).ready(function() {
+			//Lấy tỉnh thành
+			$.getJSON('https://esgoo.net/api-tinhthanh/1/0.htm',function(data_tinh){
+				if(data_tinh.error==0){
+				   $.each(data_tinh.data, function (key_tinh,val_tinh) {
+					  $("#tinh").append('<option value="'+val_tinh.id+'">'+val_tinh.full_name+'</option>');
+				   });
+				   $("#tinh").change(function(e){
+						var idtinh=$(this).val();
+						//Lấy quận huyện
+						$.getJSON('https://esgoo.net/api-tinhthanh/2/'+idtinh+'.htm',function(data_quan){
+							if(data_quan.error==0){
+							   $("#quan").html('<option value="0">Quận Huyện</option>');
+							   $("#phuong").html('<option value="0">Phường Xã</option>');
+							   $.each(data_quan.data, function (key_quan,val_quan) {
+								  $("#quan").append('<option value="'+val_quan.id+'">'+val_quan.full_name+'</option>');
+							   });
+							   //Lấy phường xã
+							   $("#quan").change(function(e){
+									var idquan=$(this).val();
+									$.getJSON('https://esgoo.net/api-tinhthanh/3/'+idquan+'.htm',function(data_phuong){
+										if(data_phuong.error==0){
+										   $("#phuong").html('<option value="0">Phường Xã</option>');
+										   $.each(data_phuong.data, function (key_phuong,val_phuong) {
+											  $("#phuong").append('<option value="'+val_phuong.id+'">'+val_phuong.full_name+'</option>');
+										   });
+										}
+									});
+							   });
+
+							}
+						});
+				   });
+
+				}
+			});
+		 });
+	</script>
+}
