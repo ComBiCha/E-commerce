@@ -18,7 +18,7 @@
 				<div class="product-image-wrapper">
 					<div class="single-products">
 						<div class="productinfo text-center">
-							<img src="~/media/products/@item.Image" alt="@item.Name" width="100%" />
+								<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" ><img src="~/media/products/@item.Image" alt="@item.Name" width="100%" /></a>
 							<h2>$@item.Price</h2>
 							<p>@item.Name</p>
 							<p>Category: @item.Category.Name</p>
