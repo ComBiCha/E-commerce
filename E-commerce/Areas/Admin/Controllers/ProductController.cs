@@ -110,41 +110,60 @@ namespace E_commerce.Areas.Admin.Controllers
             ProductModel product = await _dataContext.Products.FindAsync(Id);
             ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name", product.BrandId);
+            ViewBag.OldImage = product.Image;
 
             return View(product);
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(ProductModel product, long Id)
+        public async Task<IActionResult> Edit(ProductModel product)
         {
             ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name", product.CategoryId);
             ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name", product.BrandId);
+
+            var existed_product = _dataContext.Products.Find(product.Id);
 
             if (ModelState.IsValid)
             {
 
                 product.Slug = product.Name.Replace(" ", "-");
-                var slug = await _dataContext.Products.FirstOrDefaultAsync(p => p.Slug == product.Slug);
-                if (slug != null)
-                {
-                    ModelState.AddModelError("", "Product already exist");
-                    return View(product);
-                }
-                else
-                {
+
+
                     if (product.ImageUpload != null)
                     {
-                        string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+                    
+
+                    string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
                         string imageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
                         string filePath = Path.Combine(uploadDir, imageName);
 
-                        FileStream fs = new FileStream(filePath, FileMode.Create);
+                    string oldfilePath = Path.Combine(uploadDir, existed_product.Image);
+                    try
+                    {
+                        if (System.IO.File.Exists(oldfilePath))
+                        {
+                            System.IO.File.Delete(oldfilePath);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ModelState.AddModelError("", "An error occurred while deleting the product image.");
+                    }
+
+                    FileStream fs = new FileStream(filePath, FileMode.Create);
                         await product.ImageUpload.CopyToAsync(fs);
                         fs.Close();
-                        product.Image = imageName;
-                    }
+                    existed_product.Image = imageName;
+
+                    
                 }
-                _dataContext.Update(product);
+                existed_product.Name = product.Name;
+                existed_product.Description = product.Description;
+                existed_product.Price = product.Price;
+                existed_product.CategoryId = product.CategoryId;
+                existed_product.BrandId = product.BrandId;
+
+                _dataContext.Update(existed_product);
                 await _dataContext.SaveChangesAsync();
                 TempData["success"] = "Product updated successfully";
                 return RedirectToAction("Index");
@@ -167,19 +186,58 @@ namespace E_commerce.Areas.Admin.Controllers
         public async Task<IActionResult> Delete(long Id)
         {
             ProductModel product = await _dataContext.Products.FindAsync(Id);
-            if(!string.Equals(product.Image, "noname.jpg"))
+            if(product == null)
             {
+                return NotFound();
+            }
+
+
                 string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
-                string oldfileImage = Path.Combine(uploadDir, product.Image);
-                if (System.IO.File.Exists(oldfileImage))
+                string oldfilePath = Path.Combine(uploadDir, product.Image);
+            try
+            {
+                if (System.IO.File.Exists(oldfilePath))
                 {
-                    System.IO.File.Delete(oldfileImage);
+                    System.IO.File.Delete(oldfilePath);
                 }
             }
+            catch(Exception ex)
+            {
+                ModelState.AddModelError("", "An error occurred while deleting the product image.");
+            }
+
             _dataContext.Products.Remove(product);
             await _dataContext.SaveChangesAsync();
             TempData["success"] = "Product removed successfully";
             return RedirectToAction("Index");
+        }
+        [HttpGet]
+        public async Task<IActionResult> AddQuantity(int Id)
+        {
+            var productbyquantity = await _dataContext.ProductQuantities.Where(pq => pq.ProductId == Id).ToListAsync();
+            ViewBag.ProductByQuantity = productbyquantity;
+            ViewBag.Id = Id;
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult StoreProductQuantity(ProductQuantityModel productQuantityModel)
+        {
+            var product = _dataContext.Products.Find(productQuantityModel.ProductId);
+            if(product==null)
+            {
+                return NotFound();
+            }
+            product.Quantity += productQuantityModel.Quantity;
+
+            productQuantityModel.Quantity = productQuantityModel.Quantity;
+            productQuantityModel.ProductId = productQuantityModel.ProductId;
+            productQuantityModel.DateCreated = DateTime.Now;
+
+            _dataContext.Add(productQuantityModel);
+            _dataContext.SaveChangesAsync();
+            TempData["success"] = "Quantity added successfully";
+            return RedirectToAction("AddQuantity", "Product", new { Id = productQuantityModel.ProductId });
         }
     }
 }

@@ -19,8 +19,16 @@
         <div class="form-group">
             <label>Status</label>
             <select asp-for="Status" class="form-control">
-                <option value="1">Hiển thị</option>
-                <option value="0">Ẩn</option>
+                @if (@Model.Status == 1)
+                {
+                    <option selected value="1">Hiển thị</option>
+                    <option value="0">Ẩn</option>
+                }
+                else
+                {
+                    <option value="1">Hiển thị</option>
+                    <option selected value="0">Ẩn</option>
+                }
             </select>
             <span asp-validation-for="Status" class="text-danger" />
         </div>

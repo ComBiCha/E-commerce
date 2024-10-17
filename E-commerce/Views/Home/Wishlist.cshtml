@@ -27,7 +27,6 @@
         @foreach (var wishlist_product in Model)
         {
             <tr>
-
                 <td><a asp-action="Details" asp-controller="Product" asp-route-Id="@wishlist_product.Product.Id">@wishlist_product.Product.Name</a></td>
                 <td>@Html.Raw(@wishlist_product.Product.Description)</td>
                 <td>@wishlist_product.Product.Price</td>

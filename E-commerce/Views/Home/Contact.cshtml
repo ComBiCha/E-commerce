@@ -1,0 +1,45 @@
+﻿@model ContactModel
+@{
+	ViewData["HideFooter"] = true;
+}
+<div class="row">
+	<div class="col-sm-2">
+		<div class="companyinfo">
+			<h2><img src="~/media/contact/@Model.LogoImg" width="120" /></h2>
+			<p>@Html.Raw(@Model.Description)</p>
+		</div>
+	</div>
+	<div class="col-sm-10">
+
+		<div class="col-sm-8">
+			<div class="address">
+				@Html.Raw(Model.Map)
+			</div>
+		</div>
+
+		<div class="col-sm-4">
+			<div class="video-gallery text-center">
+				@* <a href="#">
+				<div class="iframe-img">
+				<img src="images/home/iframe3.png" alt="" />
+				</div>
+				<div class="overlay-icon">
+				<i class="fa fa-play-circle-o"></i>
+				</div>
+				</a> *@
+				<h2>Website</h2>
+				<p>@Model.Name</p>
+				<h2></h2>
+				<h2>Contact Email</h2>
+				<p>@Model.Email</p>
+				<h2></h2>
+				<h2>Contact Phone</h2>
+				<p>@Model.Phone</p>
+				<h2></h2>
+				<h2>Contact Fanpage</h2>
+				<div class="fb-page" data-href="https://www.facebook.com/CellphoneSVietnam/?locale=vi_VN" data-tabs="message" data-width="" data-height="" data-small-header="false" data-adapt-container-width="true" data-hide-cover="false" data-show-facepile="true"><blockquote cite="https://www.facebook.com/CellphoneSVietnam/?locale=vi_VN" class="fb-xfbml-parse-ignore"><a href="https://www.facebook.com/CellphoneSVietnam/?locale=vi_VN">CellphoneS - Hệ thống bán lẻ di động toàn quốc</a></blockquote></div>
+			</div>
+		</div>
+
+
+	</div>

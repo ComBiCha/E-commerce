@@ -1,0 +1,74 @@
+﻿@model SliderModel
+@{
+    ViewData["title"] = "Edit Slider";
+}
+<h4>Edit Slider</h4>
+<div class="col-md-9">
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id"/>
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <label>Name</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Description</label>
+            <textarea asp-for="Description" class="form-control"></textarea>
+            <span asp-validation-for="Description" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Status</label>
+            <select asp-for="Status" class="form-control">
+                @if(@Model.Status == 1)
+                {
+                    <option selected value="1">Hiển thị</option>
+                    <option value="0">Ẩn</option>
+                }
+                else
+                {
+                    <option value="1">Hiển thị</option>
+                    <option selected value="0">Ẩn</option>
+                }
+
+            </select>
+            <span asp-validation-for="Status" class="text-danger" />
+        </div>
+        <div class="form-group">
+            <label>Image</label>
+            <input asp-for="ImageUpload" class="form-control-file" />
+            <span asp-validation-for="ImageUpload" class="text-danger" />
+            <img id="imgpreview" src="@Url.Content("~/media/sliders/" + ViewBag.OldImage)" alt="Current Image" class="pt-2" style="max-width: 400px; max-height: 200px;" />
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary">Update</button>
+        </div>
+
+    </form>
+    <a asp-action="Index">Back to List Slider</a>
+</div>
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+        function readURL(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#imgpreview').attr('src', e.target.result);
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $("#ImageUpload").change(function () {
+            readURL(this);
+        });
+    </script>
+    <script>
+        CKEDITOR.replace('Description');
+    </script>
+}

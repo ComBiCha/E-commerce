@@ -1,26 +1,29 @@
 ﻿@model IEnumerable<ProductModel>
 @{
     ViewData["title"] = "Product Listed";
-    Paginate pager = new Paginate();
+    // Paginate pager = new Paginate();
 
-    int pageNo = 0;
+    // int pageNo = 0;
 
-    if (ViewBag.Pager != null)
-    {
-        pager = ViewBag.Pager;
+    // if (ViewBag.Pager != null)
+    // {
+    //     pager = ViewBag.Pager;
 
-        pageNo = pager.CurrentPage;
-    }
+    //     pageNo = pager.CurrentPage;
+    // }
 }
 <h3>List Products</h3>
 <a asp-action="Create" asp-controller="Product">Add Product</a>
 
-<table class="table">
+<table class="table" id="productTable">
     <thead>
         <tr>
             <th scope="col">#</th>
             <th scope="col">Product Name</th>
             <th scope="col">Product Description</th>
+            
+            <th scope="col">Product Quantity</th>
+            <th scope="col">Product Sold</th>
             <th scope="col">Product Price</th>
             <th scope="col">Product Image</th>
             <th scope="col">Product Slug</th>
@@ -35,7 +38,13 @@
             <tr>
                 <th scope="row">@item.Id</th>
                 <td>@item.Name</td>
-                <td>@item.Description</td>
+                <td>@Html.Raw(@item.Description)</td>
+                <td><b>@item.Quantity | </b>
+                    @* <br /> *@
+                    <a class="btn btn-success btn-sm" asp-controller="Product" asp-action="AddQuantity" asp-route-Id="@item.Id">+</a>
+                </td>
+                <td style="text-align:center; color:coral"><b>@item.Sold</b></td>
+                
                 <td>@item.Price</td>
                 <td><img src="~/media/products/@item.Image" width="120"/></td>
                 <td>@item.Slug</td>
@@ -51,4 +60,15 @@
 
     </tbody>
 </table>
-<partial name="_paging" model="@pager" />
+@* <partial name="_paging" model="@pager" /> *@
+@section Scripts{
+    <script>
+        let table = new DataTable('#productTable', {
+        layout: {
+                topStart: {
+                    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+                }
+            }
+        });
+    </script>
+}
