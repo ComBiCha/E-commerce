@@ -186,5 +186,16 @@ namespace E_commerce.Controllers
             TempData["success"] = "Wishlist removed successfully";
             return RedirectToAction("Wishlist","Home");
         }
+        public async Task<IActionResult> Account()
+        {
+            var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var userModel = new UserModel { UserName = user.UserName, Email = user.Email };
+            return View(userModel);
+        }
     }
 }
