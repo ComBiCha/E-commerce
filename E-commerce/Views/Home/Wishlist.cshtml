@@ -27,7 +27,7 @@
         @foreach (var wishlist_product in Model)
         {
             <tr>
-                <td>@wishlist_product.Product.Name</td>
+                <td><a asp-action="Details" asp-controller="Product" asp-route-Id="@wishlist_product.Product.Id">@wishlist_product.Product.Name</a></td>
                 <td>@Html.Raw(@wishlist_product.Product.Description)</td>
                 <td>@wishlist_product.Product.Price</td>
                 <td><img src="~/media/products/@wishlist_product.Product.Image" width="120" /></td>
