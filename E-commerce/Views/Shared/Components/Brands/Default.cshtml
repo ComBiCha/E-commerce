@@ -2,9 +2,12 @@
 
 @foreach (var brand in ViewBag.BrandCounts)
 {
-    <li>
-        <a asp-action="Index" asp-controller="Brand" asp-route-Slug="@brand.Slug">
-            <span class="pull-right">(@brand.ProductCount)</span>@brand.Name
-        </a>
-    </li>
+    @if(brand.Name != "PC")
+    {
+        <li>
+            <a asp-action="Index" asp-controller="Brand" asp-route-Slug="@brand.Slug">
+                <span class="pull-right">(@brand.ProductCount)</span>@brand.Name
+            </a>
+        </li>
+    }
 }
