@@ -23,7 +23,9 @@ namespace E_commerce.Areas.Admin.Controllers
 		}*/
         public async Task<IActionResult> Index(int pg = 1)
         {
-            List<OrderModel> order = _dataContext.Orders.ToList(); //33 datas
+            List<OrderModel> order = _dataContext.Orders
+                                         .OrderByDescending(o => o.CreatedDate)
+                                         .ToList();
 
 
             const int pageSize = 10; //10 items/trang

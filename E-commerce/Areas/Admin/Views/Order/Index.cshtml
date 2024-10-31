@@ -1,20 +1,20 @@
 ﻿@model IEnumerable<OrderModel>
 @{
     ViewData["title"] = "Order Listed";
-    // Paginate pager = new Paginate();
+    Paginate pager = new Paginate();
 
-    // int pageNo = 0;
+    int pageNo = 0;
 
-    // if (ViewBag.Pager != null)
-    // {
-    //     pager = ViewBag.Pager;
+    if (ViewBag.Pager != null)
+    {
+        pager = ViewBag.Pager;
 
-    //     pageNo = pager.CurrentPage;
-    // }
+        pageNo = pager.CurrentPage;
+    }
 }
 <h3>List Order</h3>
 
-<table class="table" id="orderTable">
+<table class="table">
     <thead>
         <tr>
             <th scope="col">#</th>
@@ -53,8 +53,8 @@
 
     </tbody>
 </table>
-@* <partial name="_paging" model="@pager" /> *@
-@section Scripts {
+<partial name="_paging" model="@pager" />
+@* @section Scripts {
     <script>
         let table = new DataTable('#orderTable', {
         layout: {
@@ -64,4 +64,4 @@
             }
         });
     </script>
-}
+} *@
