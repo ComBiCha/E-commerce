@@ -78,6 +78,7 @@ namespace E_commerce.Controllers
             TempData["success"] = "An email has been send to your registered email address with password reset instructions.";
             return RedirectToAction("ForgotPassword", "Account");
         }
+
         public async Task<IActionResult> ForgotPassword()
         {
             return View();
@@ -110,5 +111,45 @@ namespace E_commerce.Controllers
             await _signInManager.SignOutAsync();
             return Redirect(returnUrl);
         }
-	}
+        [HttpPost]
+        public async Task<IActionResult> UpdateNewPassword(AppUserModel user)
+        {
+            var checkUser = await _userManager.Users
+                .Where(u => u.Email == user.Email)
+                .Where(u => u.Token == user.Token)
+                .FirstOrDefaultAsync();
+
+            if (checkUser != null)
+            {
+                string newToken = Guid.NewGuid().ToString();
+                var passwordHasher = new PasswordHasher<AppUserModel>();
+                var passwordHash = passwordHasher.HashPassword(checkUser, user.PasswordHash);
+
+                checkUser.PasswordHash = passwordHash;
+                checkUser.Token = newToken;
+
+                var result = await _userManager.UpdateAsync(checkUser);
+
+                if (result.Succeeded)
+                {
+                    TempData["success"] = "Password updated successfully!";
+                    return RedirectToAction("Login", "Account");
+                }
+                else
+                {
+                    foreach (var error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                    TempData["error"] = "Password update failed.";
+                    return RedirectToAction("ForgotPassword", "Account");
+                }
+            }
+            else
+            {
+                TempData["error"] = "Email not found or token is incorrect.";
+                return RedirectToAction("ForgotPassword", "Account");
+            }
+        }
+    }
 }
