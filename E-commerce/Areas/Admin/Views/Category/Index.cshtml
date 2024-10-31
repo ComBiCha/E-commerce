@@ -16,7 +16,7 @@
 <h3>List Category</h3>
 <a asp-action="Create" asp-controller="Category">Add Category</a>
 
-<table class="table" id="categoryTable">
+<table class="table" id="myTable">
     <thead>
         <tr>
             <th scope="col">#</th>
@@ -54,8 +54,8 @@
     </tbody>
 </table>
 @* <partial name="_paging" model="@pager" /> *@
-@section Scripts {
+@* @section Scripts {
     <script>
         let table = new DataTable('#categoryTable');
     </script>
-}
+} *@
