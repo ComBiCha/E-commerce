@@ -1,4 +1,5 @@
-﻿using E_commerce.Models;
+﻿using E_commerce.Migrations;
+using E_commerce.Models;
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
 using Microsoft.AspNetCore.Mvc;
@@ -34,6 +35,18 @@ namespace E_commerce.Controllers
 				.Take(4)
 				.ToListAsync();
 			ViewBag.RelatedProducts = relatedProducts;
+
+			var brandCounts = _dataContext.Brands
+				.Select(b => new
+				{
+					b.Name,
+					b.Slug,
+					ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
+				})
+				.ToList();
+			var contact = _dataContext.Contacts.FirstOrDefault();
+			ViewBag.BrandCounts = brandCounts;
+			ViewBag.Contact = contact;
 
 			var viewModel = new ProductDetailsViewModel
 			{

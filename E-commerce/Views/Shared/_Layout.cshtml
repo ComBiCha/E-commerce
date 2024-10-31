@@ -35,8 +35,8 @@
 					<div class="col-sm-6">
 						<div class="contactinfo">
 							<ul class="nav nav-pills">
-								<li><a href="#"><i class="fa fa-phone"></i> +2 95 01 88 821</a></li>
-								<li><a href="#"><i class="fa fa-envelope"></i> info@domain.com</a></li>
+								@* <li><a href="#"><i class="fa fa-phone"></i> @ViewBag.Contact.Phone</a></li>
+								<li><a href="#"><i class="fa fa-envelope"></i> @ViewBag.Contact.Email</a></li> *@
 							</ul>
 						</div>
 					</div>
@@ -136,20 +136,25 @@
 								<li class="dropdown">
 									<a asp-action="Index" asp-controller="Product">Shop<i class="fa fa-angle-down"></i></a>
 									<ul role="menu" class="sub-menu">
-										<li><a asp-action="Index" asp-controller="Category">Categories</a></li>
-										<li><a asp-action="Details" asp-controller="Product">Product Details</a></li>
-										<li><a asp-action="Checkout" asp-controller="Cart">Checkout</a></li>
 										<li><a asp-action="Index" asp-controller="Cart">Cart</a></li>
-										<li><a >Login</a></li>
+										@if(User.Identity?.IsAuthenticated ?? false)
+										{
+										<li><a asp-controller="Home" asp-action="Account">Account</a></li>
+										<li><a asp-controller="Home" asp-action="Wishlist">Wishlist</a></li>
+										<li><a asp-controller="Home" asp-action="Compare">Compare</a></li>
+										} else
+										{
+											<li><a asp-controller="Account" asp-action="Login">Login</a></li>
+										}
 									</ul>
 								</li>
-								<li class="dropdown">
+								@* <li class="dropdown">
 									<a href="#">Blog<i class="fa fa-angle-down"></i></a>
 									<ul role="menu" class="sub-menu">
 										<li><a href="blog.html">Blog List</a></li>
 										<li><a href="blog-single.html">Blog Single</a></li>
 									</ul>
-								</li>
+								</li> *@
 								<li><a asp-action="Contact" asp-controller="Home">Contact</a></li>
 							</ul>
 						</div>
