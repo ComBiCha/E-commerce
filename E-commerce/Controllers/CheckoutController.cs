@@ -58,27 +58,6 @@ namespace E_commerce.Controllers
                     };
                     options.LineItems.Add(sessionListItem);
                 }
-
-                var shippingPriceCookie = Request.Cookies["ShippingPrice"];
-                if (shippingPriceCookie != null)
-                {
-                    var shippingPrice = JsonConvert.DeserializeObject<decimal>(shippingPriceCookie);
-                    var shippingLineItem = new SessionLineItemOptions
-                    {
-                        PriceData = new SessionLineItemPriceDataOptions
-                        {
-                            UnitAmount = (long)(shippingPrice * 100), // Amount in cents
-                            Currency = "usd",
-                            ProductData = new SessionLineItemPriceDataProductDataOptions
-                            {
-                                Name = "Shipping Fee",
-                            }
-                        },
-                        Quantity = 1
-                    };
-                    options.LineItems.Add(shippingLineItem);
-                }
-
                 var service = new Stripe.Checkout.SessionService();
                 Stripe.Checkout.Session session = service.Create(options);
                 // Redirect to Stripe checkout page

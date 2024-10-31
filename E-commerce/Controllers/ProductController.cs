@@ -23,19 +23,7 @@ namespace E_commerce.Controllers
 			var products = await _dataContext.Products.Where(p => p.Name.Contains(searchTerm) || p.Description.Contains(searchTerm)).ToListAsync();
 			ViewBag.Keyword = searchTerm;
 
-            var brandCounts = _dataContext.Brands
-                .Select(b => new
-                {
-                    b.Name,
-                    b.Slug,
-                    ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
-                })
-                .ToList();
-            var contact = _dataContext.Contacts.FirstOrDefault();
-            ViewBag.BrandCounts = brandCounts;
-            ViewBag.Contact = contact;
-
-            return View(products);
+			return View(products);
 		}
 		public async Task<IActionResult> Details(long Id)
 		{

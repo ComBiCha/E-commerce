@@ -15,7 +15,7 @@
 <h3>List Products</h3>
 <a asp-action="Create" asp-controller="Product">Add Product</a>
 
-<table class="table" id="myTable">
+<table class="table" id="productTable">
     <thead>
         <tr>
             <th scope="col">#</th>
@@ -61,7 +61,7 @@
     </tbody>
 </table>
 @* <partial name="_paging" model="@pager" /> *@
-@* @section Scripts{
+@section Scripts{
     <script>
         let table = new DataTable('#productTable', {
         layout: {
@@ -71,4 +71,4 @@
             }
         });
     </script>
-} *@
+}

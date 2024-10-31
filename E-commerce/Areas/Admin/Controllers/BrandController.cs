@@ -17,11 +17,11 @@ namespace E_commerce.Areas.Admin.Controllers
 		{
 			_dataContext = context;
 		}
-        public async Task<IActionResult> Index()
-        {
-            return View(await _dataContext.Brands.OrderByDescending(p => p.Id).ToListAsync());
-        }
-        /*public async Task<IActionResult> Index(int pg = 1)
+        /*public async Task<IActionResult> Index()
+		{
+			return View(await _dataContext.Brands.OrderByDescending(p => p.Id).ToListAsync());
+		}*/
+        public async Task<IActionResult> Index(int pg = 1)
         {
             List<BrandModel> brand = _dataContext.Brands.ToList(); //33 datas
 
@@ -45,7 +45,7 @@ namespace E_commerce.Areas.Admin.Controllers
             ViewBag.Pager = pager;
 
             return View(data);
-        }*/
+        }
         [HttpGet]
         public IActionResult Create()
         {
