@@ -63,6 +63,7 @@
         <thead>
             <tr>
                 <th>Product Name</th>
+                <th>Image</th>
                 <th>Total Quantity Sold</th>
             </tr>
         </thead>
@@ -70,6 +71,37 @@
             <!-- Dữ liệu được đổ ở đây -->
         </tbody>
     </table>
+</div>
+
+<div>
+    <h3>Total Quantity of All Products: <span id="totalQuantity">0</span></h3>
+
+    <h3>Products by Category</h3>
+    <table id="categoryTable">
+        <thead>
+            <tr>
+                <th>Category</th>
+                <th>Total Products</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows populated by JavaScript -->
+        </tbody>
+    </table>
+
+    <h3>Products by Brand</h3>
+    <table id="brandTable">
+        <thead>
+            <tr>
+                <th>Brand</th>
+                <th>Total Products</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Rows populated by JavaScript -->
+        </tbody>
+    </table>
+
 </div>
 <script>
     // Số lượng đơn hàng
@@ -154,14 +186,44 @@
             console.log("Top 5 Best Selling Products Data:", data);
 
             const tableBody = document.querySelector("#topProductsTable tbody");
-            tableBody.innerHTML = ""; 
+            tableBody.innerHTML = "";
 
             data.forEach(item => {
-                const row = `<tr><td>${item.name}</td><td>${item.totalQuantitySold}</td></tr>`;
+                const imageUrl = '@Url.Content("~/media/products/")' + item.image;
+                const row = `<tr>
+                            <td>${item.name}</td>
+                            <td><img src="${imageUrl}" width="120"/></td>
+                            <td>${item.totalQuantitySold}</td>
+                         </tr>`;
                 tableBody.insertAdjacentHTML("beforeend", row);
             });
         })
         .catch(error => console.error('Error fetching top 5 best selling products:', error));
 
-</script>
+    fetch('@Url.Action("GetProductStatistics", "Statistic")')
+        .then(response => response.json())
+        .then(data => {
+            console.log("Product Statistics Data:", data);
 
+            // Hiển thị tổng số lượng sản phẩm
+            document.querySelector("#totalQuantity").textContent = data.totalQuantity;
+
+            // Hiển thị thống kê theo loại
+            const categoryTableBody = document.querySelector("#categoryTable tbody");
+            categoryTableBody.innerHTML = "";
+            data.productsByCategory.forEach(item => {
+                const row = `<tr><td>${item.category}</td><td>${item.totalProducts}</td></tr>`;
+                categoryTableBody.insertAdjacentHTML("beforeend", row);
+            });
+
+            // Hiển thị thống kê theo thương hiệu
+            const brandTableBody = document.querySelector("#brandTable tbody");
+            brandTableBody.innerHTML = "";
+            data.productsByBrand.forEach(item => {
+                const row = `<tr><td>${item.brand}</td><td>${item.totalProducts}</td></tr>`;
+                brandTableBody.insertAdjacentHTML("beforeend", row);
+            });
+        })
+        .catch(error => console.error('Error fetching product statistics:', error));
+
+</script>
