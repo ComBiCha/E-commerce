@@ -18,15 +18,31 @@ namespace E_commerce.Controllers
             _logger = logger;
             _datacontext = context;
 			_userManager = userManager;
+
 		}
 
         public IActionResult Index()
         {
             var products = _datacontext.Products.Include("Category").Include("Brand").ToList();
             var sliders = _datacontext.Sliders.Where(s => s.Status == 1).ToList();
+
+            // L?y danh sách các brand cùng v?i s? l??ng s?n ph?m t??ng ?ng
+            var brandCounts = _datacontext.Brands
+                .Select(b => new
+                {
+                    b.Name,
+                    b.Slug,
+                    ProductCount = _datacontext.Products.Count(p => p.BrandId == b.Id)
+                })
+                .ToList();
+            var contact = _datacontext.Contacts.FirstOrDefault();
+            ViewBag.BrandCounts = brandCounts;
             ViewBag.Sliders = sliders;
+            ViewBag.Contact = contact;
+
             return View(products);
         }
+
 
         public IActionResult Privacy()
         {
@@ -185,6 +201,17 @@ namespace E_commerce.Controllers
             await _datacontext.SaveChangesAsync();
             TempData["success"] = "Wishlist removed successfully";
             return RedirectToAction("Wishlist","Home");
+        }
+        public async Task<IActionResult> Account()
+        {
+            var userId = _userManager.GetUserId(User);
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            var userModel = new UserModel { UserName = user.UserName, Email = user.Email };
+            return View(userModel);
         }
     }
 }

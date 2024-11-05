@@ -20,7 +20,19 @@ namespace E_commerce.Controllers
 
             var productsByCategory = _dataContext.Products.Where(p => p.CategoryId == category.Id);
 
-            return View(await productsByCategory.OrderByDescending(p => p.Id).ToListAsync());
+			var brandCounts = _dataContext.Brands
+				.Select(b => new
+				{
+					b.Name,
+					b.Slug,
+					ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
+				})
+				.ToList();
+			var contact = _dataContext.Contacts.FirstOrDefault();
+			ViewBag.BrandCounts = brandCounts;
+			ViewBag.Contact = contact;
+
+			return View(await productsByCategory.OrderByDescending(p => p.Id).ToListAsync());
         }
     }
 }
