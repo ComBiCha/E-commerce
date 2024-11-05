@@ -20,8 +20,7 @@ namespace E_commerce.Controllers
 		}
 		public async Task<IActionResult> Search(string searchTerm)
 		{
-			var products = await _dataContext.Products.Where(p => p.Name.Contains(searchTerm) || p.Description.Contains(searchTerm)).ToListAsync();
-			ViewBag.Keyword = searchTerm;
+            ViewBag.Keyword = searchTerm;
 
             var brandCounts = _dataContext.Brands
                 .Select(b => new
@@ -34,8 +33,17 @@ namespace E_commerce.Controllers
             var contact = _dataContext.Contacts.FirstOrDefault();
             ViewBag.BrandCounts = brandCounts;
             ViewBag.Contact = contact;
+            if (searchTerm == null)
+			{
+                var products = await _dataContext.Products.Include("Category").Include("Brand").ToListAsync();
+                return View(products);
+            }
+            else
+            {
+                var products = await _dataContext.Products.Where(p => p.Name.Contains(searchTerm) || p.Category.Name.Contains(searchTerm)).ToListAsync();
+                return View(products);
+            }
 
-            return View(products);
 		}
 		public async Task<IActionResult> Details(long Id)
 		{

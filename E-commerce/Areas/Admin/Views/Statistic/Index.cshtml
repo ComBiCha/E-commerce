@@ -1,0 +1,167 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@{
+    ViewData["Title"] = "Statistics";
+}
+
+<h2>Statistics</h2>
+
+<h3>Total Orders: <span id="totalOrder">0</span></h3>
+<h3>Total Revenue: <span id="totalRevenue">$0.00</span></h3>
+
+<div>
+    <h3>Monthly Order Count</h3>
+    <table id="monthlyOrderCountTable" border="1">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Order Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Data will be populated here -->
+        </tbody>
+    </table>
+</div>
+
+<div>
+    <h3>Monthly Revenue</h3>
+    <table id="monthlyRevenueTable" border="1">
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dữ liệu được đổ ở đây -->
+        </tbody>
+    </table>
+</div>
+
+<div>
+    <h3>Quarterly Revenue</h3>
+    <table id="quarterlyRevenueTable" border="1">
+        <thead>
+            <tr>
+                <th>Quarter</th>
+                <th>Revenue</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dữ liệu được đổ ở đây -->
+        </tbody>
+    </table>
+</div>
+
+<div>
+    <h3>Top 5 Best Selling Products</h3>
+    <table id="topProductsTable">
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Total Quantity Sold</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Dữ liệu được đổ ở đây -->
+        </tbody>
+    </table>
+</div>
+<script>
+    // Số lượng đơn hàng
+    fetch('@Url.Action("GetMonthlyOrderCount", "Statistic")')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Monthly Order Count Data: ", data);
+            const tableBody = document.querySelector("#monthlyOrderCountTable tbody");
+            data.forEach(item => {
+                const row = `<tr><td>${item.month}</td><td>${item.orderCount}</td></tr>`;
+                tableBody.insertAdjacentHTML("beforeend", row);
+            });
+        })
+        .catch(error => console.error('Error fetching monthly order count:', error));
+
+    // Doanh thu theo tháng
+    fetch('@Url.Action("GetMonthlyRevenue", "Statistic")')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Monthly Revenue Data: ", data);
+            const tableBody = document.querySelector("#monthlyRevenueTable tbody");
+            data.forEach(item => {
+                const row = `<tr><td>${item.month}</td><td>${item.revenue.toFixed(2)}</td></tr>`;
+                tableBody.insertAdjacentHTML("beforeend", row);
+            });
+        })
+        .catch(error => console.error('Error fetching monthly revenue:', error));
+
+    // Doanh thu theo quý
+    fetch('@Url.Action("GetQuarterlyRevenue", "Statistic")')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Quarterly Revenue Data: ", data);
+            const tableBody = document.querySelector("#quarterlyRevenueTable tbody");
+            data.forEach(item => {
+                const row = `<tr><td>${item.quarter}</td><td>${item.revenue.toFixed(2)}</td></tr>`;
+                tableBody.insertAdjacentHTML("beforeend", row);
+            });
+        })
+        .catch(error => console.error('Error fetching quarterly revenue:', error));
+
+    // Tổng đơn hàng và doanh thu
+    fetch('@Url.Action("GetTotalOrdersAndRevenue", "Statistic")')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Total Orders and Revenue Data: ", data);
+
+            // Lấy phần tử HTML để hiển thị dữ liệu
+            const totalOrderElement = document.querySelector("#totalOrder");
+            const totalRevenueElement = document.querySelector("#totalRevenue");
+
+            // Kiểm tra phần tử tồn tại, sau đó gán dữ liệu vào
+            totalOrderElement.textContent = data.totalOrders;
+            totalRevenueElement.textContent = "$" + data.totalRevenue.toFixed(2);
+        })
+        .catch(error => console.error("Error fetching total orders and revenue:", error));
+
+    //5 sản phẩm bán chạy nhất
+    fetch('@Url.Action("GetTop5BestSeller", "Statistic")')
+        .then(response => response.json())
+        .then(data => {
+            console.log("Top 5 Best Selling Products Data:", data);
+
+            const tableBody = document.querySelector("#topProductsTable tbody");
+            tableBody.innerHTML = ""; 
+
+            data.forEach(item => {
+                const row = `<tr><td>${item.name}</td><td>${item.totalQuantitySold}</td></tr>`;
+                tableBody.insertAdjacentHTML("beforeend", row);
+            });
+        })
+        .catch(error => console.error('Error fetching top 5 best selling products:', error));
+
+</script>
+
