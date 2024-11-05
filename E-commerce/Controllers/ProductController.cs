@@ -1,4 +1,5 @@
-﻿using E_commerce.Models;
+﻿using E_commerce.Migrations;
+using E_commerce.Models;
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
 using Microsoft.AspNetCore.Mvc;
@@ -19,10 +20,30 @@ namespace E_commerce.Controllers
 		}
 		public async Task<IActionResult> Search(string searchTerm)
 		{
-			var products = await _dataContext.Products.Where(p => p.Name.Contains(searchTerm) || p.Description.Contains(searchTerm)).ToListAsync();
-			ViewBag.Keyword = searchTerm;
+            ViewBag.Keyword = searchTerm;
 
-			return View(products);
+            var brandCounts = _dataContext.Brands
+                .Select(b => new
+                {
+                    b.Name,
+                    b.Slug,
+                    ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
+                })
+                .ToList();
+            var contact = _dataContext.Contacts.FirstOrDefault();
+            ViewBag.BrandCounts = brandCounts;
+            ViewBag.Contact = contact;
+            if (searchTerm == null)
+			{
+                var products = await _dataContext.Products.Include("Category").Include("Brand").ToListAsync();
+                return View(products);
+            }
+            else
+            {
+                var products = await _dataContext.Products.Where(p => p.Name.Contains(searchTerm) || p.Category.Name.Contains(searchTerm)).ToListAsync();
+                return View(products);
+            }
+
 		}
 		public async Task<IActionResult> Details(long Id)
 		{
@@ -34,6 +55,18 @@ namespace E_commerce.Controllers
 				.Take(4)
 				.ToListAsync();
 			ViewBag.RelatedProducts = relatedProducts;
+
+			var brandCounts = _dataContext.Brands
+				.Select(b => new
+				{
+					b.Name,
+					b.Slug,
+					ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
+				})
+				.ToList();
+			var contact = _dataContext.Contacts.FirstOrDefault();
+			ViewBag.BrandCounts = brandCounts;
+			ViewBag.Contact = contact;
 
 			var viewModel = new ProductDetailsViewModel
 			{
