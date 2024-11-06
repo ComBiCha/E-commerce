@@ -1,0 +1,67 @@
+﻿@model E_commerce.Models.AppUserModel
+
+@{
+    ViewData["Title"] = "Portal";
+}
+
+<style>
+    .button-group {
+        display: flex;
+        gap: 10px; /* khoảng cách giữa các nút */
+    }
+
+    .action-link-button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 18px;
+        color: white;
+        border-radius: 5px;
+        text-align: center;
+        text-decoration: none;
+        transition: background-color 0.3s;
+        cursor: pointer;
+        border: none;
+    }
+
+
+</style>
+<div class="container" style=" margin-top: 5.5rem">
+    <h1>Quản lý tài khoản</h1>
+
+    <div class="tabs">
+        <button class="tab-button" onclick="openTab(event, 'PersonalInfo')">Thông tin cá nhân</button>
+        <button class="tab-button" onclick="openTab(event, 'Orders')"><a asp-action="PersonalOrder" asp-controller="Account">Quản lý đơn hàng</a></button>
+    </div>
+
+    <div id="PersonalInfo" class="tab-content">
+        <h2>Thông tin cá nhân</h2>
+        <p>Tên: @Model.UserName</p>
+        <p>Email: @Model.Email</p>
+        <div class="button-group">
+            @Html.ActionLink("Chỉnh sửa thông tin", "EditPersonal", new { id = Model.Id }, new { @class = "btn btn-primary action-link-button" })
+            @*@Html.ActionLink("Đăng xuất", "SignOut", "Login", new { @class = "btn btn-danger action-link-button" })*@
+            <a href="/Login/SignOut" class="icon-link">
+                <button type="submit" class="btn btn-danger action-link-button">
+                    Đăng xuất
+                </button>
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openTab(evt, tabName) {
+            var i, tabcontent, tabbuttons;
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tabbuttons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabbuttons.length; i++) {
+                tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        document.getElementsByClassName("tab-button")[0].click();</script>

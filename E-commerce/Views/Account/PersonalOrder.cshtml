@@ -1,0 +1,34 @@
+﻿@model IEnumerable<OrderModel>
+
+@{
+    ViewData["Title"] = "PersonalOrder";
+}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Order Code</th>
+            <th>Day Order</th>
+            <th>Total</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.OrderCode)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.CreatedDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Status)
+            </td>
+            <td>
+                <a asp-action="ViewOrder" class="btn btn-warning btn-sm" asp-controller="Account" asp-route-OrderCode="@item.OrderCode">View Order</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
