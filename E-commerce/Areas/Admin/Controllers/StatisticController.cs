@@ -193,6 +193,7 @@ namespace E_commerce.Areas.Admin.Controllers
                           (od, p) => new
                           {
                               p.Name,
+                              p.Image,
                               od.TotalQuantitySold
                           })
                     .ToList();
@@ -206,6 +207,53 @@ namespace E_commerce.Areas.Admin.Controllers
             }
         }
 
+        public JsonResult GetProductStatistics()
+        {
+            try
+            {
+                var products = _context.Products;
+                if (products == null || !products.Any())
+                {
+                    return new JsonResult(new { message = "No products found." });
+                }
+                // Thống kê tổng số lượng sản phẩm hiện có
+                var totalQuantity = products.Count();
 
+                // Thống kê số lượng sản phẩm theo loại
+                var productsByCategory = products
+                    .GroupBy(p => p.Category.Name)
+                    .Select(g => new
+                    {
+                        Category = g.Key,
+                        TotalProducts = g.Count(),
+                    })
+                    .ToList();
+
+                // Thống kê số lượng sản phẩm theo thương hiệu
+                var productsByBrand = products
+                    .GroupBy(p => p.Brand.Name)
+                    .Select(g => new
+                    {
+                        Brand = g.Key,
+                        TotalProducts = g.Count(),
+                    })
+                    .ToList();
+
+                // Kết quả trả về
+                var result = new
+                {
+                    TotalQuantity = totalQuantity,
+                    ProductsByCategory = productsByCategory,
+                    ProductsByBrand = productsByBrand
+                };
+
+                return new JsonResult(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetProductStatistics: {ex.Message}");
+                return new JsonResult(null) { StatusCode = 500 };
+            }
+        }
     }
 }
