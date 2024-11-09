@@ -45,16 +45,26 @@
             <td colspan="1" style="color:#FE980F;font-size: 20px;">@ViewBag.Order.ShippingCost.ToString("C")</td>
 
             <td>
-                <span style="width:fit-content; font-size: 20px;">
-                    @if (@ViewBag.Order.Status == 1)
-                    {
-                        <span style="color: green;">New Order</span>
-                    }
-                    else
-                    {
-                        <span style="color: red;">Done</span>
-                    }
-                </span>
+                @if (@ViewBag.Order.Status == 1)
+                {
+                    <span class="text text-primary">đơn hàng mới</span>
+                }
+                else if (@ViewBag.Order.Status == 2)
+                {
+                    <span class="text text-danger">đơn hàng đã xác nhận</span>
+                }
+                else if (@ViewBag.Order.Status == 3)
+                {
+                    <span class="text text-warning">Đã giao cho đơn vị vận chuyển</span>
+                }
+                else if (@ViewBag.Order.Status == 4)
+                {
+                    <span class="text text-dark">Hàng đã giao tới nơi</span>
+                }
+                else if (@ViewBag.Order.Status == 5)
+                {
+                    <span class="text text-success">Đơn hàng đã hoàn thành</span>
+                }
             </td>
             <td></td>
             <td></td>

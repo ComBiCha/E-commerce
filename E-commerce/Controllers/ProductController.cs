@@ -56,7 +56,12 @@ namespace E_commerce.Controllers
 				.ToListAsync();
 			ViewBag.RelatedProducts = relatedProducts;
 
-			var brandCounts = _dataContext.Brands
+            var groupedRelatedProducts = relatedProducts
+			.Select((value, index) => new GroupedProduct { Index = index, Product = value })
+			.GroupBy(x => x.Index / 3)
+			.ToList();
+
+            var brandCounts = _dataContext.Brands
 				.Select(b => new
 				{
 					b.Name,
@@ -71,7 +76,8 @@ namespace E_commerce.Controllers
 			var viewModel = new ProductDetailsViewModel
 			{
 				ProductDetails = productsById,
-			};
+                RelatedProductsGrouped = groupedRelatedProducts,
+            };
 
 			return View(viewModel);
 		}

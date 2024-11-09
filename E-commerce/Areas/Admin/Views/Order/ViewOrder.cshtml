@@ -45,7 +45,7 @@
             <td colspan="1" style="color:#FE980F;font-size: 20px;">@ViewBag.Order.ShippingCost.ToString("C")</td>
             
             <td>
-                <select style="width:fit-content" class="form-control select-update-order">
+                @* <select style="width:fit-content" class="form-control select-update-order">
                     @if (@ViewBag.Order.Status == 1)
                     {
                         <option value="1" selected>New Order</option>
@@ -57,9 +57,46 @@
                         <option value="0" selected>Done</option>
                     }
                     
-                </select>
+                </select> *@
+                <button id="statusUpdateButton" class="btn btn-primary">
+                    @{
+                        var buttonText = ViewBag.Order.Status switch
+                        {
+                            1 => "Xác nhận đơn hàng",
+                            2 => "Đã gửi hàng đi",
+                            3 => "Hàng đã giao tới nơi",
+                            4 => "Hoàn thành đơn hàng",
+                            _ => "Đơn hàng đã hoàn thành"
+                        };
+                        @buttonText
+                    }
+                </button>
+
             </td>
-            <td></td>
+            <td>
+                <span id="orderStatusText" class="text">
+                    @if (ViewBag.Order.Status == 1)
+                    {
+                        <span class="text-primary">đơn hàng mới</span>
+                    }
+                    else if (ViewBag.Order.Status == 2)
+                    {
+                        <span class="text-danger">đơn hàng đã xác nhận</span>
+                    }
+                    else if (ViewBag.Order.Status == 3)
+                    {
+                        <span class="text-warning">Đã giao cho đơn vị vận chuyển</span>
+                    }
+                    else if (ViewBag.Order.Status == 4)
+                    {
+                        <span class="text-dark">Hàng đã giao tới nơi</span>
+                    }
+                    else if (ViewBag.Order.Status == 5)
+                    {
+
+                    }
+                </span>
+            </td>
             <td></td>
             <td></td>
             <td></td>
@@ -69,7 +106,7 @@
 </table>
 
 @section Scripts{
-    <script>
+    @* <script>
         $(document).ready(function () {
             $('.select-update-order').change(function () {
                 var status = $(this).val();
@@ -98,7 +135,85 @@
                 });
             });
         });
+    </script> *@
+    <script>
+        $(document).ready(function () {
+            // Initialize the JavaScript variable for current status
+            var currentStatus = @ViewBag.Order.Status;
+
+            $('#statusUpdateButton').click(function () {
+                var ordercode = $('.getId').val(); // Assuming there's an input with the OrderCode
+
+                // If the status is already at "Success", disable the button
+                if (currentStatus >= 5) {
+                    Swal.fire({
+                        icon: "info",
+                        title: "Đơn hàng đã hoàn thành",
+                        text: "Đơn hàng này đã hoàn thành!",
+                    });
+                    return;
+                }
+
+                // Increment status on each button click
+                var newStatus = currentStatus + 1;
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("UpdateOrder")",
+                    data: { status: newStatus, ordercode: ordercode },
+                    success: function (result) {
+                        if (result.success) {
+                            // Update button text and status display based on the new status
+                            var buttonText = "";
+                            var statusText = "";
+                            switch (newStatus) {
+                                case 2:
+                                    buttonText = "Đã gửi hàng đi";
+                                    statusText = "<span class='text-danger'>đơn hàng đã xác nhận</span>";
+                                    break;
+                                case 3:
+                                    buttonText = "Hàng đã giao tới nơi";
+                                    statusText = "<span class='text-warning'>Đã giao cho đơn vị vận chuyển</span>";
+                                    break;
+                                case 4:
+                                    buttonText = "Hoàn thành đơn hàng";
+                                    statusText = "<span class='text-dark'>Hàng đã giao tới nơi</span>";
+                                    break;
+                                case 5:
+                                    buttonText = "Đơn hàng đã hoàn thành";
+                                    $('#statusUpdateButton').prop('disabled', true);
+                                    break;
+                                default:
+                                    buttonText = "Xác nhận đơn hàng";
+                                    statusText = "<span class='text-primary'>đơn hàng mới</span>";
+                                    break;
+                            }
+                            $('#statusUpdateButton').text(buttonText);
+                            $('#orderStatusText').html(statusText);
+
+                            // Update the JavaScript variable `currentStatus`
+                            currentStatus = newStatus;
+
+                            Swal.fire({
+                                icon: "success",
+                                title: "Yayyy",
+                                text: "Order status updated successfully!",
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Oops...",
+                                text: "Update failed: " + result.message,
+                            });
+                        }
+                    }
+                });
+            });
+        });
     </script>
+
+
+
     <script>
         let table = new DataTable('#orderdetailsTable', {
         layout: {

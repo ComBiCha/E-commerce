@@ -6,6 +6,7 @@ using E_commerce.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace E_commerce.Controllers
 {
@@ -144,33 +145,94 @@ namespace E_commerce.Controllers
 			return View();
 		}
 
-		[HttpPost]
-		public async Task<IActionResult> Create(UserModel user)
-		{
-			if (ModelState.IsValid)
-			{
-				AppUserModel newUser = new AppUserModel { UserName = user.UserName, Email = user.Email };
-				IdentityResult result = await _userManager.CreateAsync(newUser, user.Password);
+        [HttpPost]
+        public async Task<IActionResult> Create(UserModel user)
+        {
+            if (ModelState.IsValid)
+            {
+                AppUserModel newUser = new AppUserModel
+                {
+                    UserName = user.UserName,
+                    Email = user.Email
+                };
 
-				if (result.Succeeded)
-				{
-					TempData["success"] = "Create account successfully";
-					return Redirect("/Account/Login");
-				}
+                IdentityResult result = await _userManager.CreateAsync(newUser, user.Password);
 
-				foreach (IdentityError error in result.Errors)
-				{
-					ModelState.AddModelError("", error.Description);
-				}
-			}
+                if (result.Succeeded)
+                {
+                    // Assign the default role "User" to the newly created account
+                    var addToRoleResult = await _userManager.AddToRoleAsync(newUser, "User");
 
-			return View(user);
-		}
+                    if (addToRoleResult.Succeeded)
+                    {
+                        TempData["success"] = "Account created successfully";
+                        return RedirectToAction("Login", "Account");
+                    }
+                    else
+                    {
+                        // Handle any errors that occurred while adding the user to the role
+                        foreach (IdentityError error in addToRoleResult.Errors)
+                        {
+                            ModelState.AddModelError("", error.Description);
+                        }
+                    }
+                }
+                else
+                {
+                    // Handle errors during account creation
+                    foreach (IdentityError error in result.Errors)
+                    {
+                        ModelState.AddModelError("", error.Description);
+                    }
+                }
+            }
 
-		public async Task<IActionResult> Logout(string returnUrl = "/")
+            return View(user);
+        }
+
+
+        public async Task<IActionResult> Logout(string returnUrl = "/")
 		{
 			await _signInManager.SignOutAsync();
 			return Redirect(returnUrl);
 		}
-	}
+
+        public async Task<IActionResult> Portal()
+        {
+            // Step 1: Get the current user's email
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            // Step 2: Ensure email is not null
+            if (string.IsNullOrEmpty(email))
+            {
+                return NotFound("User is not logged in or no email found.");
+            }
+            // Step 3: Get the current user using the UserManager
+            var currentUser = await _userManager.FindByEmailAsync(email);
+            if (currentUser == null)
+            {
+                return NotFound("User not found.");
+            }
+            // Step 6: Return the view with the model
+            return View(currentUser);
+        }
+        public async Task<IActionResult> PersonalOrder()
+        {
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+            {
+                return NotFound("User is not logged in or no email found.");
+            }
+            var check = _dataContext.Orders
+                        .Where(d => d.UserName == email)
+                        .OrderBy(c => c.CreatedDate);
+            return View(await check.OrderByDescending(p => p.CreatedDate).ToListAsync());
+        }
+        public async Task<IActionResult> ViewOrder(string ordercode)
+        {
+            var order = await _dataContext.Orders.FirstOrDefaultAsync(o => o.OrderCode == ordercode);
+            ViewBag.Order = order;
+            var DetailsOrder = await _dataContext.OrderDetails.Include(o => o.Product).Where(o => o.OrderCode == ordercode).ToListAsync();
+            return View(DetailsOrder);
+        }
+    }
 }

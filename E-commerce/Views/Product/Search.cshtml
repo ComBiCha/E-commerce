@@ -37,7 +37,7 @@
 								@if (User.Identity?.IsAuthenticated ?? false)
 								{
 									<ul class="nav nav-pills nav-justified">
-										<li><button class="btn btn-default add-btn-wishlist" data-product_id="@item.Id"><i class="fa fa-plus-square"></i> to wishlist</button></li>
+										<li><button class="btn btn-default add-btn-wishlist"><i class="fa fa-plus-square"></i><a asp-action="AddWishList" asp-controller="Home" asp-route-Id="@item.Id"> Add Wishlist</a></button></li>
 										<li><button class="btn btn-default add-btn-compare" data-product_id="@item.Id"><i class="fa fa-plus-square"></i> to compare</button></li>
 									</ul>
 								}

@@ -95,7 +95,7 @@
 								<li><a asp-action="Index" asp-controller="Cart"><i class="fa fa-shopping-cart"></i>Cart</a></li>
 								@if(User.Identity?.IsAuthenticated ?? false)
 								{
-									<li><a asp-controller="Home" asp-action="Account"><i class="fa fa-user"></i> Account</a></li>
+									<li><a asp-controller="Account" asp-action="Portal"><i class="fa fa-user"></i> Account</a></li>
 									<li><a asp-controller="Home" asp-action="Wishlist"><i class="fa fa-star"></i> Wishlist</a></li>
 									<li><a asp-controller="Home" asp-action="Compare"><i class="fa fa-star"></i> Compare</a></li>
 									@* <li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li> *@

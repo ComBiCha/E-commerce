@@ -93,119 +93,14 @@
 			<!--category-tab-->
 			<div class="col-sm-12">
 				<ul class="nav nav-tabs">
-					<li ><a href="#details" data-toggle="tab">Details</a></li>
-					<li><a href="#companyprofile" data-toggle="tab">Company Profile</a></li>
-					<li><a href="#tag" data-toggle="tab">Tag</a></li>
-					<li class="active"><a href="#reviews" data-toggle="tab">Reviews (5)</a></li>
+					<li class="active"><a href="#details" data-toggle="tab">Details</a></li>
+					<li ><a href="#reviews" data-toggle="tab">Reviews (5)</a></li>
 				</ul>
 			</div>
 			<div class="tab-content">
 				<div class="tab-pane fade active in" id="details">
 					@Html.Raw(@Model.ProductDetails.Description)
 				</div>
-
-				<div class="tab-pane fade" id="companyprofile">
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery1.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery3.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery2.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery4.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-
-				<div class="tab-pane fade" id="tag">
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery1.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery2.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery3.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="product-image-wrapper">
-							<div class="single-products">
-								<div class="productinfo text-center">
-									<img src="images/home/gallery4.jpg" alt="" />
-									<h2>$56</h2>
-									<p>Easy Polo Black Edition</p>
-									<button type="button" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>Add to cart</button>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-
 				<div class="tab-pane fade " id="reviews">
 					<div class="col-sm-12">
 						<ul>
@@ -237,47 +132,71 @@
 
 			</div>
 		</div><!--/category-tab-->
-
 		<div class="recommended_items">
-			<!--recommended_items-->
 			<h2 class="title text-center">Related Products</h2>
 
 			<div id="recommended-item-carousel" class="carousel slide" data-ride="carousel">
 				<div class="carousel-inner">
-					<div class="item active">
-						@foreach (var relatedProduct in @ViewBag.RelatedProducts as IEnumerable<ProductModel>)
-						{
-							<div class="col-sm-4">
-								<div class="product-image-wrapper">
-									<div class="single-products">
-										<div class="productinfo text-center">
-											<img src="~/media/products/@relatedProduct.Image" alt="@relatedProduct.Name" width="100%" />
-											<h2>$@relatedProduct.Price</h2>
-											<p>@relatedProduct.Name</p>
-											<p>Category: @relatedProduct.Category.Name</p>
-											<p>Brand: @relatedProduct.Brand.Name</p>
-											<a asp-action="Details" asp-controller="Product" asp-route-Id="@relatedProduct.Id" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>View Details</a>
-										</div>
-									</div>
-									<div class="choose">
-										<ul class="nav nav-pills nav-justified">
-											<li><a href="#"><i class="fa fa-plus-square"></i>Add to wishlist</a></li>
-											<li><a href="#"><i class="fa fa-plus-square"></i>Add to compare</a></li>
-										</ul>
+					@foreach (var relatedProductGroup in Model.RelatedProductsGrouped)
+					{
+						<div class="item @((relatedProductGroup.First().Index == 0) ? "active" : "")">
+							@foreach (var chunk in relatedProductGroup.Chunk(3))
+							{
+								<div class="col-sm-12">
+									<div class="row">
+										@foreach (var relatedProduct in chunk)
+										{
+											<div class="col-sm-4">
+												<div class="product-image-wrapper">
+													<div class="single-products">
+														<div class="productinfo text-center">
+															<img src="~/media/products/@relatedProduct.Product.Image" alt="@relatedProduct.Product.Name" width="100%" />
+															<h2>$@relatedProduct.Product.Price</h2>
+															<p>@relatedProduct.Product.Name</p>
+															<p>Category: @relatedProduct.Product.Category.Name</p>
+															<p>Brand: @relatedProduct.Product.Brand.Name</p>
+															<a asp-action="Details" asp-controller="Product" asp-route-Id="@relatedProduct.Product.Id" class="btn btn-default add-to-cart">
+																<i class="fa fa-shopping-cart"></i> View Details
+															</a>
+														</div>
+													</div>
+													<div class="choose">
+														<ul class="nav nav-pills nav-justified">
+															<li>
+																<button class="btn btn-default add-btn-wishlist">
+																	<i class="fa fa-plus-square"></i>
+																	<a asp-action="AddWishList" asp-controller="Home" asp-route-Id="@relatedProduct.Product.Id"> Add Wishlist</a>
+																</button>
+															</li>
+															<li>
+																<button class="btn btn-default add-btn-compare" data-product_id="@relatedProduct.Product.Id">
+																	<i class="fa fa-plus-square"></i> to compare
+																</button>
+															</li>
+														</ul>
+													</div>
+												</div>
+											</div>
+										}
 									</div>
 								</div>
-							</div>
-						}								
-					</div>
+							}
+						</div>
+					}
 				</div>
-				<a class="left recommended-item-control" href="#recommended-item-carousel" data-slide="prev">
-					<i class="fa fa-angle-left"></i>
-				</a>
-				<a class="right recommended-item-control" href="#recommended-item-carousel" data-slide="next">
-					<i class="fa fa-angle-right"></i>
-				</a>
+
+				@if (@ViewBag.RelatedProducts.Count > 3)
+				{
+					<a class="left recommended-item-control" href="#recommended-item-carousel" data-slide="prev">
+						<i class="fa fa-angle-left"></i>
+					</a>
+					<a class="right recommended-item-control" href="#recommended-item-carousel" data-slide="next">
+						<i class="fa fa-angle-right"></i>
+					</a>
+				}
 			</div>
-		</div><!--/recommended_items-->
+		</div>
+
 
 	</div>
 </div>
@@ -305,3 +224,16 @@
 		});
 	</script>
 }
+<style>
+	.product-carousel .carousel-item {
+		height: 300px; /* Điều chỉnh chiều cao phù hợp */
+	}
+
+		.product-carousel .carousel-item .row {
+			margin: 0;
+		}
+
+		.product-carousel .carousel-item .col-md-4 {
+			padding: 0;
+		}
+</style>

@@ -5,6 +5,7 @@ namespace E_commerce.Models.ViewModel
 	public class ProductDetailsViewModel
 	{
 		public ProductModel ProductDetails { get; set; }
+        public List<IGrouping<int, GroupedProduct>> RelatedProductsGrouped { get; set; }
 
 		[Required(ErrorMessage = "Comment is required")]
 		public string Comment { get; set; }
