@@ -1,8 +1,10 @@
 using E_commerce.Areas.Admin.Repository;
+using E_commerce.Controllers;
 using E_commerce.Models;
 using E_commerce.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,6 +19,15 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "E-Commerce API", Version = "v1" });
+});
+
+builder.Services.AddScoped<BrandApiController>();
+builder.Services.AddScoped<CategoryApiController>();
+
 
 builder.Services.AddDistributedMemoryCache();
 
@@ -60,10 +71,21 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
 }
+else
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "E-Commerce API v1");
+        c.RoutePrefix = string.Empty;
+    });
+}
 
 app.UseStaticFiles();
 
 app.UseRouting();
+
+
 
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 

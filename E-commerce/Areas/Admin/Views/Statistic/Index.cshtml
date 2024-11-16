@@ -93,10 +93,10 @@
                                     <div class="row">
                                         <div class="col-8 text-start">
                                             <div class="icon icon-shape bg-white shadow text-center border-radius-2xl">
-                                                <i class="ni ni-cart text-dark text-gradient text-lg opacity-10" aria-hidden="true"></i>
+                                                <i class="fa-solid fa-user fa-xl"></i>
                                             </div>
-                                            <h3 class="text-white font-weight-bolder mb-0 mt-3"></h3>
-                                            <span class="text-white text-sm">Total Products</span>
+                                            <h3 class="text-white font-weight-bolder mb-0 mt-3"><span id="userCount">0</span></h3>
+                                            <span class="text-white text-sm">Total Users</span>
                                         </div>
                                     </div>
                                 </div>
@@ -138,7 +138,7 @@
                 <div class="col-lg-5 mb-lg-0 mb-4">
                     <div class="card z-index-2">
                         <div class="card-body p-2">
-                            <h5>Monthly Orders</h5>
+                            <h3>Monthly Orders</h3>
                             <div class="bg-dark border-radius-md py-3 pe-1 mb-3">
                                 <div class="chart">
                                     <canvas id="chart-bars" class="chart-canvas" height="320"></canvas>
@@ -150,7 +150,7 @@
                 <div class="col-lg-7">
                     <div class="card z-index-2">
                         <div class="card-header pb-0">
-                            <h6>Sales overview</h6>
+                            <h3>Sales overview</h3>
                             <p class="text-sm">
                                 in <span class="font-weight-bold">@DateTime.Now.Year</span>
                             </p>
@@ -163,9 +163,58 @@
                     </div>
                 </div>
             </div>
+            <div class="row mt-4">
+                <div class="col-lg-5 mb-lg-0 mb-4">
+                    <div class="card z-index-2">
+                        <div class="card-body p-2">
+                            <h3>Quarterly Revenue</h3>
+                            <div class="bg-dark border-radius-md py-3 pe-1 mb-3">
+                                <div class="chart">
+                                    <canvas id="quarterlyRevenueChart" style="width: 100%; height: 100%;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <div class="card z-index-2">
+                        <div class="card-body p-3">
+                            <h3 class="section-title1">Products by Category</h3>
+                            <table id="categoryTable" class="styled-table">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Total Products</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Rows populated by JavaScript -->
+                                </tbody>
+                            </table>
+
+                            <h3 class="section-title1">Products by Brand</h3>
+                            <table id="brandTable" class="styled-table">
+                                <thead>
+                                    <tr>
+                                        <th>Brand</th>
+                                        <th>Total Products</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Rows populated by JavaScript -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
             @* =============================================================================================== *@
+            
+
+
+
             <div class="container1">
-                <h3 class="section-title1">Quarterly Revenue</h3>
+                @* <h3 class="section-title1">Quarterly Revenue</h3>
                 <table id="quarterlyRevenueTable" class="styled-table">
                     <thead>
                         <tr>
@@ -176,33 +225,9 @@
                     <tbody>
                         <!-- Data will be inserted here -->
                     </tbody>
-                </table>
+                </table> *@
 
-                <h3 class="section-title1">Products by Category</h3>
-                <table id="categoryTable" class="styled-table">
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Total Products</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Rows populated by JavaScript -->
-                    </tbody>
-                </table>
-
-                <h3 class="section-title1">Products by Brand</h3>
-                <table id="brandTable" class="styled-table">
-                    <thead>
-                        <tr>
-                            <th>Brand</th>
-                            <th>Total Products</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Rows populated by JavaScript -->
-                    </tbody>
-                </table>
+                
             </div>
 
             @* <footer class="footer pt-3  ">
@@ -570,6 +595,24 @@
         .catch(error => console.error('Error fetching monthly revenue:', error));
 
     // Doanh thu theo quý
+    // fetch('@Url.Action("GetQuarterlyRevenue", "Statistic")')
+    //     .then(response => {
+    //         if (!response.ok) {
+    //             throw new Error('Network response was not ok: ' + response.statusText);
+    //         }
+    //         return response.json();
+    //     })
+    //     .then(data => {
+    //         console.log("Quarterly Revenue Data: ", data);
+    //         const tableBody = document.querySelector("#quarterlyRevenueTable tbody");
+    //         data.forEach(item => {
+    //             const row = `<tr><td>${item.quarter}</td><td>${item.revenue.toFixed(2)}</td></tr>`;
+    //             tableBody.insertAdjacentHTML("beforeend", row);
+    //         });
+    //     })
+    //     .catch(error => console.error('Error fetching quarterly revenue:', error));
+    var ctxPie = document.getElementById("quarterlyRevenueChart").getContext("2d");
+
     fetch('@Url.Action("GetQuarterlyRevenue", "Statistic")')
         .then(response => {
             if (!response.ok) {
@@ -579,13 +622,46 @@
         })
         .then(data => {
             console.log("Quarterly Revenue Data: ", data);
-            const tableBody = document.querySelector("#quarterlyRevenueTable tbody");
-            data.forEach(item => {
-                const row = `<tr><td>${item.quarter}</td><td>${item.revenue.toFixed(2)}</td></tr>`;
-                tableBody.insertAdjacentHTML("beforeend", row);
+
+            // Extract revenue data for each quarter
+            const quarters = data.map(item => item.quarter);
+            const revenues = data.map(item => item.revenue);
+
+            // Create the pie chart
+            new Chart(ctxPie, {
+                type: 'pie', // Pie chart type
+                data: {
+                    labels: quarters, // Quarters names
+                    datasets: [{
+                        label: 'Quarterly Revenue',
+                        data: revenues, // Revenue for each quarter
+                        backgroundColor: ['#FF5733', '#33FF57', '#3357FF', '#FF33A1'], // Customize colors for each slice
+                        borderColor: ['#FFFFFF', '#FFFFFF', '#FFFFFF', '#FFFFFF'], // Border color for each slice
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: 'white' // Set the legend label color to white
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (tooltipItem) {
+                                    return tooltipItem.label + ': $' + tooltipItem.raw.toFixed(2); // Format tooltip
+                                }
+                            }
+                        }
+                    }
+                }
             });
         })
         .catch(error => console.error('Error fetching quarterly revenue:', error));
+
 
     // Tổng đơn hàng và doanh thu
     fetch('@Url.Action("GetTotalOrdersAndRevenue", "Statistic")')
@@ -655,6 +731,14 @@
         })
         .catch(error => console.error('Error fetching product statistics:', error));
 
+    fetch('@Url.Action("GetTotalUserCount", "Statistic")')
+        .then(response => response.json())
+        .then(data => {
+            console.log("Total Users:", data);
+            // Giả sử bạn muốn hiển thị tổng số người dùng trong phần tử với id "userCount"
+            document.getElementById("userCount").textContent = data;
+        })
+        .catch(error => console.error('Error fetching total user count:', error));
 </script>
 <style>
  /* Container Styling */
@@ -751,5 +835,6 @@
         content: attr(data-label);
     }
 }
+
 
 </style>

@@ -255,5 +255,14 @@ namespace E_commerce.Areas.Admin.Controllers
                 return new JsonResult(null) { StatusCode = 500 };
             }
         }
+
+        public async Task<JsonResult> GetTotalUserCount()
+        {
+            // Đếm tổng số lượng người dùng hiện có
+            var totalUserCount = await _context.Users.CountAsync();
+
+            // Trả về kết quả dưới dạng Json
+            return new JsonResult(totalUserCount);
+        }
     }
 }
