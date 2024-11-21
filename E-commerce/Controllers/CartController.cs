@@ -135,11 +135,13 @@ namespace E_commerce.Controllers
             return RedirectToAction("Index");
 		}
 		[HttpPost]
-		public async Task<IActionResult> GetShippingPrice(ShippingModel shippingModel, string quan, string tinh, string phuong)
+		public async Task<IActionResult> GetShippingPrice(ShippingModel shippingModel, string quan, string tinh, string phuong, string detailAddress)
 		{
 			var existingShipping = await _dataContext.Shippings.FirstOrDefaultAsync(x => x.City == tinh && x.District == quan && x.Ward == phuong);
 
-			decimal shippingPrice = 0;
+            HttpContext.Session.SetString("ShippingAddress", $"{detailAddress}, {phuong}, {quan}, {tinh}");
+
+            decimal shippingPrice = 0;
 
 			if(existingShipping != null)
 			{

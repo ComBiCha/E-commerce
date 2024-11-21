@@ -1,0 +1,328 @@
+﻿@model E_commerce.Models.WarrantyRequestModel
+
+@{
+    ViewData["Title"] = "Warranty Request Details";
+}
+
+<h3>@ViewData["Title"]</h3>
+
+<div>
+    <h4>Warranty Request Information</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Warranty Code:</dt>
+        <dd class="col-sm-10">@Model.WarrantyCode</dd>
+
+        <dt class="col-sm-2">User:</dt>
+        <dd class="col-sm-10">@Model.User.UserName</dd>
+
+        <dt class="col-sm-2">Reason:</dt>
+        <dd class="col-sm-10">@Model.Reason</dd>
+
+        <dt class="col-sm-2">Status:</dt>
+        <dd class="col-sm-10">
+            @if (Model.Status == 0)
+            {
+                <span class="badge bg-warning">Đợi duyệt</span>
+            }
+            else if (Model.Status == 1)
+            {
+                <span class="badge bg-success">Đã duyệt</span>
+            }
+            else if (Model.Status == 2)
+            {
+                <span class="badge bg-info">Đã tiếp nhận sản phẩm lỗi</span>
+            }
+            else if (Model.Status == 3)
+            {
+                <span class="badge bg-primary">Đã khắc phục</span>
+            }
+            else if (Model.Status == 4)
+            {
+                <span class="badge bg-dark">Đã hoàn thành</span>
+            }
+            else if (Model.Status == 5)
+            {
+                <span class="badge bg-danger">Bị từ chối</span>
+            }
+            else if (Model.Status == 6)
+            {
+                <span class="badge bg-danger">Đã bị huỷ</span>
+            }
+        </dd>
+
+        <dt class="col-sm-2">Created Date:</dt>
+        <dd class="col-sm-10">@Model.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+
+        <dt class="col-sm-2">Updated Date:</dt>
+        <dd class="col-sm-10">@Model.UpdatedDate.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+    </dl>
+
+    <h4>Product Information</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">Product Name:</dt>
+        <dd class="col-sm-10">@Model.Warranty.Product.Name</dd>
+
+        <dt class="col-sm-2">Product Description:</dt>
+        <dd class="col-sm-10">@Html.Raw(@Model.Warranty.Product.Description)</dd>
+
+        <dt class="col-sm-2">Product Price:</dt>
+        <dd class="col-sm-10">@Model.Warranty.Product.Price.ToString("C")</dd>
+
+        <dt class="col-sm-2">Product Image:</dt>
+        <dd class="col-sm-10">
+            <img src="~/media/products/@Model.Warranty.Product.Image" width="200" />
+        </dd>
+    </dl>
+
+    <h4>Current Status</h4>
+    <p id="warrantyStatusText" style="font-size:24px;">
+        @if (Model.Status == 0)
+        {
+            <span class="badge bg-warning">Đợi duyệt</span>
+        }
+        else if (Model.Status == 1)
+        {
+            <span class="badge bg-success">Đã duyệt</span>
+        }
+        else if (Model.Status == 2)
+        {
+            <span class="badge bg-info">Đã tiếp nhận sản phẩm lỗi</span>
+        }
+        else if (Model.Status == 3)
+        {
+            <span class="badge bg-primary">Đã khắc phục</span>
+        }
+        else if (Model.Status == 4)
+        {
+            <span class="badge bg-dark">Đã hoàn thành</span>
+        }
+        else if (Model.Status == 5)
+        {
+            <span class="badge bg-danger">Bị từ chối</span>
+        }
+        else if (Model.Status == 6)
+        {
+            <span class="badge bg-danger">Đã bị huỷ</span>
+        }
+    </p>
+
+    <!-- Accept/Deny Section -->
+    @if (Model.Status != 6)
+    {
+        <h4>Update Status</h4>
+        <div id="actionButtons" style="margin-bottom:20px;">
+            <!-- Accept Button -->
+            <button id="acceptButton" class="btn btn-success" @(Model.Status == 0 ? "" : "disabled")>
+                Duyệt bảo hành
+            </button>
+
+            <!-- Next Status buttons -->
+            <button id="processingButton" class="btn btn-info" style="display:@(Model.Status == 1 ? "inline-block" : "none");">
+                Đã tiếp nhận sản phẩm lỗi
+            </button>
+            <button id="inspectionButton" class="btn btn-primary" style="display:@(Model.Status == 2 ? "inline-block" : "none");">
+                Đã khắc phục sản phẩm
+            </button>
+            <button id="completeButton" class="btn btn-success" style="display:@(Model.Status == 3 ? "inline-block" : "none");">
+                Đã hoàn thành bảo hành
+            </button>
+
+            <!-- Deny Button -->
+            <button id="denyButton" class="btn btn-danger" @(Model.Status == 0 ? "" : "disabled")>
+                Từ chối bảo hành
+            </button>
+        </div>
+    }
+    <a style="margin-bottom:30px;" asp-action="Index">Back to List Warranty</a>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Update status text based on the current status
+            function updateStatusText(status) {
+                let statusText = '';
+                if (status == 0) statusText = "<span class='text-warning'>Đợi duyệt</span>";
+                if (status == 1) statusText = "<span class='text-success'>Đã duyệt</span>";
+                if (status == 2) statusText = "<span class='text-info'>Đã tiếp nhận sản phẩm lỗi</span>";
+                if (status == 3) statusText = "<span class='text-primary'>Đã khắc phục</span>";
+                if (status == 4) statusText = "<span class='text-dark'>Đã hoàn thành</span>";
+                if (status == 5) statusText = "<span class='text-danger'>Bị từ chối</span>";
+                if (status == 5) statusText = "<span class='text-danger'>Đã bị huỷ</span>";
+
+                $('#warrantyStatusText').html(statusText);
+
+                // Handle visibility of buttons based on status
+                if (status == 0) {
+                    $('#acceptButton').prop("disabled", false).show();
+                    $('#denyButton').prop("disabled", false).show();
+                    $('#processingButton').hide();
+                    $('#inspectionButton').hide();
+                    $('#completeButton').hide();
+                } else if (status == 1) {
+                    $('#acceptButton').prop("disabled", true).hide();
+                    $('#denyButton').prop("disabled", true).hide();
+                    $('#processingButton').show();
+                    $('#inspectionButton').hide();
+                    $('#completeButton').hide();
+                } else if (status == 2) {
+                    $('#acceptButton').prop("disabled", true).hide();
+                    $('#denyButton').prop("disabled", true).hide();
+                    $('#processingButton').hide();
+                    $('#inspectionButton').show();
+                    $('#completeButton').hide();
+                } else if (status == 3) {
+                    $('#acceptButton').prop("disabled", true).hide();
+                    $('#denyButton').prop("disabled", true).hide();
+                    $('#processingButton').hide();
+                    $('#inspectionButton').hide();
+                    $('#completeButton').show();
+                } else if (status == 4 || status == 5) {
+                    $('#acceptButton').prop("disabled", true).hide();
+                    $('#denyButton').prop("disabled", true).hide();
+                    $('#processingButton').hide();
+                    $('#inspectionButton').hide();
+                    $('#completeButton').hide();
+                }
+            }
+
+            // Call the function with the current status
+            updateStatusText(@Model.Status);
+
+            // Accept button click event
+            $('#acceptButton').click(function () {
+                var warrantyId = @Model.Id; // Get the current warranty ID
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("Accept")",
+                    data: { id: warrantyId },
+                    success: function (result) {
+                        if (result.success) {
+                            updateStatusText(result.newStatus);
+                            if (result.newStatus == 1) {
+                                $('#processingButton').show(); // Show Processing button
+                            }
+                            $('#acceptButton').prop("disabled", true).hide(); // Hide accept button
+                            $('#denyButton').prop("disabled", true).hide(); // Hide deny button
+                        } else {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: result.message,
+                            });
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "An error occurred while processing the request.",
+                        });
+                    }
+                });
+            });
+
+            // Processing button click event
+            $('#processingButton').click(function () {
+                var warrantyId = @Model.Id;
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("SetProcessing")",
+                    data: { id: warrantyId },
+                    success: function (result) {
+                        if (result.success) {
+                            updateStatusText(result.newStatus);
+                            $('#inspectionButton').show(); // Show Inspection button
+                            $('#processingButton').hide(); // Hide Processing button
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "An error occurred while processing the request.",
+                        });
+                    }
+                });
+            });
+
+            // Inspection button click event
+            $('#inspectionButton').click(function () {
+                var warrantyId = @Model.Id;
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("SetUnderInspection")",
+                    data: { id: warrantyId },
+                    success: function (result) {
+                        if (result.success) {
+                            updateStatusText(result.newStatus);
+                            $('#completeButton').show(); // Show Complete button
+                            $('#inspectionButton').hide(); // Hide Inspection button
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "An error occurred while processing the request.",
+                        });
+                    }
+                });
+            });
+
+            // Complete button click event
+            $('#completeButton').click(function () {
+                var warrantyId = @Model.Id;
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("SetComplete")",
+                    data: { id: warrantyId },
+                    success: function (result) {
+                        if (result.success) {
+                            updateStatusText(result.newStatus);
+                            $('#completeButton').hide(); // Hide Complete button after completion
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "An error occurred while processing the request.",
+                        });
+                    }
+                });
+            });
+
+            // Deny button click event
+            $('#denyButton').click(function () {
+                var warrantyId = @Model.Id;
+
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("Deny")",
+                    data: { id: warrantyId },
+                    success: function (result) {
+                        if (result.success) {
+                            updateStatusText(5); // Denied status
+                            $('#actionButtons').hide(); // Hide all buttons after deny
+                        }
+                    },
+                    error: function () {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Error",
+                            text: "An error occurred while processing the request.",
+                        });
+                    }
+                });
+            });
+        });
+
+    </script>
+}

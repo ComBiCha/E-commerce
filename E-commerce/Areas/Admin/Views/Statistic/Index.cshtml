@@ -55,7 +55,21 @@
                             </div>
                         </div>
                         <div class="col-lg-3 col-md-6 col-12 mt-4 mt-md-0">
-                            <div class="card">
+                            @* <div class="card">
+                                <span class="mask bg-dark opacity-10 border-radius-lg"></span>
+                                <div class="card-body p-3 position-relative">
+                                    <div class="row">
+                                        <div class="col-8 text-start">
+                                            <div class="icon icon-shape bg-white shadow text-center border-radius-2xl">
+                                                <i class="fa-solid fa-money-bill fa-xl"></i>
+                                            </div>
+                                            <h3 class="text-white font-weight-bolder mb-0 mt-3"><span id="totalRevenue">$0.00</span></h3>
+                                            <span class="text-white text-sm">Total Revenue</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> *@
+                            <div class="card" onclick="openRevenueModal()">
                                 <span class="mask bg-dark opacity-10 border-radius-lg"></span>
                                 <div class="card-body p-3 position-relative">
                                     <div class="row">
@@ -69,6 +83,27 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- The Modal -->
+                            <div id="customModal" class="custom-modal">
+                                <div class="custom-modal-content">
+                                    <div class="custom-modal-header">
+                                        <span class="close-btn" id="closeModal">&times;</span>
+                                        <h3>Revenue Details</h3>
+                                    </div>
+                                    <div class="custom-modal-body">
+                                        <h4>Today's Revenue: <span style="color:#FE980F" id="todayRevenue">Loading...</span></h4>
+                                        <h4>Current Month: <span id="currentMonth">Loading...</span></h4>
+                                        <h4>Previous Month: <span id="previousMonth">Loading...</span></h4>
+                                        <h4>Growth: <span style="color:#FE980F" id="growth">Loading...</span></h4>
+                                    </div>
+                                </div>
+                            </div>
+
+
+
+
+
                         </div>
                         <div class="col-lg-3 col-md-6 col-12">
                             <div class="card">
@@ -208,60 +243,12 @@
                     </div>
                 </div>
             </div>
+            <!-- Modal for Revenue Details -->
+            <!-- Modal -->
+
+
+
             @* =============================================================================================== *@
-            
-
-
-
-            <div class="container1">
-                @* <h3 class="section-title1">Quarterly Revenue</h3>
-                <table id="quarterlyRevenueTable" class="styled-table">
-                    <thead>
-                        <tr>
-                            <th>Quarter</th>
-                            <th>Revenue</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Data will be inserted here -->
-                    </tbody>
-                </table> *@
-
-                
-            </div>
-
-            @* <footer class="footer pt-3  ">
-                <div class="container-fluid">
-                    <div class="row align-items-center justify-content-lg-between">
-                        <div class="col-lg-6 mb-lg-0 mb-4">
-                            <div class="copyright text-center text-sm text-muted text-lg-start">
-                                © <script>
-                                      document.write(new Date().getFullYear())
-                                </script>,
-                                made with <i class="fa fa-heart"></i> by
-                                <a href="https://www.creative-tim.com" class="font-weight-bold" target="_blank">Creative Tim</a>
-                                for a better web.
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <ul class="nav nav-footer justify-content-center justify-content-lg-end">
-                                <li class="nav-item">
-                                    <a href="https://www.creative-tim.com" class="nav-link text-muted" target="_blank">Creative Tim</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="https://www.creative-tim.com/presentation" class="nav-link text-muted" target="_blank">About Us</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="https://www.creative-tim.com/blog" class="nav-link text-muted" target="_blank">Blog</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a href="https://www.creative-tim.com/license" class="nav-link pe-0 text-muted" target="_blank">License</a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </footer> *@
         </div>
     </main>
     <div class="fixed-plugin">
@@ -740,6 +727,79 @@
         })
         .catch(error => console.error('Error fetching total user count:', error));
 </script>
+
+<script>
+    // Get the modal and close button elements
+    const modal = document.getElementById('customModal');
+    const closeModalBtn = document.getElementById('closeModal');
+
+    // Open the modal
+    function openRevenueModal() {
+        // Show the modal
+        modal.style.display = "flex";
+
+        // Fetch today's revenue and revenue growth
+        fetch('@Url.Action("GetTodayRevenue", "Statistic")')
+            .then(response => response.json())
+            .then(data => {
+                if (data.totalRevenue !== undefined) {
+                    document.getElementById("todayRevenue").textContent =
+                        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(data.totalRevenue);
+                } else {
+                    console.error(data.message || "Failed to fetch today's revenue.");
+                    document.getElementById("todayRevenue").textContent = "N/A";
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching today\'s revenue:', error);
+                document.getElementById("todayRevenue").textContent = "Error";
+            });
+
+        fetch('@Url.Action("GetCurrentMonthRevenueGrowth", "Statistic")')
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    console.error(data.message);
+                    document.getElementById("currentMonth").textContent = "N/A";
+                    document.getElementById("previousMonth").textContent = "N/A";
+                    document.getElementById("growth").textContent = "N/A";
+                    return;
+                }
+
+                document.getElementById("currentMonth").textContent = data.currentMonth;
+                document.getElementById("previousMonth").textContent = data.previousMonth;
+
+                const growthPercentage = data.growth.toFixed(2);
+                const growthText = growthPercentage > 0
+                    ? `+${growthPercentage}%`
+                    : `${growthPercentage}%`;
+
+                document.getElementById("growth").textContent = growthText;
+            })
+            .catch(error => {
+                console.error('Error fetching revenue growth data:', error);
+                document.getElementById("currentMonth").textContent = "Error";
+                document.getElementById("previousMonth").textContent = "Error";
+                document.getElementById("growth").textContent = "Error";
+            });
+    }
+
+    // Close the modal when the user clicks the close button
+    closeModalBtn.addEventListener('click', () => {
+        modal.style.display = "none";  // Hide the modal
+    });
+
+    // Close the modal if the user clicks outside of the modal content
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+    });
+
+</script>
+
+
+
 <style>
  /* Container Styling */
 .container1 {
@@ -836,5 +896,48 @@
     }
 }
 
+    /* The Modal (background) */
+    .custom-modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1000; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Black background with opacity */
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Modal Content */
+    .custom-modal-content {
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        width: 80%;
+        max-width: 500px;
+    }
+
+    /* Close Button */
+    .close-btn {
+        font-size: 30px;
+        color: #aaa;
+        float: right;
+        cursor: pointer;
+    }
+
+        .close-btn:hover,
+        .close-btn:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    /* Modal Header */
+    .custom-modal-header h5 {
+        margin: 0;
+        font-size: 20px;
+    }
 
 </style>

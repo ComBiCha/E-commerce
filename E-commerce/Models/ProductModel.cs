@@ -26,11 +26,13 @@ namespace E_commerce.Models
         public CategoryModel Category { get; set; }
 		public BrandModel Brand { get; set; }
 		public RatingModel Ratings { get; set; }
+		public int WarrantyPeriod { get; set; }
 		public string Image { get; set; }
 
 		[NotMapped]
 		[FileExtension]
 		public IFormFile? ImageUpload { get; set; }
+        public ICollection<WarrantyModel> Warranty { get; set; }
 
-	}
+    }
 }

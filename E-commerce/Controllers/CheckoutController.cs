@@ -8,6 +8,7 @@ using Stripe.BillingPortal;
 using System.Security.Claims;
 using Stripe.Checkout;
 using Stripe;
+using System.Text;
 
 namespace E_commerce.Controllers
 {
@@ -108,11 +109,15 @@ namespace E_commerce.Controllers
                 var shippingPriceJson = shippingPriceCookie;
                 shippingPrice = JsonConvert.DeserializeObject<decimal>(shippingPriceJson);
             }
-            // Create the order
-            var orderItem = new OrderModel
+			// shipping address
+			var shippingAddress = HttpContext.Session.GetString("ShippingAddress");
+
+			// Create the order
+			var orderItem = new OrderModel
             {
                 OrderCode = ordercode,
                 ShippingCost = shippingPrice,
+                Address = shippingAddress,
                 UserName = userEmail,
                 Status = 1, // Set the status as "pending" or "paid"
                 CreatedDate = DateTime.Now
@@ -120,7 +125,8 @@ namespace E_commerce.Controllers
             _datacontext.Add(orderItem);
             await _datacontext.SaveChangesAsync();
             // Create order details and update product stock
-            foreach (var cart in cartItems)
+
+            /*foreach (var cart in cartItems)
             {
                 var orderdetails = new OrderDetails
                 {
@@ -136,13 +142,118 @@ namespace E_commerce.Controllers
                 _datacontext.Update(product);
                 _datacontext.Add(orderdetails);
             }
+            await _datacontext.SaveChangesAsync();*/
+
+            foreach (var cart in cartItems)
+            {
+                // Thêm chi tiết đơn hàng
+                var orderdetails = new OrderDetails
+                {
+                    UserName = userEmail,
+                    OrderCode = ordercode,
+                    ProductId = cart.ProductId,
+                    Price = cart.Price,
+                    Quantity = cart.Quantity
+                };
+                _datacontext.Add(orderdetails);
+
+                // Cập nhật số lượng sản phẩm trong kho
+                var product = await _datacontext.Products.Where(p => p.Id == cart.ProductId).FirstAsync();
+                product.Quantity -= cart.Quantity;
+                product.Sold += cart.Quantity;
+                _datacontext.Update(product);
+
+                // Tạo mã bảo hành
+                var warrantyCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper(); // Mã bảo hành ngẫu nhiên
+                var warranty = new WarrantyModel
+                {
+                    WarrantyCode = warrantyCode,
+                    ProductId = cart.ProductId,
+                    OrderCode = ordercode,
+                    ExpirationDate = DateTime.Now.AddMonths(product.WarrantyPeriod), // Lấy thời hạn bảo hành từ sản phẩm
+                    CreatedDate = DateTime.Now
+                };
+                _datacontext.Add(warranty);
+            }
             await _datacontext.SaveChangesAsync();
+
+
             // Send order confirmation email
             var receiver = userEmail;
             var subject = "Order Successfully";
-            var message = "We have received your order." +
-                          "Your Order will be delivered to your house in 1-2 days. Thank you for your order!";
-            await _emailSender.SendEmailAsync(receiver, subject, message);
+
+            /*var warranties = await _datacontext.Warranties
+            .Where(w => w.OrderCode == ordercode)
+            .Include(w => w.Product)
+            .ToListAsync();
+
+            var warrantyDetails = string.Join("\n", warranties.Select(w =>
+                $"Product: {w.Product.Name}, Warranty Code: {w.WarrantyCode}, Expiration Date: {w.ExpirationDate:yyyy-MM-dd}"));
+
+            var message = $"We have received your order.\n" +
+                          "Your order will be delivered to your house in 1-2 days. Thank you for your order!\n\n" +
+                          "Warranty Information:\n" + warrantyDetails;
+
+            await _emailSender.SendEmailAsync(receiver, subject, message);*/
+
+            var warranties = await _datacontext.Warranties
+            .Where(w => w.OrderCode == ordercode)
+            .Include(w => w.Product)
+            .ToListAsync();
+
+            var orderDetails = await _datacontext.OrderDetails
+                .Where(od => od.OrderCode == ordercode)
+                .Include(od => od.Product)
+                .ToListAsync();
+
+            // Xây dựng nội dung email chi tiết
+            var emailBody = new StringBuilder();
+            emailBody.AppendLine("Dear Customer,");
+            emailBody.AppendLine("We have successfully received your order. Here are the details:");
+            emailBody.AppendLine();
+
+            // Thông tin đơn hàng
+            emailBody.AppendLine("**Order Details:**");
+            emailBody.AppendLine($"Order Code: {ordercode}");
+            emailBody.AppendLine($"Order Date: {DateTime.Now:yyyy-MM-dd}");
+            emailBody.AppendLine($"Shipping Cost: ${shippingPrice:F2}");
+            emailBody.AppendLine($"Total Items: {cartItems.Count}");
+            emailBody.AppendLine();
+
+            // Thông tin sản phẩm
+            var baseUrl = "http://localhost:5139/";
+            emailBody.AppendLine("**Products in Your Order:**");
+            foreach (var detail in orderDetails)
+            {
+                var productImageUrl = $"{baseUrl}/media/products/{detail.Product.Image}";
+                emailBody.AppendLine($"- **Product Name**: {detail.Product.Name}");
+                emailBody.AppendLine($"  - Quantity: {detail.Quantity}");
+                emailBody.AppendLine($"  - Price per Unit: ${detail.Price:F2}");
+                emailBody.AppendLine($"  - Total: ${detail.Quantity * detail.Price:F2}");
+                emailBody.AppendLine($"  - Product Image: [View Image]({productImageUrl})");
+                emailBody.AppendLine();
+            }
+
+            // Thông tin bảo hành
+            /*emailBody.AppendLine("**Warranty Information:**");
+            foreach (var warranty in warranties)
+            {
+                emailBody.AppendLine($"- **Product Name**: {warranty.Product.Name}");
+                emailBody.AppendLine($"  - Warranty Code: {warranty.WarrantyCode}");
+                emailBody.AppendLine($"  - Expiration Date: {warranty.ExpirationDate:yyyy-MM-dd}");
+                emailBody.AppendLine();
+            }*/
+
+            // Kết thúc email
+            emailBody.AppendLine("Thank you for shopping with us!");
+            emailBody.AppendLine("If you have any questions, feel free to contact our support team.");
+            emailBody.AppendLine();
+            emailBody.AppendLine("Best regards");
+
+            // Gửi email
+            await _emailSender.SendEmailAsync(receiver, subject, emailBody.ToString());
+
+
             TempData["success"] = "Checkout successfully";
             // Clear cart
             HttpContext.Session.Remove("Cart");

@@ -6,7 +6,7 @@
 }
 @* For Admin *@
 <h3>Order Details</h3>
-
+<h4>Shipping Address: <span style="color:#FE980F">@ViewBag.Order.Address</span></h4>
 <table class="table" id="orderdetailsTable">
     <thead>
         <tr>
@@ -58,20 +58,22 @@
                     }
                     
                 </select> *@
-                <button id="statusUpdateButton" class="btn btn-primary">
-                    @{
-                        var buttonText = ViewBag.Order.Status switch
-                        {
-                            1 => "Xác nhận đơn hàng",
-                            2 => "Đã gửi hàng đi",
-                            3 => "Hàng đã giao tới nơi",
-                            4 => "Hoàn thành đơn hàng",
-                            _ => "Đơn hàng đã hoàn thành"
-                        };
-                        @buttonText
-                    }
-                </button>
-
+                @if (ViewBag.Order.Status != 6)
+                {
+                    <button id="statusUpdateButton" class="btn btn-primary">
+                        @{
+                            var buttonText = ViewBag.Order.Status switch
+                            {
+                                1 => "Xác nhận đơn hàng",
+                                2 => "Đã gửi hàng đi",
+                                3 => "Hàng đã giao tới nơi",
+                                4 => "Hoàn thành đơn hàng",
+                                _ => "Đơn hàng đã hoàn thành"
+                            };
+                            @buttonText
+                        }
+                    </button>
+                }
             </td>
             <td>
                 <span id="orderStatusText" class="text">
@@ -94,6 +96,10 @@
                     else if (ViewBag.Order.Status == 5)
                     {
 
+                    }
+                    else if (ViewBag.Order.Status == 6)
+                    {
+                        <span class="text text-danger">Đơn hàng đã bị huỷ</span>
                     }
                 </span>
             </td>

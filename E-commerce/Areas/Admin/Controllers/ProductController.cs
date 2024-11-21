@@ -162,6 +162,7 @@ namespace E_commerce.Areas.Admin.Controllers
                 existed_product.Price = product.Price;
                 existed_product.CategoryId = product.CategoryId;
                 existed_product.BrandId = product.BrandId;
+                existed_product.WarrantyPeriod = product.WarrantyPeriod;
 
                 _dataContext.Update(existed_product);
                 await _dataContext.SaveChangesAsync();

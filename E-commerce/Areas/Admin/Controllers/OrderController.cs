@@ -17,11 +17,11 @@ namespace E_commerce.Areas.Admin.Controllers
 		{
 			_dataContext = context;
 		}
-        /*public async Task<IActionResult> Index()
-		{
-			return View(await _dataContext.Orders.OrderByDescending(p => p.Id).ToListAsync());
-		}*/
-        public async Task<IActionResult> Index(int pg = 1)
+        public async Task<IActionResult> Index()
+        {
+            return View(await _dataContext.Orders.OrderByDescending(o => o.CreatedDate).ToListAsync());
+        }
+        /*public async Task<IActionResult> Index(int pg = 1)
         {
             List<OrderModel> order = _dataContext.Orders
                                          .OrderByDescending(o => o.CreatedDate)
@@ -47,7 +47,7 @@ namespace E_commerce.Areas.Admin.Controllers
             ViewBag.Pager = pager;
 
             return View(data);
-        }
+        }*/
         public async Task<IActionResult> ViewOrder(string ordercode)
         {
             var order = await _dataContext.Orders.FirstOrDefaultAsync(o => o.OrderCode == ordercode);

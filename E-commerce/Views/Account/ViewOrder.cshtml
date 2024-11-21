@@ -3,6 +3,8 @@
     ViewData["title"] = "Order Details";
     decimal total = 0;
     decimal subtotal = 0;
+
+
 }
  @* For user *@
 <h3>Order Details</h3>
@@ -18,11 +20,13 @@
             <th scope="col">Product Image</th>
             <th scope="col">Quantity</th>
             <th scope="col">Subtotal</th>
+            <th scope="col">Warranty Code</th>
         </tr>
     </thead>
     <tbody>
         @foreach (var item in Model)
         {
+            var warrantyCode = @item.Product.Warranty?.FirstOrDefault()?.WarrantyCode ?? "No Warranty";
             subtotal = item.Quantity * item.Price;
             total += subtotal;
             <tr>
@@ -35,6 +39,18 @@
                 <td><img src="~/media/products/@item.Product.Image" width="120" /></td>
                 <td>@item.Quantity</td>
                 <td>@subtotal.ToString("C")</td>
+                <td>
+                    @if (@ViewBag.Order.Status == 5) // Hiển thị khi trạng thái đơn hàng là "Đơn hàng đã hoàn thành"
+                    {
+                        <span class="text-success">
+                            @warrantyCode
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-muted">Not Completed</span>
+                    }
+                </td>
             </tr>
         }
         <!-- The total row is now outside the loop -->
@@ -59,11 +75,18 @@
                 }
                 else if (@ViewBag.Order.Status == 4)
                 {
-                    <span class="text text-dark">Hàng đã giao tới nơi</span>
+                    <form action="@Url.Action("ConfirmDelivery", "Account")" method="post">
+                        <input type="hidden" name="orderCode" value="@ViewBag.Order.OrderCode" />
+                        <button type="submit" class="btn btn-success">Xác nhận đã nhận hàng</button>
+                    </form>
                 }
                 else if (@ViewBag.Order.Status == 5)
                 {
                     <span class="text text-success">Đơn hàng đã hoàn thành</span>
+                }
+                else if (@ViewBag.Order.Status == 6)
+                {
+                    <span class="text text-danger">Đơn hàng đã bị huỷ</span>
                 }
             </td>
             <td></td>

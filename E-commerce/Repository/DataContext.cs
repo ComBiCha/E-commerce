@@ -1,6 +1,7 @@
 ﻿using E_commerce.Models;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 
 namespace E_commerce.Repository
 {
@@ -22,6 +23,9 @@ namespace E_commerce.Repository
 		public DbSet<CompareModel> Compares { get; set; }
         public DbSet<ProductQuantityModel> ProductQuantities { get; set; }
 		public DbSet<ShippingModel> Shippings { get; set; }
-	    public DbSet<E_commerce.Models.UserModel> UserModel { get; set; }
-	}
+        public DbSet<WarrantyModel> Warranties { get; set; }
+        public DbSet<WarrantyRequestModel> WarrantyRequests { get; set; }
+
+        public DbSet<E_commerce.Models.UserModel> UserModel { get; set; }
+    }
 }

@@ -21,7 +21,7 @@ namespace E_commerce.Controllers
 
 		}
 
-        public IActionResult Index()
+        /*public IActionResult Index()
         {
             var products = _datacontext.Products.Include("Category").Include("Brand").ToList();
             var sliders = _datacontext.Sliders.Where(s => s.Status == 1).ToList();
@@ -41,7 +41,43 @@ namespace E_commerce.Controllers
             ViewBag.Contact = contact;
 
             return View(products);
+        }*/
+
+        public async Task<IActionResult> Index(int page = 1)
+        {
+            int pageSize = 9;  // S? l??ng s?n ph?m trên m?i trang
+            int totalProducts = await _datacontext.Products.CountAsync();  // T?ng s? s?n ph?m
+            var products = await _datacontext.Products
+                .Include("Category")
+                .Include("Brand")
+                .Skip((page - 1) * pageSize)  // B? qua các s?n ph?m c?a các trang tr??c
+                .Take(pageSize)  // L?y s? l??ng s?n ph?m c?a trang hi?n t?i
+                .ToListAsync();
+
+            var sliders = _datacontext.Sliders.Where(s => s.Status == 1).ToList();
+
+            // L?y danh sách các brand cùng v?i s? l??ng s?n ph?m t??ng ?ng
+            var brandCounts = _datacontext.Brands
+                .Select(b => new
+                {
+                    b.Name,
+                    b.Slug,
+                    ProductCount = _datacontext.Products.Count(p => p.BrandId == b.Id)
+                })
+                .ToList();
+
+            var contact = _datacontext.Contacts.FirstOrDefault();
+
+            // Thêm thông tin phân trang vào ViewBag
+            ViewBag.Page = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+            ViewBag.BrandCounts = brandCounts;
+            ViewBag.Sliders = sliders;
+            ViewBag.Contact = contact;
+
+            return View(products);
         }
+
 
 
         public IActionResult Privacy()

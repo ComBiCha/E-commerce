@@ -231,8 +231,143 @@ namespace E_commerce.Controllers
         {
             var order = await _dataContext.Orders.FirstOrDefaultAsync(o => o.OrderCode == ordercode);
             ViewBag.Order = order;
-            var DetailsOrder = await _dataContext.OrderDetails.Include(o => o.Product).Where(o => o.OrderCode == ordercode).ToListAsync();
+            var DetailsOrder = await _dataContext.OrderDetails
+        .Include(o => o.Product)
+        .ThenInclude(p => p.Warranty) // Bao gồm thông tin bảo hành từ Product
+        .Where(o => o.OrderCode == ordercode)
+        .ToListAsync();
             return View(DetailsOrder);
         }
+        public async Task<IActionResult> MyWarranties()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Lấy User ID từ Claims
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["error"] = "Unable to identify the user. Please log in again.";
+                return RedirectToAction("Login", "Account"); // Chuyển hướng đến trang đăng nhập nếu không lấy được userId
+            }
+
+            var myRequests = await _dataContext.WarrantyRequests
+                .Where(wr => wr.UserId == userId)
+                .Include(wr => wr.Warranty)
+                .ThenInclude(w => w.Product) // Bao gồm thông tin sản phẩm (nếu cần hiển thị trong View)
+                .ToListAsync();
+
+            return View(myRequests);
+        }
+
+        public async Task<IActionResult> WarrantyDetails(int id)
+        {
+            var request = await _dataContext.WarrantyRequests
+                .Include(r => r.Warranty)
+                .Include(r => r.User)
+                .Include(r => r.Warranty.Product)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (request == null)
+            {
+                return NotFound();
+            }
+
+            return View(request);
+        }
+        public async Task<IActionResult> CancelWarranty(int id)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Lấy UserId của người dùng
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                TempData["error"] = "Unable to identify the user. Please log in again.";
+                return RedirectToAction("Login", "Account"); // Chuyển hướng đến trang đăng nhập nếu không lấy được userId
+            }
+
+            var request = await _dataContext.WarrantyRequests
+                .FirstOrDefaultAsync(wr => wr.Id == id && wr.UserId == userId);
+
+            if (request == null)
+            {
+                TempData["error"] = "Không tìm thấy yêu cầu bảo hành này.";
+                return RedirectToAction("MyWarranties");
+            }
+
+            // Cập nhật trạng thái yêu cầu bảo hành thành "Đã huỷ"
+            request.Status = 6;
+            request.UpdatedDate = DateTime.Now;
+
+            _dataContext.WarrantyRequests.Update(request);
+            await _dataContext.SaveChangesAsync();
+
+            TempData["success"] = "Yêu cầu bảo hành đã được huỷ thành công.";
+            return RedirectToAction("MyWarranties");
+        }
+        public async Task<IActionResult> CancelOrder(string orderCode)
+        {
+            // Lấy Email của người dùng hiện tại từ Claims
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            if (string.IsNullOrEmpty(email))
+            {
+                TempData["error"] = "Unable to identify the user. Please log in again.";
+                return RedirectToAction("Login", "Account"); // Nếu không đăng nhập, chuyển hướng về Login
+            }
+
+            // Kiểm tra đơn hàng có tồn tại và thuộc về người dùng hiện tại không
+            var order = await _dataContext.Orders
+                .FirstOrDefaultAsync(o => o.OrderCode == orderCode && o.UserName == email);
+
+            if (order == null)
+            {
+                TempData["error"] = "Order not found or you do not have permission to cancel this order.";
+                return RedirectToAction("PersonalOrder"); // Chuyển hướng về danh sách đơn hàng cá nhân
+            }
+
+
+            // Cập nhật trạng thái đơn hàng thành "Đã hủy"
+            order.Status = 6;
+
+            _dataContext.Orders.Update(order);
+            await _dataContext.SaveChangesAsync();
+
+            TempData["success"] = "Order has been canceled successfully.";
+            return RedirectToAction("PersonalOrder"); // Chuyển hướng về danh sách đơn hàng cá nhân
+        }
+        [HttpPost]
+        public async Task<IActionResult> ConfirmDelivery(string orderCode)
+        {
+            // Lấy email của người dùng từ Claims
+            var email = User.FindFirstValue(ClaimTypes.Email);
+
+            if (string.IsNullOrEmpty(email))
+            {
+                TempData["error"] = "Unable to identify the user. Please log in again.";
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Tìm đơn hàng theo mã và người dùng
+            var order = await _dataContext.Orders
+                .FirstOrDefaultAsync(o => o.OrderCode == orderCode && o.UserName == email);
+
+            if (order == null)
+            {
+                TempData["error"] = "Order not found or you do not have permission to confirm this delivery.";
+                return RedirectToAction("PersonalOrder"); // Chuyển hướng về danh sách đơn hàng cá nhân
+            }
+
+            // Kiểm tra xem đơn hàng có ở trạng thái "Hàng đã giao tới nơi" (4) không
+            if (order.Status == 4)
+            {
+                order.Status = 5;  // Cập nhật trạng thái thành "Đơn hàng đã hoàn thành"
+                await _dataContext.SaveChangesAsync();
+
+                TempData["success"] = "Order has been confirmed as received.";
+            }
+            else
+            {
+                TempData["error"] = "This order cannot be confirmed at this stage.";
+            }
+
+            return RedirectToAction("PersonalOrder"); // Chuyển hướng về danh sách đơn hàng cá nhân
+        }
+
+
     }
 }

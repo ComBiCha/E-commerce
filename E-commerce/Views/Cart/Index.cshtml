@@ -4,6 +4,7 @@
     For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 *@
 @{
+	int i = 0;
 }
 <section id="cart_items">
 	<div class="container">
@@ -17,7 +18,8 @@
 			<table class="table table-condensed">
 				<thead>
 					<tr class="cart_menu">
-						<td class="name" style="width: 40%;">Product Name</td>
+						<td class="name" style="width: 10%;">#</td>
+						<td class="name" style="width: 30%;">Product Name</td>
 						<td class="image" style="width: 20%;">Image</td>
 						<td class="price" style="width: 10%;">Price</td>
 						<td class="quantity" style="width: 20%;">Quantity</td>
@@ -27,7 +29,11 @@
 				<tbody>
 					@if(Model.CartItems.Count > 0){
 						@foreach(var item in Model.CartItems){
-						<tr>
+							i = i + 1;
+							<tr>
+								<td class="cart_description">
+									@i
+								</td>
 							<td class="cart_description">
 								<h4><a href="">@item.ProductName</a></h4>
 							</td>
@@ -39,7 +45,7 @@
 							</td>
 									<td>
 									<a class="btn btn-success btn-sm" asp-controller="Cart" asp-action="Increase" asp-route-Id="@item.ProductId"> + </a>
-									<input class="cart_quantity_input" type="text" name="quantity" value="@item.Quantity" autocomplete="off" size="2">
+									<input class="cart_quantity_input" type="text" name="quantity" value="@item.Quantity" autocomplete="off" size="2" readonly>
 									<a class="btn btn-success btn-sm" asp-controller="Cart" asp-action="Decrease" asp-route-Id="@item.ProductId"> - </a>
 									<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Remove" asp-route-Id="@item.ProductId"> Remove </a>
 									</td>
@@ -52,7 +58,7 @@
 						</tr>
 						}
 						<tr>
-							<td colspan="3"></td>
+							<td colspan="4"></td>
 							<td colspan="2" class="text-right">
 								<strong>Grand Total: <span style="color:#FE980F">$@Model.GrandTotal.ToString()</span></strong>
 								<strong>Shipping Cost: <span style="color:#FE980F">$@Model.ShippingCost.ToString()</span></strong>
@@ -79,11 +85,15 @@
 									<option value="0">Phường Xã</option>
 								</select>
 							</div>
+							<div class="form-group">
+								<label for="detailAddress">Detailed Address:</label>
+								<textarea name="detailAddress" id="detailAddress" title="detailAddress" rows="3" required></textarea>
+							</div>
 							<button style="margin-bottom:10px" type="button" class="btn btn-warning btn-add-shipping">Submit</button>
 						</tr>
 						
 						<tr>
-							<td colspan="3"></td>
+							<td colspan="4"></td>
 							<td colspan="2" class="text-right">
 								<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Clear"> Clear Cart </a>
 								@if (User.Identity?.IsAuthenticated ?? false)
@@ -127,14 +137,15 @@
 			var tinh = $("#tinh").find('option:selected').text();
 			var quan = $("#quan").find('option:selected').text();
 			var phuong = $("#phuong").find('option:selected').text();
+			var detailAddress = $("#detailAddress").val();
 
-			if (tinh == '' || quan == '' || phuong == '') {
+			if (tinh == '' || quan == '' || phuong == '' || detailAddress == '') {
 				Swal.fire("Please choose all options.");
 			} else {
 				$.ajax({
 					type: "POST",
 					url: "@Url.Action("GetShippingPrice", "Cart")",
-					data: { tinh: tinh, quan: quan, phuong: phuong},
+					data: { tinh: tinh, quan: quan, phuong: phuong, detailAddress: detailAddress },
 
 					success: function (result) {
 						if (result) {

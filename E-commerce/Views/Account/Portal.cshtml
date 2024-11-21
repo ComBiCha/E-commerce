@@ -30,7 +30,8 @@
 
     <div class="tabs">
         <button class="tab-button" onclick="openTab(event, 'PersonalInfo')">Thông tin cá nhân</button>
-        <button class="tab-button" onclick="openTab(event, 'Orders')"><a asp-action="PersonalOrder" asp-controller="Account">Quản lý đơn hàng</a></button>
+        <button class="tab-button" onclick="openTab(event, 'Orders')"><a asp-action="PersonalOrder" asp-controller="Account">Lịch sử đơn hàng</a></button>
+        <button class="tab-button" onclick="openTab(event, 'Orders')"><a asp-action="MyWarranties" asp-controller="Account">Lịch sử bảo hành</a></button>
     </div>
 
     <div id="PersonalInfo" class="tab-content">

@@ -69,7 +69,8 @@ app.UseSession();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    /*app.UseExceptionHandler("/Home/Error");*/
+    app.UseStatusCodePagesWithRedirects("/Home/Index");
 }
 else
 {
@@ -77,8 +78,10 @@ else
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "E-Commerce API v1");
-        c.RoutePrefix = string.Empty;
+        c.RoutePrefix = "swagger";
     });
+
+    app.UseStatusCodePagesWithRedirects("/Home/Index");
 }
 
 app.UseStaticFiles();

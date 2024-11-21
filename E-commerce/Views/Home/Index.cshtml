@@ -46,8 +46,28 @@
 		}
 
 	</div><!--features_items-->
+		<div class="pagination">
+			@if (ViewBag.Page > 1)
+			{
+				<a asp-action="Index" asp-route-page="1" class="first">First</a> <!-- Nút "First" -->
+				<a asp-action="Index" asp-route-page="@(ViewBag.Page - 1)" class="prev">Previous</a>
+			}
+
+			@for (var i = 1; i <= ViewBag.TotalPages; i++)
+			{
+				<a asp-action="Index" asp-route-page="@i" class="@(i == ViewBag.Page ? "active" : "")">@i</a>
+			}
+
+			@if (ViewBag.Page < ViewBag.TotalPages)
+			{
+				<a asp-action="Index" asp-route-page="@(ViewBag.Page + 1)" class="next">Next</a>
+				<a asp-action="Index" asp-route-page="@ViewBag.TotalPages" class="last">Last</a> <!-- Nút "Last" -->
+			}
+		</div>
+
 </div>
 </div>
+
 @section Scripts {
 	@* <script>
 		$(document).ready(function () {
@@ -94,3 +114,31 @@
 		});
 	</script>
 }
+<style>
+	.pagination {
+		text-align: center;
+		margin-top: 20px;
+	}
+
+		.pagination a {
+			padding: 8px 16px;
+			margin: 0 4px;
+			background-color: #f1f1f1;
+			color: #333;
+			text-decoration: none;
+			border-radius: 4px;
+		}
+
+			.pagination a:hover {
+				background-color: #ddd;
+			}
+
+		.pagination .active {
+			background-color: #4CAF50;
+			color: white;
+		}
+
+		.pagination .prev, .pagination .next {
+			font-weight: bold;
+		}
+</style>

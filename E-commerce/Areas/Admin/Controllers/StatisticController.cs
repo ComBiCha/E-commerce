@@ -21,6 +21,10 @@ namespace E_commerce.Areas.Admin.Controllers
         {
             return View();
         }
+        public IActionResult Revenue()
+        {
+            return View();
+        }
 
         // Action: Lấy số lượng đơn hàng theo tháng
         public JsonResult GetMonthlyOrderCount()
@@ -263,6 +267,107 @@ namespace E_commerce.Areas.Admin.Controllers
 
             // Trả về kết quả dưới dạng Json
             return new JsonResult(totalUserCount);
+        }
+        // tính doanh thu trong ngày
+        public JsonResult GetTodayRevenue()
+        {
+            try
+            {
+                // Lấy ngày hiện tại
+                var today = DateTime.Today;
+
+                // Lọc các đơn hàng trong ngày hiện tại
+                var orders = _context.Orders
+                    .Where(order => order.CreatedDate.Date == today)
+                    .ToList();
+
+                // Kiểm tra nếu không có đơn hàng
+                if (orders == null || !orders.Any())
+                {
+                    return new JsonResult(new { message = "No orders found for today." });
+                }
+
+                // Tính doanh thu bằng cách group các đơn hàng với chi tiết của chúng
+                var totalData = orders
+                    .GroupJoin(
+                        _context.OrderDetails,
+                        order => order.OrderCode,
+                        detail => detail.OrderCode,
+                        (order, orderDetails) => new
+                        {
+                            Revenue = orderDetails.Sum(detail => detail.Price * detail.Quantity)
+                        })
+                    .ToList();
+
+                // Tính tổng doanh thu
+                var totalRevenue = totalData.Sum(x => x.Revenue);
+
+                // Trả về kết quả
+                return new JsonResult(new
+                {
+                    TotalRevenue = totalRevenue
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetTodayRevenue: {ex.Message}");
+                return new JsonResult(null) { StatusCode = 500 };
+            }
+        }
+
+        //Tính mức tăng trưởng so với tháng trước
+        public JsonResult GetCurrentMonthRevenueGrowth()
+        {
+            try
+            {
+                // Lấy danh sách đơn hàng
+                var orders = _context.Orders.ToList();
+                if (orders == null || !orders.Any())
+                {
+                    return new JsonResult(new { message = "No orders found." });
+                }
+
+                // Tính tổng doanh thu từng tháng
+                var monthlyRevenue = orders
+                    .Join(_context.OrderDetails,
+                          order => order.OrderCode,
+                          detail => detail.OrderCode,
+                          (order, detail) => new { order.CreatedDate, detail.Price, detail.Quantity })
+                    .GroupBy(o => new { o.CreatedDate.Year, o.CreatedDate.Month })
+                    .Select(g => new
+                    {
+                        Month = new DateTime(g.Key.Year, g.Key.Month, 1),
+                        Revenue = g.Sum(x => x.Price * x.Quantity)
+                    })
+                    .OrderBy(x => x.Month)
+                    .ToList();
+
+                // Lấy tháng hiện tại và tháng trước
+                var currentMonth = monthlyRevenue.LastOrDefault(); // Tháng hiện tại
+                var previousMonth = monthlyRevenue.Count > 1 ? monthlyRevenue[^2] : null; // Tháng trước
+
+                if (currentMonth == null || previousMonth == null)
+                {
+                    return new JsonResult(new { message = "Not enough data to calculate growth." });
+                }
+
+                // Tính mức tăng trưởng
+                var growth = currentMonth.Revenue / previousMonth.Revenue * 100;
+
+                // Trả về kết quả
+                return new JsonResult(new
+                {
+                    CurrentMonth = currentMonth.Month.ToString("MM/yyyy"),
+                    PreviousMonth = previousMonth.Month.ToString("MM/yyyy"),
+                    Growth = growth
+                });
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi
+                Console.WriteLine($"Error in GetCurrentMonthRevenueGrowth: {ex.Message}");
+                return new JsonResult(null) { StatusCode = 500 };
+            }
         }
     }
 }
