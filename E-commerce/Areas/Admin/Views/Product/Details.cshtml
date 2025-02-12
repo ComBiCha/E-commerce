@@ -1,0 +1,69 @@
+﻿@model ProductModel
+
+<h3>Chi Tiết Sản Phẩm</h3>
+<table class="table">
+    <tr>
+        <th>Name:</th>
+        <td>@Model.Name</td>
+    </tr>
+    <tr>
+        <th>Description:</th>
+        <td>@Html.Raw(Model.Description)</td>
+    </tr>
+    <tr>
+        <th>Quantity:</th>
+        <td>@Model.Quantity</td>
+    </tr>
+    <tr>
+        <th>Sold:</th>
+        <td>@Model.Sold</td>
+    </tr>
+    <tr>
+        <th>Price:</th>
+        <td>@Model.Price</td>
+    </tr>
+    <tr>
+        <th>Picture:</th>
+        <td><img src="~/media/products/@Model.Image" width="200" /></td>
+    </tr>
+    <tr>
+        <th>Category:</th>
+        <td>@Model.Category.Name</td>
+    </tr>
+    <tr>
+        <th>Brand:</th>
+        <td>@Model.Brand.Name</td>
+    </tr>
+</table>
+
+<h4>Variations</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Materials</th>
+            <th>Colors</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Picture</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var variation in Model.Variations)
+        {
+            <tr>
+                <td>@variation.Material.Name</td>
+                <td>@variation.Color.Name</td>
+                <td>@variation.Price</td>
+                <td>@variation.Stock</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(variation.ImageUrl))
+                    {
+                        <img src="~/media/variations/@variation.ImageUrl" width="100" />
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Index" class="btn btn-primary">Quay lại danh sách</a>

@@ -1,0 +1,92 @@
+﻿.active {
+    background-color: #b6d420;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #52511c;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    padding: 1rem 4rem;
+    margin: 0px auto;
+}
+
+.navbar-title {
+    letter-spacing: 0.4em;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: none;
+    text-align: center;
+    color: white;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(30px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+    .navbar-title.visible {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+    }
+
+    .navbar-title.immediate-visible {
+        opacity: 1; /* Hiển thị ngay lập tức */
+        transform: translateY(0); /* Đưa về vị trí ban đầu */
+        transition: none; /* Không có hiệu ứng */
+        visibility: visible;
+    }
+
+ul {
+    display: flex;
+}
+
+li {
+    list-style: none;
+    display: flex;
+    align-items: center;
+}
+
+a {
+    display: flex;
+    text-decoration: none;
+    align-items: center;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 20px;
+}
+
+.menu span {
+    font-size: 13px;
+    text-transform: uppercase;
+}
+
+.menu svg {
+    margin-right: 5px;
+}
+
+.contact {
+    font-size: 13px;
+    margin-right: 90px;
+}
+
+    .contact svg {
+        margin-right: 5px;
+    }
+
+a:not(.active, .navbar-title, .contact, .banner-title):hover {
+    background-color: #7f8933;
+}
+a:focus {
+    outline: none; /* Loại bỏ border/màu focus mặc định */
+}
+
+.visible {
+    opacity: 1;
+    transition: 0.5s;
+}

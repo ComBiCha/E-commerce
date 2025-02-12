@@ -34,5 +34,7 @@ namespace E_commerce.Models
 		public IFormFile? ImageUpload { get; set; }
         public ICollection<WarrantyModel> Warranty { get; set; }
 
+        public List<ProductVariationModel> Variations { get; set; } = new List<ProductVariationModel>();
+
     }
 }

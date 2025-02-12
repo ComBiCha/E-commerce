@@ -25,6 +25,9 @@ namespace E_commerce.Repository
 		public DbSet<ShippingModel> Shippings { get; set; }
         public DbSet<WarrantyModel> Warranties { get; set; }
         public DbSet<WarrantyRequestModel> WarrantyRequests { get; set; }
+        public DbSet<ProductVariationModel> Variations { get; set; }
+        public DbSet<MaterialModel> Materials { get; set; }
+        public DbSet<ColorModel> Colors { get; set; }
 
         public DbSet<E_commerce.Models.UserModel> UserModel { get; set; }
     }

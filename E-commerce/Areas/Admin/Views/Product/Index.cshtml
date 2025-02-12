@@ -51,6 +51,7 @@
                 <td>@item.Category.Name</td>
                 <td>@item.Brand.Name</td>
                 <td>
+                    <a asp-action="Details" asp-controller="Product" asp-route-id="@item.Id" class="btn btn-info btn-sm">Detail</a>
                     <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Product" asp-route-Id="@item.Id">Edit</a>
                     <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Product" asp-route-Id="@item.Id">Delete</a>
                 </td>

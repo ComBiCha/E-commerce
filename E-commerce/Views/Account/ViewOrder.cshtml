@@ -27,6 +27,7 @@
         @foreach (var item in Model)
         {
             var warrantyCode = @item.Product.Warranty?.FirstOrDefault()?.WarrantyCode ?? "No Warranty";
+            var warrantyDate = @item.Product.Warranty?.FirstOrDefault()?.ExpirationDate;
             subtotal = item.Quantity * item.Price;
             total += subtotal;
             <tr>
@@ -43,7 +44,7 @@
                     @if (@ViewBag.Order.Status == 5) // Hiển thị khi trạng thái đơn hàng là "Đơn hàng đã hoàn thành"
                     {
                         <span class="text-success">
-                            @warrantyCode
+                            @warrantyCode <br> Expiration Date: @warrantyDate
                         </span>
                     }
                     else

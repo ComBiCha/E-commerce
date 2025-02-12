@@ -47,6 +47,9 @@
             <span asp-validation-for="ImageUpload" class="text-danger" />
             <img id="imgpreview" class="pt-2"/>
         </div>
+        <h4>Add Variations (Optional)</h4>
+        <button type="button" id="add-variation" class="btn btn-success">+ Add Variation</button>
+        <div id="variations-container"></div>
         <div class="form-group">
             <button class="btn btn-primary">Create</button>
         </div>
@@ -75,5 +78,64 @@
                 currency_input)
             );
         });
+    </script>
+    <script>
+        var materials = @Html.Raw(Json.Serialize(ViewBag.Materials));
+        var colors = @Html.Raw(Json.Serialize(ViewBag.Colors));
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            $("#add-variation").click(function () {
+                var index = $(".variation").length;
+
+                // Tạo danh sách Material options từ mảng materials
+                var materialOptions = '<option value="">--Choose a Material--</option>';
+                materials.forEach(function (mat) {
+                    materialOptions += `<option value="${mat.value}">${mat.text}</option>`;
+                });
+
+                // Tạo danh sách Color options từ mảng colors
+                var colorOptions = '<option value="">--Choose a Color--</option>';
+                colors.forEach(function (col) {
+                    colorOptions += `<option value="${col.value}">${col.text}</option>`;
+                });
+
+                var variationHtml = `
+                    <div class="variation border p-3 my-2">
+                        <h5>Variation ${index + 1}</h5>
+                        <div class="form-group">
+                            <label>Material</label>
+                            <select name="Variations[${index}].MaterialId" class="form-control">
+                                ${materialOptions}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Color</label>
+                            <select name="Variations[${index}].ColorId" class="form-control">
+                                ${colorOptions}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Price</label>
+                            <input name="Variations[${index}].Price" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>Stock</label>
+                            <input name="Variations[${index}].Stock" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label>Variation Image</label>
+                            <input type="file" name="VariationImages" class="form-control-file" accept="image/*" />
+                        </div>
+                </div>
+                    </div>
+                `;
+
+                $("#variations-container").append(variationHtml);
+            });
+        });
+
+
     </script>
 }

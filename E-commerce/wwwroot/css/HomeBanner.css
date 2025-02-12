@@ -1,0 +1,100 @@
+﻿.home-banner {
+    position: relative;
+    height: 120vh; /* Độ cao 120vh như bạn mong muốn */
+    overflow: hidden;
+    width: 100%;
+}
+
+.banner-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.banner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: center;
+    background: rgba(0, 0, 0, 0.3);
+    padding-top: 2rem;
+}
+
+.banner-title-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+.banner-title-wrapper {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    opacity: 1;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+    .banner-title-wrapper.hidden {
+        transform: translate(-50%, -100px);
+        opacity: 0;
+    }
+
+
+.banner-title {
+    font-family: "Times New Roman", serif;
+    font-size: 16rem;
+    font-weight: bold;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 3.5rem;
+    margin: 0;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.banner-subtitle {
+    font-family: "Arial", sans-serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: white;
+}
+
+.banner-content {
+    position: absolute;
+    top: 65%; /* Bắt đầu ở 65% chiều cao màn hình */
+    left: 50%;
+    transform: translate(-50%, -65%); /* Đồng bộ với JavaScript */
+    text-align: center;
+    transition: transform 0.1s ease-out; /* Hiệu ứng mượt */
+    color: white;
+}
+
+.banner-buttons {
+    margin-top: 1rem;
+}
+
+    .banner-buttons button {
+        font-family: "Arial", sans-serif;
+        font-size: 1rem;
+        font-weight: bold;
+        color: white;
+        background-color: transparent;
+        border: 2px solid white;
+        padding: 1rem 2rem;
+        margin: 0 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+        .banner-buttons button:hover {
+            background-color: white;
+            color: black;
+        }

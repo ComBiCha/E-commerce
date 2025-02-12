@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Model;
 
 namespace E_commerce.Areas.Admin.Controllers
 {
@@ -47,14 +48,36 @@ namespace E_commerce.Areas.Admin.Controllers
 
             return View(data);
         }
+        public async Task<IActionResult> Details(int id)
+        {
+            var product = await _dataContext.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.Variations)
+                .ThenInclude(v => v.Material)
+                .Include(p => p.Variations)
+                .ThenInclude(v => v.Color)
+                .FirstOrDefaultAsync(p => p.Id == id);
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            return View(product);
+        }
+
         [HttpGet]
         public IActionResult Create()
         {
             ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name");
             ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name");
+            ViewBag.Materials = new SelectList(_dataContext.Materials, "Id", "Name");
+            ViewBag.Colors = new SelectList(_dataContext.Colors, "Id", "Name");
+
             return View();
         }
-        [HttpPost]
+        /*[HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductModel product)
         {
@@ -104,7 +127,85 @@ namespace E_commerce.Areas.Admin.Controllers
                 string errorMessage = string.Join("\n", errors);
                 return BadRequest(errorMessage);
             }
+        }*/
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ProductModel model, List<IFormFile> VariationImages)
+        {
+            ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name");
+            ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name");
+            ViewBag.Materials = new SelectList(_dataContext.Materials, "Id", "Name");
+            ViewBag.Colors = new SelectList(_dataContext.Colors, "Id", "Name");
+            if (ModelState.IsValid)
+            {
+                model.Slug = model.Name.Replace(" ", "-");
+                // Upload ảnh chính cho sản phẩm
+                if (model.ImageUpload != null)
+                {
+                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ImageUpload.FileName;
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.ImageUpload.CopyToAsync(fileStream);
+                    }
+
+                    model.Image = uniqueFileName;
+                }
+
+                _dataContext.Products.Add(model);
+                await _dataContext.SaveChangesAsync(); // Lưu sản phẩm trước để có Id
+
+                // Xử lý biến thể nếu có
+                if (model.Variations != null && model.Variations.Count > 0)
+                {
+                    for (int i = 0; i < model.Variations.Count; i++)
+                    {
+                        var variationData = model.Variations[i];
+
+                        // Kiểm tra nếu có ảnh thì mới xử lý
+                        if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
+                        {
+                            string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "media/variations");
+                            string uniqueFileName = Guid.NewGuid().ToString() + "_" + VariationImages[i].FileName;
+                            string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                            using (var fileStream = new FileStream(filePath, FileMode.Create))
+                            {
+                                await VariationImages[i].CopyToAsync(fileStream);
+                            }
+
+                            // Chỉ tạo biến thể nếu có ảnh
+                            var variation = new ProductVariationModel
+                            {
+                                MaterialId = variationData.MaterialId,
+                                ColorId = variationData.ColorId,
+                                Price = variationData.Price,
+                                Stock = variationData.Stock,
+                                ProductId = model.Id,
+                                ImageUrl = uniqueFileName
+                            };
+
+                            _dataContext.Variations.Add(variation);
+                        }
+                    }
+                    var invalidVariations = _dataContext.Variations.Where(v => v.ImageUrl == null).ToList();
+                    _dataContext.Variations.RemoveRange(invalidVariations);
+                    await _dataContext.SaveChangesAsync();
+
+                }
+
+
+
+                return RedirectToAction(nameof(Index));
+            }
+
+
+
+            return View(model);
         }
+
         public async Task<IActionResult> Edit(long Id)
         {
             ProductModel product = await _dataContext.Products.FindAsync(Id);
