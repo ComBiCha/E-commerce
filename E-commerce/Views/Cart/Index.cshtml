@@ -1,64 +1,64 @@
 ﻿@using E_commerce.Models.ViewModel
 @model CartItemViewModel
-@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+
 @{
-	int i = 0;
+    int i = 0;
 }
+
 <section id="cart_items">
-	<div class="container">
-		<div class="breadcrumbs">
-			<ol class="breadcrumb">
-				<li><a href="#">Home</a></li>
-				<li class="active">Shopping Cart</li>
-			</ol>
-		</div>
-		<div class="table-responsive cart_info">
-			<table class="table table-condensed">
-				<thead>
-					<tr class="cart_menu">
-						<td class="name" style="width: 10%;">#</td>
-						<td class="name" style="width: 30%;">Product Name</td>
-						<td class="image" style="width: 20%;">Image</td>
-						<td class="price" style="width: 10%;">Price</td>
-						<td class="quantity" style="width: 20%;">Quantity</td>
-						<td class="total" style="width: 10%;">Total</td>
-					</tr>
-				</thead>
-				<tbody>
-					@if(Model.CartItems.Count > 0){
-						@foreach(var item in Model.CartItems){
-							i = i + 1;
+    <div class="container">
+        <div class="breadcrumbs">
+            <ol class="breadcrumb">
+                <li><a href="#">Home</a></li>
+                <li class="active">Shopping Cart</li>
+            </ol>
+        </div>
+        <div class="table-responsive cart_info">
+            <table class="table table-condensed">
+                <thead>
+                    <tr class="cart_menu">
+                        <td class="name" style="width: 5%;">#</td>
+                        <td class="name" style="width: 25%;">Product Name</td>
+                        <td class="variation" style="width: 15%;">Variation</td>
+                        <td class="image" style="width: 15%;">Image</td>
+                        <td class="price" style="width: 10%;">Price</td>
+                        <td class="quantity" style="width: 15%;">Quantity</td>
+                        <td class="total" style="width: 15%;">Total</td>
+                    </tr>
+                </thead>
+                <tbody>
+					@if (Model != null && Model.CartItems != null && Model.CartItems.Count > 0)
+					{
+						@foreach (var item in Model.CartItems)
+						{
+							i++;
 							<tr>
-								<td class="cart_description">
-									@i
+								<td>@i</td>
+								<td>
+									<h4><a href="">@item.ProductName</a></h4>
 								</td>
-							<td class="cart_description">
-								<h4><a href="">@item.ProductName</a></h4>
-							</td>
-							<td class="cart_product">
-								<img src="~/media/products/@item.Image" alt="" style="max-width:100px">
-							</td>				
-							<td class="cart_price">
-								<p>$@item.Price</p>
-							</td>
-									<td>
+								<td>
+									@item.Variation.Material.Name - @item.Variation.Color.Name
+								</td>
+								<td>
+									<img src="~/media/variations/@item.Variation.ImageUrl" alt="" style="max-width:100px">
+								</td>
+								<td>
+									<p>$@item.Price</p>
+								</td>
+								<td>
 									<a class="btn btn-success btn-sm" asp-controller="Cart" asp-action="Increase" asp-route-Id="@item.ProductId"> + </a>
 									<input class="cart_quantity_input" type="text" name="quantity" value="@item.Quantity" autocomplete="off" size="2" readonly>
 									<a class="btn btn-success btn-sm" asp-controller="Cart" asp-action="Decrease" asp-route-Id="@item.ProductId"> - </a>
 									<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Remove" asp-route-Id="@item.ProductId"> Remove </a>
-									</td>
-							<td class="cart_total">
-								<p class="cart_total_price">$@Model.CartItems.Where(x => x.ProductId == item.ProductId).Sum(x => x.Quantity*x.Price).ToString()</p>
-							</td>
-	@* 						<td class="cart_delete">
-								<a class="cart_quantity_delete" href=""><i class="fa fa-times"></i></a>
-							</td> *@
-						</tr>
+								</td>
+								<td>
+									<p class="cart_total_price">$@((item.Quantity * item.Price).ToString("0.00"))</p>
+								</td>
+							</tr>
 						}
 						<tr>
-							<td colspan="4"></td>
+							<td colspan="5"></td>
 							<td colspan="2" class="text-right">
 								<strong>Grand Total: <span style="color:#FE980F">$@Model.GrandTotal.ToString()</span></strong>
 								<strong>Shipping Cost: <span style="color:#FE980F">$@Model.ShippingCost.ToString()</span></strong>
@@ -91,37 +91,41 @@
 							</div>
 							<button style="margin-bottom:10px" type="button" class="btn btn-warning btn-add-shipping">Submit</button>
 						</tr>
-						
+
 						<tr>
-							<td colspan="4"></td>
+							<td colspan="5"></td>
 							<td colspan="2" class="text-right">
 								<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Clear"> Clear Cart </a>
 								@if (User.Identity?.IsAuthenticated ?? false)
 								{
-									@if(@Model.ShippingCost <= 0)
+									@if (@Model.ShippingCost <= 0)
 									{
 										<a disabled="disabled" style="margin-top:0px" class="btn btn-primary btn-sm" asp-controller="Checkout" asp-action="CheckOut"> Checkout </a>
 										<p style="color:red">Please enter your shipping information first!</p>
-									} else
+									}
+									else
 									{
 										<a style="margin-top:0px" class="btn btn-primary btn-sm" asp-controller="Checkout" asp-action="CheckOut"> Checkout </a>
 									}
 
-							}
+								}
 							</td>
 						</tr>
 					}
 					else
 					{
 						<tr>
-							<td colspan="5"><h4>Your Cart is Empty</h4></td>
+							<td colspan="7"><h4>Your Cart is Empty</h4></td>
 						</tr>
 					}
-				</tbody>
-			</table>
-		</div>
-	</div>
-</section> <!--/#cart_items-->
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+
 <style>
 	.text-right {
 		text-align: right;
@@ -131,6 +135,7 @@
 		margin-left: 10px;
 	}
 </style>
+
 @section Scripts {
 	<script>
 		$(".btn-add-shipping").click(function () {

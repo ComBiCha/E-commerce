@@ -21,10 +21,27 @@ namespace E_commerce.Controllers
 			var shippingPriceCookie = Request.Cookies["ShippingPrice"];
 			decimal shippingPrice = 0;
 
-			if(shippingPriceCookie != null)
+			if (shippingPriceCookie != null)
 			{
-				var shippingPriceJson = shippingPriceCookie;
-				shippingPrice = JsonConvert.DeserializeObject<decimal>(shippingPriceJson);
+				shippingPrice = JsonConvert.DeserializeObject<decimal>(shippingPriceCookie);
+			}
+
+			// Lấy danh sách Variation từ database dựa trên VariationId
+			var variationIds = cartItems.Select(x => x.VariationId).Distinct().ToList();
+			var variations = _dataContext.Variations
+	.Include(v => v.Material)
+	.Include(v => v.Color)// Load thêm Material vào Variation
+	.Where(v => variationIds.Contains(v.Id))
+	.ToDictionary(v => v.Id);
+
+
+			// Gán thông tin Variation vào từng CartItemModel
+			foreach (var item in cartItems)
+			{
+				if (variations.ContainsKey(item.VariationId))
+				{
+					item.Variation = variations[item.VariationId];
+				}
 			}
 
 			CartItemViewModel cartVM = new()
@@ -33,33 +50,57 @@ namespace E_commerce.Controllers
 				GrandTotal = cartItems.Sum(x => x.Quantity * x.Price),
 				ShippingCost = shippingPrice
 			};
+
 			return View(cartVM);
 		}
+
 		public IActionResult Checkout()
 		{
 			return View("~/Views/Checkout/Index.cshtml");
 		}
 		[HttpPost]
-		public async Task<IActionResult> Add(long Id)
+		public async Task<IActionResult> Add(long productId, int? variationId)
 		{
-			ProductModel product = await _dataContext.Products.FindAsync(Id);
-			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
-			CartItemModel cartItems = cart.Where(c => c.ProductId == Id).FirstOrDefault();
+			ProductModel product = await _dataContext.Products.FindAsync(productId);
+			if (product == null) return NotFound();
 
-			if (cartItems == null)
+			// Lấy danh sách cart từ session
+			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+
+			// Kiểm tra xem variation có tồn tại không
+			ProductVariationModel variation = null;
+			if (variationId.HasValue)
 			{
-				cart.Add(new CartItemModel(product));
+				variation = await _dataContext.Variations.FindAsync(variationId.Value);
+				if (variation == null) return NotFound();
+			}
+
+			// Tìm item trong giỏ hàng
+			CartItemModel cartItem = cart.FirstOrDefault(c => c.ProductId == productId && c.VariationId == variationId);
+
+			if (cartItem == null)
+			{
+				cart.Add(new CartItemModel
+				{
+					ProductId = product.Id,
+					ProductName = product.Name,
+					Price = variation != null ? variation.Price : product.Price,
+					Quantity = 1,
+					Image = variation != null ? variation.ImageUrl : product.Image,
+					VariationId = variation.Id
+				});
 			}
 			else
 			{
-				cartItems.Quantity += 1;
+				cartItem.Quantity += 1;
 			}
 
+			// Cập nhật session
 			HttpContext.Session.SetJson("Cart", cart);
 
-			TempData["success"] = "Add Item to cart Successfully";
-			return Redirect(Request.Headers["Referer"].ToString());
+			return Json(new { success = true });
 		}
+
 		public async Task<IActionResult> Decrease(long Id)
 		{
 			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart");
@@ -87,20 +128,39 @@ namespace E_commerce.Controllers
 		}
 		public async Task<IActionResult> Increase(long Id)
 		{
-			ProductModel product = await _dataContext.Products.Where(p => p.Id == Id).FirstOrDefaultAsync();
+			// Lấy Cart từ Session
 			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart");
 
-			CartItemModel cartitem = cart.Where(c => c.ProductId == Id).FirstOrDefault();
-
-			if (cartitem.Quantity >= 1 && product.Quantity > cartitem.Quantity)
+			// Tìm CartItem tương ứng
+			CartItemModel cartitem = cart.FirstOrDefault(c => c.ProductId == Id);
+			if (cartitem == null)
 			{
-				++cartitem.Quantity;
+				return RedirectToAction("Index"); // Không tìm thấy item trong giỏ hàng
+			}
+
+			// Lấy thông tin Variation từ DB (bao gồm số lượng tồn kho)
+			var variation = await _dataContext.Variations
+				.Where(v => v.Id == cartitem.VariationId)
+				.FirstOrDefaultAsync();
+
+			if (variation == null)
+			{
+				TempData["error"] = "This product variation does not exist.";
+				return RedirectToAction("Index");
+			}
+
+			// Kiểm tra số lượng tồn kho
+			if (cartitem.Quantity < variation.Stock)
+			{
+				cartitem.Quantity++;
 			}
 			else
 			{
-				cartitem.Quantity = product.Quantity;
-				TempData["success"] = "The Maximum Quantity available for this Product is " + product.Quantity;
+				cartitem.Quantity = variation.Stock;
+				TempData["error"] = $"The Maximum Quantity available for this variation is {variation.Stock}";
 			}
+
+			// Cập nhật lại session
 			if (cart.Count == 0)
 			{
 				HttpContext.Session.Remove("Cart");
@@ -112,6 +172,7 @@ namespace E_commerce.Controllers
 
 			return RedirectToAction("Index");
 		}
+
 		public async Task<IActionResult> Remove(long Id)
 		{
 			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart");
