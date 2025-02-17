@@ -45,43 +45,57 @@ namespace E_commerce.Controllers
             }
 
 		}
-		public async Task<IActionResult> Details(long Id)
-		{
-			if (Id == null) return RedirectToAction("Index");
+        public async Task<IActionResult> Details(long Id)
+        {
+            if (Id == null) return RedirectToAction("Index");
 
-			var productsById = _dataContext.Products.Include(p => p.Ratings).Where(p => p.Id == Id).FirstOrDefault();
-			//related
-			var relatedProducts = await _dataContext.Products.Where(p => p.CategoryId == productsById.CategoryId && p.Id != productsById.Id)
-				.Take(4)
-				.ToListAsync();
-			ViewBag.RelatedProducts = relatedProducts;
+			var productsById = _dataContext.Products
+				.Include(p => p.Ratings)
+				.Include(p => p.Variations)
+					.ThenInclude(v => v.Material) // Load Material của Variations
+				.Include(p => p.Variations)
+					.ThenInclude(v => v.Color) // Load Color của Variations
+				.FirstOrDefault(p => p.Id == Id);
+
+
+			if (productsById == null) return NotFound();
+
+            // Lấy danh sách sản phẩm liên quan
+            var relatedProducts = await _dataContext.Products
+                .Where(p => p.CategoryId == productsById.CategoryId && p.Id != productsById.Id)
+                .Take(4)
+                .ToListAsync();
+            ViewBag.RelatedProducts = relatedProducts;
 
             var groupedRelatedProducts = relatedProducts
-			.Select((value, index) => new GroupedProduct { Index = index, Product = value })
-			.GroupBy(x => x.Index / 3)
-			.ToList();
+                .Select((value, index) => new GroupedProduct { Index = index, Product = value })
+                .GroupBy(x => x.Index / 3)
+                .ToList();
 
             var brandCounts = _dataContext.Brands
-				.Select(b => new
-				{
-					b.Name,
-					b.Slug,
-					ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
-				})
-				.ToList();
-			var contact = _dataContext.Contacts.FirstOrDefault();
-			ViewBag.BrandCounts = brandCounts;
-			ViewBag.Contact = contact;
+                .Select(b => new
+                {
+                    b.Name,
+                    b.Slug,
+                    ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
+                })
+                .ToList();
 
-			var viewModel = new ProductDetailsViewModel
-			{
-				ProductDetails = productsById,
+            var contact = _dataContext.Contacts.FirstOrDefault();
+            ViewBag.BrandCounts = brandCounts;
+            ViewBag.Contact = contact;
+
+            var viewModel = new ProductDetailsViewModel
+            {
+                ProductDetails = productsById,
                 RelatedProductsGrouped = groupedRelatedProducts,
+                Variations = productsById.Variations.ToList()
             };
 
-			return View(viewModel);
-		}
-		[HttpPost]
+            return View(viewModel);
+        }
+
+        [HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> CommentProduct(RatingModel rating)
 		{

@@ -8,11 +8,13 @@ namespace E_commerce.Models
         public int Id { get; set; }
         public string WarrantyCode { get; set; }
         public long ProductId { get; set; }
-        public string OrderCode { get; set; }
+		public int VariationId { get; set; }
+		public string OrderCode { get; set; }
         public DateTime ExpirationDate { get; set; }
         public DateTime CreatedDate { get; set; }
 
         [ForeignKey("ProductId")]
         public ProductModel Product { get; set; }
-    }
+		public ProductVariationModel Variation { get; set; }
+	}
 }

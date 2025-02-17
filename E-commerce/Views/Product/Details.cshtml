@@ -1,4 +1,9 @@
 ﻿@model ProductDetailsViewModel
+@{
+	var materialName = Model.Variations.FirstOrDefault()?.Material.Name;
+	var colorName = Model.Variations.FirstOrDefault()?.Color.Name;
+	var selectedVariationId = "";
+}
 <div>
 	<div class="col-sm-3">
 		@Html.Partial("_SideBarPartical")
@@ -46,47 +51,47 @@
 			</div>
 			<div class="col-sm-7">
 				<div class="product-information">
-					<!--/product-information-->
-					<img src="images/product-details/new.jpg" class="newarrival" alt="" />
 					<h2>@Model.ProductDetails.Name</h2>
 					<p>Product ID: @Model.ProductDetails.Id</p>
-					<img src="images/product-details/rating.png" alt="" />
 					<span>
 						<span>US $@Model.ProductDetails.Price</span>
-						@* <label>Quantity:</label>
-						<input type="text" value="1" /> *@
-						@* <a asp-action="Add" asp-controller="Cart" asp-route-Id="@Model.Id"> *@
-						@if(@Model.ProductDetails.Quantity > 0)
+						@if (Model.ProductDetails.Quantity > 0)
 						{
 							<button class="btn btn-fefault add-to-cart" data-product_id="@Model.ProductDetails.Id">
-								<i class="fa fa-shopping-cart"></i>
-								Add to cart
+								<i class="fa fa-shopping-cart"></i> Add to cart
 							</button>
 						}
 						else
 						{
 							<button class="btn btn-fefault">
-								<i class="fa fa-minus-square"></i>
-								Out of stock
+								<i class="fa fa-minus-square"></i> Out of stock
 							</button>
 						}
-
-						@* </a> *@
 					</span>
-					@if (@Model.ProductDetails.Quantity > 0)
-					{
-						<p><b>Availability:</b> In Stock</p>
-					}
-					else
-					{
-						<p><b>Availability:</b> Out of Stock</p>
-					}
-					<p><b>Condition:</b> New</p>
+
+					<p><b>Availability:</b> @(Model.ProductDetails.Quantity > 0 ? "In Stock" : "Out of Stock")</p>
 					<p><b>Brand:</b> @Model.ProductDetails.Brand.Name</p>
 					<p><b>Category:</b> @Model.ProductDetails.Category.Name</p>
 					<p><b>Warranty:</b> @Model.ProductDetails.WarrantyPeriod months</p>
-					<a href=""><img src="images/product-details/share.png" class="share img-responsive" alt="" /></a>
-				</div><!--/product-information-->
+
+					@if (Model.Variations != null && Model.Variations.Count > 0)
+					{
+						<h4>Available Variations:</h4>
+						<div class="variations">
+							@foreach (var variation in Model.Variations)
+							{
+								<div class="variation-item">
+									<img src="~/media/variations/@variation.ImageUrl" alt="@variation." width="80" height="80" />
+									<p>@variation.Material.Name - @variation.Color.Name - $@variation.Price</p>
+									<button class="btn btn-default select-variation" data-variation_id="@variation.Id">
+										<i class="fa fa-check"></i> Select
+									</button>
+								</div>
+							}
+						</div>
+					}
+				</div>
+
 			</div>
 		</div><!--/product-details-->
 
@@ -204,25 +209,45 @@
 @section Scripts {
 	<script>
 		$(document).ready(function () {
+			let selectedVariationId = null;
+
+			$('.select-variation').click(function () {
+				selectedVariationId = $(this).data("variation_id");
+
+				// Highlight variation đã chọn
+				$('.select-variation').removeClass("btn-primary").addClass("btn-default");
+				$(this).removeClass("btn-default").addClass("btn-primary");
+
+				Swal.fire("Selected variation: " + selectedVariationId);
+			});
+
 			$('.add-to-cart').click(function () {
-				var Id = $(this).data("product_id");
+				var productId = $(this).data("product_id");
+
+				if (!selectedVariationId) {
+					Swal.fire("Please select a variation before adding to cart.");
+					return;
+				}
 
 				$.ajax({
 					type: "POST",
 					url: "@Url.Action("Add", "Cart")",
-					data: { Id: Id },
-
+					data: { productId: productId, variationId: selectedVariationId },
 					success: function (result) {
-						if (result) {
+						if (result.success) {
 							Swal.fire("Added to cart successfully.");
+						} else {
+							Swal.fire("Error: " + result.message);
 						}
 					},
-					error: function () {
-						Swal.fire("Có lỗi xảy ra khi thêm vào giỏ hàng.");
+					error: function (xhr) {
+						Swal.fire("Có lỗi xảy ra khi thêm vào giỏ hàng: " + xhr.responseText);
 					}
 				});
 			});
 		});
+
+
 	</script>
 }
 <style>

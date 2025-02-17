@@ -1,60 +1,95 @@
-﻿@model ProductModel
+﻿@model E_commerce.Models.ProductModel
+
 @{
-    ViewData["title"] = "Edit Product";
+    ViewData["Title"] = "Edit Product";
 }
-<h4>Edit Product</h4>
-<div class="col-md-9">
-    <form asp-action="Edit" method="post" enctype="multipart/form-data">
-        <input type="hidden" asp-for="Id"/>
 
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <div class="form-group">
-            <label>Name</label>
-            <input asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger" />
-        </div>
-        <div class="form-group">
-            <label>Description</label>
-            <textarea asp-for="Description" class="form-control"></textarea>
-            <span asp-validation-for="Description" class="text-danger" />
-        </div>
-        <div class="form-group">
-            <label>Price</label>
-            <input asp-for="Price" class="form-control" />
-            <span asp-validation-for="Price" class="text-danger" />
-        </div>
-        <div class="form-group">
-            <label>WarrantyPeriod</label>
-            <input asp-for="WarrantyPeriod" class="form-control" />
-            <span asp-validation-for="WarrantyPeriod" class="text-danger" />
-        </div>
-        <div class="form-group">
-            <label>Category</label>
-            <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
-                <option>--Choose a Category</option>
-            </select>
-            <span asp-validation-for="CategoryId" class="text-danger" />
-        </div>
-        <div class="form-group">
-            <label>Brand</label>
-            <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands">
-                <option>--Choose a Brand</option>
-            </select>
-            <span asp-validation-for="BrandId" class="text-danger" />
-        </div>
-        <div class="form-group">
-            <label>Image</label>
-            <input asp-for="ImageUpload" class="form-control-file" />
-            <span asp-validation-for="ImageUpload" class="text-danger" />
-            <img id="imgpreview" src="@Url.Content("~/media/products/" + ViewBag.OldImage)" alt="Current Image" class="pt-2" style="max-width: 200px; max-height: 200px;" />
-        </div>
-        <div class="form-group">
-            <button class="btn btn-primary">Update</button>
-        </div>
+<h2>Edit Product</h2>
 
-    </form>
-    <a asp-action="Index">Back to List Product</a>
-</div>
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="Name">Product Name</label>
+        <input asp-for="Name" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>Description</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger" />
+    </div>
+    <div class="form-group">
+        <label>WarrantyPeriod</label>
+        <input asp-for="WarrantyPeriod" class="form-control" />
+        <span asp-validation-for="WarrantyPeriod" class="text-danger" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Price">Price</label>
+        <input asp-for="Price" type="number" step="0.01" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>Category</label>
+        <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
+            <option>--Choose a Category</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger" />
+    </div>
+    <div class="form-group">
+        <label>Brand</label>
+        <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands">
+            <option>--Choose a Brand</option>
+        </select>
+        <span asp-validation-for="BrandId" class="text-danger" />
+    </div>
+    <div class="form-group">
+        <label>Image</label>
+        <input asp-for="ImageUpload" class="form-control-file" />
+        <span asp-validation-for="ImageUpload" class="text-danger" />
+        <img id="imgpreview" src="@Url.Content("~/media/products/" + ViewBag.OldImage)" alt="Current Image" class="pt-2" style="max-width: 200px; max-height: 200px;" />
+    </div>
+    <h3>Product Variations</h3>
+    <div id="variations">
+        @for (int i = 0; i < Model.Variations.Count; i++)
+        {
+            <input type="hidden" asp-for="Variations[i].Id" />
+            <div class="variation-item">
+                <h3></h3>
+                <h4>Variations @(i+1):</h4>
+                <div class="form-group">
+                    <label asp-for="Variations[i].MaterialId">Material</label>
+                    <select asp-for="Variations[i].MaterialId" asp-items="ViewBag.Materials" class="form-control"></select>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Variations[i].ColorId">Color</label>
+                    <select asp-for="Variations[i].ColorId" asp-items="ViewBag.Colors" class="form-control"></select>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Variations[i].Price">Price</label>
+                    <input asp-for="Variations[i].Price" type="number" step="0.01" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Variations[i].Stock">Stock</label>
+                    <input asp-for="Variations[i].Stock" type="number" class="form-control" required />
+                </div>
+
+                <div class="form-group">
+                    <label>Variation Image</label>
+                    <input type="file" name="VariationImages" class="form-control" />
+                    @if (!string.IsNullOrEmpty(Model.Variations[i].ImageUrl))
+                    {
+                        <img src="~/media/variations/@Model.Variations[i].ImageUrl" width="100" />
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

@@ -39,9 +39,7 @@
                 <th scope="row">@item.Id</th>
                 <td>@item.Name</td>
                 <td>@Html.Raw(@item.Description)</td>
-                <td><b>@item.Quantity | </b>
-                    @* <br /> *@
-                    <a class="btn btn-success btn-sm" asp-controller="Product" asp-action="AddQuantity" asp-route-Id="@item.Id">+</a>
+                <td><b>@item.Quantity</b>
                 </td>
                 <td style="text-align:center; color:coral"><b>@item.Sold</b></td>
                 

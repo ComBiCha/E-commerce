@@ -19,36 +19,42 @@ namespace E_commerce.Areas.Admin.Controllers
             _dataContext = context;
             _webHostEnvironment = webHostEnvironment;
         }
-        /*public async Task<IActionResult> Index()
+		/*public async Task<IActionResult> Index()
         {
             return View(await _dataContext.Products.OrderByDescending(p => p.Id).Include(p => p.Category).Include(p => p.Brand).ToListAsync());
         }*/
-        public async Task<IActionResult> Index(int pg = 1)
-        {
-            List<ProductModel> product = _dataContext.Products.Include(p => p.Category).Include(p => p.Brand).ToList(); //33 datas
+		public async Task<IActionResult> Index(int pg = 1)
+		{
+			const int pageSize = 10;
 
+			if (pg < 1)
+				pg = 1;
 
-            const int pageSize = 10; //10 items/trang
+			// Lấy danh sách sản phẩm kèm Variations
+			List<ProductModel> products = await _dataContext.Products
+				.Include(p => p.Category)
+				.Include(p => p.Brand)
+				.Include(p => p.Variations) // Include Variations để tính tổng Stock
+				.ToListAsync();
 
-            if (pg < 1) //page < 1;
-            {
-                pg = 1; //page ==1
-            }
-            int recsCount = product.Count(); //33 items;
+			// Cập nhật Quantity = tổng Stock của tất cả Variations
+			foreach (var product in products)
+			{
+				product.Quantity = product.Variations?.Sum(v => v.Stock) ?? 0;
+			}
 
-            var pager = new Paginate(recsCount, pg, pageSize);
+			int recsCount = products.Count();
+			var pager = new Paginate(recsCount, pg, pageSize);
+			int recSkip = (pg - 1) * pageSize;
 
-            int recSkip = (pg - 1) * pageSize; //(3 - 1) * 10; 
+			var data = products.Skip(recSkip).Take(pager.PageSize).ToList();
 
-            //category.Skip(20).Take(10).ToList()
+			ViewBag.Pager = pager;
 
-            var data = product.Skip(recSkip).Take(pager.PageSize).ToList();
+			return View(data);
+		}
 
-            ViewBag.Pager = pager;
-
-            return View(data);
-        }
-        public async Task<IActionResult> Details(int id)
+		public async Task<IActionResult> Details(int id)
         {
             var product = await _dataContext.Products
                 .Include(p => p.Category)
@@ -77,57 +83,6 @@ namespace E_commerce.Areas.Admin.Controllers
 
             return View();
         }
-        /*[HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ProductModel product)
-        {
-            ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name", product.CategoryId);
-            ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name", product.BrandId);
-
-            if (ModelState.IsValid)
-            {
-                
-                product.Slug = product.Name.Replace(" ", "-");
-                var slug = await _dataContext.Products.FirstOrDefaultAsync(p => p.Slug == product.Slug);
-                if(slug != null)
-                {
-                    ModelState.AddModelError("", "Product already exist");
-                    return View(product);
-                }
-                else
-                {
-                    if(product.ImageUpload != null)
-                    {
-                        string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath,"media/products");
-                        string imageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
-                        string filePath = Path.Combine(uploadDir, imageName);
-
-                        FileStream fs = new FileStream(filePath, FileMode.Create);
-                        await product.ImageUpload.CopyToAsync(fs);
-                        fs.Close();
-                        product.Image = imageName;
-                    }
-                }
-                _dataContext.Add(product);
-                await _dataContext.SaveChangesAsync();
-                TempData["success"] = "Product added successfully";
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                TempData["error"] = "Model error";
-                List<string> errors = new List<string>();
-                foreach(var value in ModelState.Values)
-                {
-                    foreach(var error in value.Errors)
-                    {
-                        errors.Add(error.ErrorMessage);
-                    }
-                }
-                string errorMessage = string.Join("\n", errors);
-                return BadRequest(errorMessage);
-            }
-        }*/
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ProductModel model, List<IFormFile> VariationImages)
@@ -153,7 +108,10 @@ namespace E_commerce.Areas.Admin.Controllers
 
                     model.Image = uniqueFileName;
                 }
-
+                if (model.Variations != null && model.Variations.Count > 0)
+                {
+                    model.Quantity = model.Variations.Sum(v => v.Stock);
+                }
                 _dataContext.Products.Add(model);
                 await _dataContext.SaveChangesAsync(); // Lưu sản phẩm trước để có Id
 
@@ -190,8 +148,11 @@ namespace E_commerce.Areas.Admin.Controllers
                             _dataContext.Variations.Add(variation);
                         }
                     }
+
+
                     var invalidVariations = _dataContext.Variations.Where(v => v.ImageUrl == null).ToList();
                     _dataContext.Variations.RemoveRange(invalidVariations);
+                    model.Quantity = _dataContext.Variations.Where(v => v.ProductId == model.Id).Sum(v => v.Stock);
                     await _dataContext.SaveChangesAsync();
 
                 }
@@ -205,114 +166,161 @@ namespace E_commerce.Areas.Admin.Controllers
 
             return View(model);
         }
+		public async Task<IActionResult> Edit(long Id)
+		{
+			var product = await _dataContext.Products
+				.Include(p => p.Variations)
+				.FirstOrDefaultAsync(p => p.Id == Id);
 
-        public async Task<IActionResult> Edit(long Id)
-        {
-            ProductModel product = await _dataContext.Products.FindAsync(Id);
-            ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name", product.CategoryId);
-            ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name", product.BrandId);
+			if (product == null)
+			{
+				return NotFound();
+			}
+
+			ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name", product.CategoryId);
+			ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name", product.BrandId);
+			ViewBag.Materials = new SelectList(_dataContext.Materials, "Id", "Name");
+			ViewBag.Colors = new SelectList(_dataContext.Colors, "Id", "Name");
             ViewBag.OldImage = product.Image;
 
             return View(product);
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(ProductModel product)
-        {
-            ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name", product.CategoryId);
-            ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name", product.BrandId);
+		}
 
-            var existed_product = _dataContext.Products.Find(product.Id);
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Edit(ProductModel product, List<IFormFile> VariationImages)
+		{
+			var existingProduct = await _dataContext.Products
+				.Include(p => p.Variations)
+				.FirstOrDefaultAsync(p => p.Id == product.Id);
 
-            if (ModelState.IsValid)
-            {
+			if (existingProduct == null)
+			{
+				return NotFound();
+			}
 
-                product.Slug = product.Name.Replace(" ", "-");
+			ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name", product.CategoryId);
+			ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name", product.BrandId);
+			ViewBag.Materials = new SelectList(_dataContext.Materials, "Id", "Name");
+			ViewBag.Colors = new SelectList(_dataContext.Colors, "Id", "Name");
 
+			if (ModelState.IsValid)
+			{
+				existingProduct.Name = product.Name;
+				existingProduct.Description = product.Description;
+				existingProduct.Price = product.Price;
+				existingProduct.CategoryId = product.CategoryId;
+				existingProduct.BrandId = product.BrandId;
+				existingProduct.WarrantyPeriod = product.WarrantyPeriod;
 
-                    if (product.ImageUpload != null)
-                    {
-                    
+				if (product.ImageUpload != null)
+				{
+					string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+					string newImageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
+					string newFilePath = Path.Combine(uploadDir, newImageName);
 
-                    string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
-                        string imageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
-                        string filePath = Path.Combine(uploadDir, imageName);
+					// Xóa ảnh cũ
+					if (!string.IsNullOrEmpty(existingProduct.Image))
+					{
+						string oldFilePath = Path.Combine(uploadDir, existingProduct.Image);
+						if (System.IO.File.Exists(oldFilePath))
+						{
+							System.IO.File.Delete(oldFilePath);
+						}
+					}
 
-                    string oldfilePath = Path.Combine(uploadDir, existed_product.Image);
-                    try
-                    {
-                        if (System.IO.File.Exists(oldfilePath))
-                        {
-                            System.IO.File.Delete(oldfilePath);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        ModelState.AddModelError("", "An error occurred while deleting the product image.");
-                    }
+					using (var fileStream = new FileStream(newFilePath, FileMode.Create))
+					{
+						await product.ImageUpload.CopyToAsync(fileStream);
+					}
 
-                    FileStream fs = new FileStream(filePath, FileMode.Create);
-                        await product.ImageUpload.CopyToAsync(fs);
-                        fs.Close();
-                    existed_product.Image = imageName;
+					existingProduct.Image = newImageName;
+				}
 
-                    
-                }
-                existed_product.Name = product.Name;
-                existed_product.Description = product.Description;
-                existed_product.Price = product.Price;
-                existed_product.CategoryId = product.CategoryId;
-                existed_product.BrandId = product.BrandId;
-                existed_product.WarrantyPeriod = product.WarrantyPeriod;
+				// Cập nhật Variations
+				for (int i = 0; i < existingProduct.Variations.Count; i++)
+				{
+					var variation = existingProduct.Variations[i];
 
-                _dataContext.Update(existed_product);
+					var updatedVariation = product.Variations[i];
+					variation.MaterialId = updatedVariation.MaterialId;
+					variation.ColorId = updatedVariation.ColorId;
+					variation.Price = updatedVariation.Price;
+					variation.Stock = updatedVariation.Stock;
+
+					// Cập nhật ảnh của biến thể
+					if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
+					{
+						string variationUploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/variations");
+						string newVariationImage = Guid.NewGuid().ToString() + "_" + VariationImages[i].FileName;
+						string newVariationPath = Path.Combine(variationUploadDir, newVariationImage);
+
+						if (!string.IsNullOrEmpty(variation.ImageUrl))
+						{
+							string oldVariationPath = Path.Combine(variationUploadDir, variation.ImageUrl);
+							if (System.IO.File.Exists(oldVariationPath))
+							{
+								System.IO.File.Delete(oldVariationPath);
+							}
+						}
+
+						using (var fileStream = new FileStream(newVariationPath, FileMode.Create))
+						{
+							await VariationImages[i].CopyToAsync(fileStream);
+						}
+
+						variation.ImageUrl = newVariationImage;
+					}
+				}
+                // Cập nhật tổng quantity từ variations
+                existingProduct.Quantity = existingProduct.Variations.Sum(v => v.Stock);
+                _dataContext.Update(existingProduct);
+                existingProduct.Quantity = existingProduct.Variations.Sum(v => v.Stock);
                 await _dataContext.SaveChangesAsync();
-                TempData["success"] = "Product updated successfully";
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                TempData["error"] = "Model error";
-                List<string> errors = new List<string>();
-                foreach (var value in ModelState.Values)
-                {
-                    foreach (var error in value.Errors)
-                    {
-                        errors.Add(error.ErrorMessage);
-                    }
-                }
-                string errorMessage = string.Join("\n", errors);
-                return BadRequest(errorMessage);
-            }
-        }
-        public async Task<IActionResult> Delete(long Id)
+				TempData["success"] = "Product and variations updated successfully";
+				return RedirectToAction("Index");
+			}
+
+			return View(product);
+		}
+        [HttpPost]
+        public IActionResult DeleteVariation(int variationId, int productId)
         {
-            ProductModel product = await _dataContext.Products.FindAsync(Id);
-            if(product == null)
+            var variation = _dataContext.Variations.FirstOrDefault(v => v.Id == variationId);
+            if (variation == null)
             {
                 return NotFound();
             }
 
+            // Xóa variation
+            _dataContext.Variations.Remove(variation);
+            _dataContext.SaveChanges();
 
-                string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
-                string oldfilePath = Path.Combine(uploadDir, product.Image);
-            try
+            return RedirectToAction("Details", new { id = productId });
+        }
+
+
+        [HttpPost]
+        public IActionResult DeleteProduct(int productId)
+        {
+            var product = _dataContext.Products.FirstOrDefault(p => p.Id == productId);
+            if (product == null)
             {
-                if (System.IO.File.Exists(oldfilePath))
-                {
-                    System.IO.File.Delete(oldfilePath);
-                }
+                return NotFound();
             }
-            catch(Exception ex)
+
+            // Kiểm tra nếu sản phẩm không còn variations mới được phép xoá
+            bool hasRemainingVariations = _dataContext.Variations.Any(v => v.ProductId == productId);
+            if (hasRemainingVariations)
             {
-                ModelState.AddModelError("", "An error occurred while deleting the product image.");
+                return BadRequest("Cannot delete the product because it still has variations.");
             }
 
             _dataContext.Products.Remove(product);
-            await _dataContext.SaveChangesAsync();
-            TempData["success"] = "Product removed successfully";
+            _dataContext.SaveChanges();
             return RedirectToAction("Index");
         }
+
         [HttpGet]
         public async Task<IActionResult> AddQuantity(int Id)
         {
