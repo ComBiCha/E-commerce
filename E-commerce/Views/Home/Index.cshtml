@@ -76,12 +76,19 @@
 			<h2 class="story_title">Featured</h2>
 			<div class="story_container">
 			<div class="story_image">
-				<img src="https://media.gucci.com/content/HeroRegularStandard_1600x675/1736954114/HeroRegularStandard_Gucci-SS25-Jan25-1-24-0489-11-TU-F_001_Default.jpg"
+					<img src="https://media.gucci.com/content/DiaryArticleDouble_Standard_2800x1788/1737993612/DiaryArticleDouble_Gucci-SS25-Jan25-2-1-0573-08-F_001_Default.jpg"
 					 alt="story" class="story-img" />
 			</div>
 			<div class="story_text">
-				Where Light Find Us
+		<div class="story-right-text">
+			<div class="story-title">Where Light Finds Us</div>
+			<div class="story-description">
+				Yara Shahidi and George MacKay star in the new Spring Summer 2025 campaign, an evocative story of balance and connection.
 			</div>
+			<button class="discover-more">Discover More</button>
+		</div>
+</div>
+
 			</div>
 		</div>
 
@@ -396,17 +403,16 @@
 
 	.story_items {
 		width: 100%;
-		max-width: 1200px; /* Giới hạn chiều rộng của container */
 		margin: 0 auto; /* Căn giữa container */
-		padding: 16px; /* Khoảng cách bên trong */
+		padding: 16px 16px 100px 16px; /* Khoảng cách bên trong */
 	}
 
 	.story_title {
 		text-transform: uppercase;
 		text-align: center; 
-		font-size: 3rem;
+		font-size: 2rem;
 		font-weight: bold;
-		margin-bottom: 50px;
+		margin-bottom: 100px;
 		color: white; /* Màu chữ */
 	}
 
@@ -414,35 +420,65 @@
 		display: flex; /* Bố cục theo hàng */
 		align-items: center; /* Căn giữa theo chiều dọc */
 		justify-content: space-between; /* Tách đều các phần tử */
-		gap: 16px; /* Khoảng cách giữa các khung */
+		gap: 20px; /* Khoảng cách giữa các khung */
+		padding-left: 105px;
+		padding-right: 105px;
 	}
 
 	.story_image {
 		flex: 1; /* Chiếm 1 phần không gian */
+		width: 100%; /* Ảnh chiếm toàn bộ chiều rộng khung */
+		height: 100vh; /* Giữ tỷ lệ ảnh */
 	}
 
 		.story_image img {
 			width: 100%; /* Ảnh chiếm toàn bộ chiều rộng khung */
-			height: auto; /* Giữ tỷ lệ ảnh */
+			height: 100%; /* Giữ tỷ lệ ảnh */
 			border-radius: 8px; /* Bo tròn góc ảnh */
-			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Tạo đổ bóng */
+			object-fit: cover;
+			object-position: 35% center;
 		}
 
 	.story_text {
 		flex: 1; /* Chiếm 1 phần không gian */
 		padding: 16px; /* Khoảng cách bên trong */
-		background-color: #f8f8f8; /* Màu nền khung văn bản */
-		border-radius: 8px; /* Bo tròn góc */
-		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Tạo đổ bóng */
-		font-size: 1.2rem; /* Cỡ chữ */
-		line-height: 1.5; /* Khoảng cách dòng */
-		color: #333; /* Màu chữ */
 		text-align: center; /* Căn giữa nội dung */
 	}
 
 
+	.story-title {
+		font-size: 30px;
+		font-weight: 600;
+		margin-bottom: 20px; /* Khoảng cách dưới tiêu đề */
+		color: white;
+	}
 
+	.story-description {
+		font-size: 16px;
+		color: #d9d9d9; /* Màu chữ mờ giống hình */
+		font-weight: 100;
+		margin-bottom: 30px; /* Khoảng cách dưới phần mô tả */
+		line-height: 1.5; /* Tăng khoảng cách dòng để dễ đọc */
+		padding: 0px 10rem 0px 10rem;
+		display: -webkit-box;
+		-webkit-line-clamp: 3; /* Giới hạn chỉ hiển thị 3 dòng */
+		-webkit-box-orient: vertical;
+		overflow: hidden; /* Ẩn bớt phần văn bản thừa */
+	}
 
+	.discover-more {
+		font-size: 14px;
+		text-transform: uppercase;
+		font-weight: bold;
+		color: white;
+		background: none;
+		border: none;
+		cursor: pointer;
+		border-bottom: 2px solid white;
+		padding: 5px 0;
+	}
+
+	
 	/* .pagination {
 		text-align: center;
 		margin-top: 20px;
