@@ -1,9 +1,9 @@
 ﻿@{
-    int index = 0;
+	int index = 0;
 }
 <style>
 	#slider-carousel {
-		width: 100vw !important;/* Chiều rộng bằng toàn màn hình */
+		width: 100vw !important; /* Chiều rộng bằng toàn màn hình */
 		margin: 0;
 		padding: 0;
 		position: relative;
@@ -64,7 +64,7 @@
 		position: absolute;
 		color: black;
 		transition: bottom 0.3s ease; /* Hiệu ứng mượt */
-	}	
+	}
 
 	.slider-buttons {
 		margin-top: 10px; /* Khoảng cách giữa text và nút */
@@ -75,7 +75,7 @@
 		margin: 0 10px; /* Khoảng cách giữa các nút */
 		padding: 15px 25px;
 		font-size: 14px;
-		font-weight:600;
+		font-weight: 600;
 		color: white;
 		text-decoration: none;
 		background: transparent;
@@ -105,14 +105,14 @@
 		text-decoration: none;
 	}
 
-	.slider-text-bottom h2{
+	.slider-text-bottom h2 {
 		font-family: Arial, Helvetica, sans-serif;
 		font-size: 3rem;
 		color: white;
 		margin: 0;
 		text-decoration: none;
 		margin-bottom: 25px;
-		letter-spacing:0.1rem;
+		letter-spacing: 0.1rem;
 		pointer-events: none;
 	}
 
@@ -157,7 +157,7 @@
 </section><!--/slider-->
 
 <script>
-		window.addEventListener("scroll", () => {
+	window.addEventListener("scroll", () => {
 		const sliderText = document.querySelector(".slider-text-bottom");
 		const slider = document.querySelector("#slider");
 

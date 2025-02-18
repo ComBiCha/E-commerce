@@ -102,40 +102,52 @@
                 });
 
                 var variationHtml = `
-                    <div class="variation border p-3 my-2">
-                        <h5>Variation ${index + 1}</h5>
-                        <div class="form-group">
-                            <label>Material</label>
-                            <select name="Variations[${index}].MaterialId" class="form-control">
-                                ${materialOptions}
-                            </select>
+                        <div class="variation border p-3 my-2">
+                            <h5>Variation ${index + 1}</h5>
+                            <div class="form-group">
+                                <label>Material</label>
+                                <select name="Variations[${index}].MaterialId" class="form-control">
+                                    ${materialOptions}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Color</label>
+                                <select name="Variations[${index}].ColorId" class="form-control">
+                                    ${colorOptions}
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Price</label>
+                                <input name="Variations[${index}].Price" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label>Stock</label>
+                                <input name="Variations[${index}].Stock" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label>Variation Image</label>
+                                <input type="file" name="VariationImages" class="form-control-file variation-image" accept="image/*" data-preview="variation-preview-${index}" />
+                                <img id="variation-preview-${index}" class="pt-2" style="max-width: 100px; display: none;"/>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Color</label>
-                            <select name="Variations[${index}].ColorId" class="form-control">
-                                ${colorOptions}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Price</label>
-                            <input name="Variations[${index}].Price" class="form-control" />
-                        </div>
-                        <div class="form-group">
-                            <label>Stock</label>
-                            <input name="Variations[${index}].Stock" class="form-control" />
-                        </div>
-                        <div class="form-group">
-                            <label>Variation Image</label>
-                            <input type="file" name="VariationImages" class="form-control-file" accept="image/*" />
-                        </div>
-                </div>
-                    </div>
-                `;
+                    `;
 
                 $("#variations-container").append(variationHtml);
             });
+
+            // Xử lý preview ảnh
+            $("#variations-container").on("change", ".variation-image", function () {
+                var input = this;
+                var previewId = $(this).data("preview");
+                if (input.files && input.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $("#" + previewId).attr("src", e.target.result).show();
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            });
         });
-
-
     </script>
+
 }

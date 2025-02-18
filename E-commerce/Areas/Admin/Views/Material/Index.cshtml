@@ -1,0 +1,46 @@
+﻿@model IEnumerable<MaterialModel>
+@{
+    ViewData["title"] = "Material Listed";
+
+    // Paginate pager = new Paginate();
+
+    // int pageNo = 0;
+
+    // if(ViewBag.Pager != null)
+    // {
+    //     pager = ViewBag.Pager;
+
+    //     pageNo = pager.CurrentPage;
+    // }
+}
+<h3>List Category</h3>
+<a asp-action="Create" asp-controller="Material">Add Material</a>
+
+<table class="table" id="myTable">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Material Name</th>
+            <th scope="col">Material Manage</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <th scope="row">@item.Id</th>
+                <td>@item.Name</td>
+                <td>
+                    <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Material" asp-route-Id="@item.Id">Edit</a>
+                    <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Material" asp-route-Id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@* <partial name="_paging" model="@pager" /> *@
+@* @section Scripts {
+    <script>
+        let table = new DataTable('#categoryTable');
+    </script>
+} *@

@@ -231,11 +231,7 @@ namespace E_commerce.Controllers
         {
             var order = await _dataContext.Orders.FirstOrDefaultAsync(o => o.OrderCode == ordercode);
             ViewBag.Order = order;
-            var DetailsOrder = await _dataContext.OrderDetails
-        .Include(o => o.Product)
-        .ThenInclude(p => p.Warranty) // Bao gồm thông tin bảo hành từ Product
-        .Where(o => o.OrderCode == ordercode)
-        .ToListAsync();
+			var DetailsOrder = await _dataContext.OrderDetails.Include(o => o.Product).ThenInclude(p => p.Warranty).Include(o => o.Variation).Include(o => o.Variation.Material).Include(o => o.Variation.Color).Where(o => o.OrderCode == ordercode).ToListAsync();
             return View(DetailsOrder);
         }
         public async Task<IActionResult> MyWarranties()
