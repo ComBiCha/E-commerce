@@ -55,15 +55,17 @@ a#scrollUp {
 	bottom: 0px;
 	right: 10px;
 	padding: 5px 10px;
-	background: #FE980F;
+	background: #52511c;
 	color: #FFF;
 	-webkit-animation: bounce 2s ease infinite;
 	animation: bounce 2s ease infinite;
 }
 
-	a#scrollUp i {
-		font-size: 30px;
-	}
+
+a#scrollUp i{
+  font-size: 50px;
+}
+
 
 
 /*************************
@@ -430,44 +432,54 @@ ul.sub-menu {
 **************************/
 
 #footer {
-	background: #F0F0E9;
+	background: #404040;
+}
+
+.footer-title {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	margin-top: 4rem;
 }
 
 
-.footer-top .container {
-	border-bottom: 1px solid #E0E0DA;
-	padding-bottom: 20px;
-}
-
-.companyinfo {
-	margin-top: 57px;
-}
-
-	.companyinfo h2 {
-		color: #B4B1AB;
-		font-family: abel;
-		font-size: 27px;
-		text-transform: uppercase;
+	.footer-title > div {
+		flex: 1; /* Mỗi phần chiếm 1 cột */
+		margin: 0 10px; /* Khoảng cách giữa các cột */
 	}
 
-		.companyinfo h2 span {
-			color: #FE980F;
-		}
-
-	.companyinfo p {
-		color: #B3B3AD;
-		font-family: 'Roboto', sans-serif;
-		font-size: 12px;
-		font-weight: 300;
+	.footer-title h2,
+	.footer-title p {
+		margin: 5px 0;
 	}
+
+	.footer-title p {
+		color: white;
+		font-size: 13px;
+	}
+
+	.footer-title h2 {
+		color: #bfbfbf;
+	}
+
+.companyinfo img {
+  margin-top: 57px!important;
+  width: 86vw;
+  text-align: center;
+}
 
 .footer-top .col-sm-3 {
 	overflow: hidden;
 }
 
 .video-gallery {
-	margin-top: 57px;
-	position: inherit;
+	flex-direction: column;
+	display: flex;
+	margin-top: 18rem;
 }
 
 	.video-gallery a img {
@@ -531,9 +543,13 @@ ul.sub-menu {
 
 
 .address {
-	margin-top: 30px;
-	position: relative;
-	overflow: hidden;
+  margin-top: 30px;
+  position: relative;
+  overflow: hidden;
+  text-align:center;
+}
+.address  img {
+	width:100%;
 }
 
 	.address img {
@@ -630,22 +646,16 @@ ul.sub-menu {
 }
 
 .footer-bottom {
-	background: #D6D6D0;
+	background: #595959;
 	padding-top: 10px;
 }
 
-	.footer-bottom p {
-		color: #363432;
-		font-family: 'Roboto', sans-serif;
-		font-weight: 300;
-		margin-left: 15px;
-	}
-
-		.footer-bottom p span a {
-			color: #FE980F;
-			font-style: italic;
-			text-decoration: underline;
-		}
+.footer-bottom p {
+  color: white;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 300;
+  margin-left: 15px;
+}
 
 
 /*************************
@@ -885,19 +895,8 @@ ul.sub-menu {
 
 .features_items {
 	overflow: hidden;
-	padding: 30px 20px 150px 20px;
+	padding: 30px 20px 100px 20px;
 }
-
-	/*.features_items::before {
-		content: "";
-		position: absolute;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		background: rgba(0, 0, 0, 0.3);*/ /* Overlay màu đen nhạt, độ trong suốt 20% */
-		/*z-index: 1;
-	}*/
 
 
 h2.title {
