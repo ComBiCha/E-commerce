@@ -53,7 +53,7 @@ namespace E_commerce.Areas.Admin.Controllers
             var order = await _dataContext.Orders.FirstOrDefaultAsync(o => o.OrderCode == ordercode);
             ViewBag.Order = order;
 
-            var DetailsOrder = await _dataContext.OrderDetails.Include(o=>o.Product).Where(o=>o.OrderCode==ordercode).ToListAsync();
+            var DetailsOrder = await _dataContext.OrderDetails.Include(o=>o.Product).Include(o => o.Variation).Include(o => o.Variation.Material).Include(o => o.Variation.Color).Where(o=>o.OrderCode==ordercode).ToListAsync();
             return View(DetailsOrder);
         }
         /*public async Task<IActionResult> Delete(int Id)

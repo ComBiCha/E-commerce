@@ -14,13 +14,43 @@ namespace E_commerce.Controllers
 		{
 			_dataContext = context;
 		}
-		public IActionResult Index()
-		{
-			return View();
-		}
-		public async Task<IActionResult> Search(string searchTerm)
-		{
-            ViewBag.Keyword = searchTerm;
+        public async Task<IActionResult> Index(int page = 1)
+        {
+            int pageSize = 9;  // S? l??ng s?n ph?m trên m?i trang
+            int totalProducts = await _dataContext.Products.CountAsync();  // T?ng s? s?n ph?m
+            var products = await _dataContext.Products
+                .Include("Category")
+                .Include("Brand")
+                .Skip((page - 1) * pageSize)  // B? qua các s?n ph?m c?a các trang tr??c
+                .Take(pageSize)  // L?y s? l??ng s?n ph?m c?a trang hi?n t?i
+                .ToListAsync();
+
+            var sliders = _dataContext.Sliders.Where(s => s.Status == 1).ToList();
+
+            // L?y danh sách các brand cùng v?i s? l??ng s?n ph?m t??ng ?ng
+            var brandCounts = _dataContext.Brands
+                .Select(b => new
+                {
+                    b.Name,
+                    b.Slug,
+                    ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
+                })
+                .ToList();
+
+            var contact = _dataContext.Contacts.FirstOrDefault();
+
+            // Thêm thông tin phân trang vào ViewBag
+            ViewBag.Page = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+            ViewBag.BrandCounts = brandCounts;
+            ViewBag.Sliders = sliders;
+            ViewBag.Contact = contact;
+
+            return View(products);
+        }
+        public async Task<IActionResult> Search(string searchTerm, string category, string brand)
+        {
+            ViewBag.Keyword = searchTerm ?? $"{category} {brand}";
 
             var brandCounts = _dataContext.Brands
                 .Select(b => new
@@ -33,18 +63,25 @@ namespace E_commerce.Controllers
             var contact = _dataContext.Contacts.FirstOrDefault();
             ViewBag.BrandCounts = brandCounts;
             ViewBag.Contact = contact;
-            if (searchTerm == null)
-			{
-                var products = await _dataContext.Products.Include("Category").Include("Brand").ToListAsync();
-                return View(products);
-            }
-            else
+
+            IQueryable<ProductModel> products = _dataContext.Products.Include(p => p.Category).Include(p => p.Brand);
+
+            if (!string.IsNullOrEmpty(searchTerm))
             {
-                var products = await _dataContext.Products.Where(p => p.Name.Contains(searchTerm) || p.Category.Name.Contains(searchTerm)).ToListAsync();
-                return View(products);
+                products = products.Where(p => p.Name.Contains(searchTerm) || p.Category.Name.Contains(searchTerm));
+            }
+            if (!string.IsNullOrEmpty(category))
+            {
+                products = products.Where(p => p.Category.Slug == category);
+            }
+            if (!string.IsNullOrEmpty(brand))
+            {
+                products = products.Where(p => p.Brand.Name == brand);
             }
 
-		}
+            return View(await products.ToListAsync());
+        }
+
         public async Task<IActionResult> Details(long Id)
         {
             if (Id == null) return RedirectToAction("Index");

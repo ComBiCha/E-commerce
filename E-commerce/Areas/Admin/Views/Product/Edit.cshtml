@@ -86,6 +86,7 @@
             </div>
         }
     </div>
+    <button type="button" id="addVariation" class="btn btn-success">+ Add Variation</button>
 
     <button type="submit" class="btn btn-primary">Save Changes</button>
 </form>
@@ -113,4 +114,79 @@
     <script>
         CKEDITOR.replace('Description');
     </script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let addButton = document.getElementById("addVariation");
+
+        if (addButton) {
+            addButton.addEventListener("click", function () {
+                console.log("Button clicked!"); // Kiểm tra sự kiện click
+                
+                let variationsContainer = document.getElementById("variations");
+                let index = document.querySelectorAll(".variation-item").length; // Lấy số lượng variations hiện có
+                
+                let variationHtml = `
+                    <div class="variation-item border p-3 mb-3" style="position: relative;">
+                        <input type="hidden" name="Variations[${index}].Id" value="0" />
+                        <h4>Variation ${index + 1}:</h4>
+
+                        <div class="form-group">
+                            <label>Material</label>
+                            <select name="Variations[${index}].MaterialId" class="form-control">
+                                @foreach (var material in ViewBag.Materials)
+                                {
+                                    <option value="@material.Value">@material.Text</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Color</label>
+                            <select name="Variations[${index}].ColorId" class="form-control">
+                                @foreach (var color in ViewBag.Colors)
+                                {
+                                    <option value="@color.Value">@color.Text</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Price</label>
+                            <input type="number" name="Variations[${index}].Price" class="form-control" step="0.01" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Stock</label>
+                            <input type="number" name="Variations[${index}].Stock" class="form-control" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Variation Image</label>
+                            <input type="file" name="VariationImages" class="form-control" />
+                        </div>
+
+                        <!-- Nút Remove -->
+                        <button type="button" class="btn btn-danger btn-sm removeVariation" style="position: absolute; top: 10px; right: 10px;">
+                            Remove
+                        </button>
+                    </div>
+                `;
+
+                variationsContainer.insertAdjacentHTML("beforeend", variationHtml);
+            });
+
+            // Lắng nghe sự kiện click trên toàn bộ variationsContainer
+            document.getElementById("variations").addEventListener("click", function (e) {
+                if (e.target.classList.contains("removeVariation")) {
+                    e.target.closest(".variation-item").remove(); // Xóa variation khi ấn Remove
+                }
+            });
+        } else {
+            console.error("Button #addVariation not found!");
+        }
+    });
+</script>
+
+
+
 }

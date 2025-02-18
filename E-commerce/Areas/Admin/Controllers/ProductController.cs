@@ -186,103 +186,135 @@ namespace E_commerce.Areas.Admin.Controllers
             return View(product);
 		}
 
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Edit(ProductModel product, List<IFormFile> VariationImages)
-		{
-			var existingProduct = await _dataContext.Products
-				.Include(p => p.Variations)
-				.FirstOrDefaultAsync(p => p.Id == product.Id);
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(ProductModel product, List<IFormFile> VariationImages)
+        {
+            var existingProduct = await _dataContext.Products
+                .Include(p => p.Variations)
+                .FirstOrDefaultAsync(p => p.Id == product.Id);
 
-			if (existingProduct == null)
-			{
-				return NotFound();
-			}
+            if (existingProduct == null)
+            {
+                return NotFound();
+            }
 
-			ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name", product.CategoryId);
-			ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name", product.BrandId);
-			ViewBag.Materials = new SelectList(_dataContext.Materials, "Id", "Name");
-			ViewBag.Colors = new SelectList(_dataContext.Colors, "Id", "Name");
+            ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name", product.CategoryId);
+            ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name", product.BrandId);
+            ViewBag.Materials = new SelectList(_dataContext.Materials, "Id", "Name");
+            ViewBag.Colors = new SelectList(_dataContext.Colors, "Id", "Name");
 
-			if (ModelState.IsValid)
-			{
-				existingProduct.Name = product.Name;
-				existingProduct.Description = product.Description;
-				existingProduct.Price = product.Price;
-				existingProduct.CategoryId = product.CategoryId;
-				existingProduct.BrandId = product.BrandId;
-				existingProduct.WarrantyPeriod = product.WarrantyPeriod;
+            if (ModelState.IsValid)
+            {
+                existingProduct.Name = product.Name;
+                existingProduct.Description = product.Description;
+                existingProduct.Price = product.Price;
+                existingProduct.CategoryId = product.CategoryId;
+                existingProduct.BrandId = product.BrandId;
+                existingProduct.WarrantyPeriod = product.WarrantyPeriod;
 
-				if (product.ImageUpload != null)
-				{
-					string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
-					string newImageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
-					string newFilePath = Path.Combine(uploadDir, newImageName);
+                if (product.ImageUpload != null)
+                {
+                    string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+                    string newImageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
+                    string newFilePath = Path.Combine(uploadDir, newImageName);
 
-					// Xóa ảnh cũ
-					if (!string.IsNullOrEmpty(existingProduct.Image))
-					{
-						string oldFilePath = Path.Combine(uploadDir, existingProduct.Image);
-						if (System.IO.File.Exists(oldFilePath))
-						{
-							System.IO.File.Delete(oldFilePath);
-						}
-					}
+                    if (!string.IsNullOrEmpty(existingProduct.Image))
+                    {
+                        string oldFilePath = Path.Combine(uploadDir, existingProduct.Image);
+                        if (System.IO.File.Exists(oldFilePath))
+                        {
+                            System.IO.File.Delete(oldFilePath);
+                        }
+                    }
 
-					using (var fileStream = new FileStream(newFilePath, FileMode.Create))
-					{
-						await product.ImageUpload.CopyToAsync(fileStream);
-					}
+                    using (var fileStream = new FileStream(newFilePath, FileMode.Create))
+                    {
+                        await product.ImageUpload.CopyToAsync(fileStream);
+                    }
 
-					existingProduct.Image = newImageName;
-				}
+                    existingProduct.Image = newImageName;
+                }
 
-				// Cập nhật Variations
-				for (int i = 0; i < existingProduct.Variations.Count; i++)
-				{
-					var variation = existingProduct.Variations[i];
+                // Cập nhật các variations đã có
+                for (int i = 0; i < existingProduct.Variations.Count; i++)
+                {
+                    var variation = existingProduct.Variations[i];
+                    var updatedVariation = product.Variations[i];
+                    variation.MaterialId = updatedVariation.MaterialId;
+                    variation.ColorId = updatedVariation.ColorId;
+                    variation.Price = updatedVariation.Price;
+                    variation.Stock = updatedVariation.Stock;
 
-					var updatedVariation = product.Variations[i];
-					variation.MaterialId = updatedVariation.MaterialId;
-					variation.ColorId = updatedVariation.ColorId;
-					variation.Price = updatedVariation.Price;
-					variation.Stock = updatedVariation.Stock;
+                    if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
+                    {
+                        string variationUploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/variations");
+                        string newVariationImage = Guid.NewGuid().ToString() + "_" + VariationImages[i].FileName;
+                        string newVariationPath = Path.Combine(variationUploadDir, newVariationImage);
 
-					// Cập nhật ảnh của biến thể
-					if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
-					{
-						string variationUploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/variations");
-						string newVariationImage = Guid.NewGuid().ToString() + "_" + VariationImages[i].FileName;
-						string newVariationPath = Path.Combine(variationUploadDir, newVariationImage);
+                        if (!string.IsNullOrEmpty(variation.ImageUrl))
+                        {
+                            string oldVariationPath = Path.Combine(variationUploadDir, variation.ImageUrl);
+                            if (System.IO.File.Exists(oldVariationPath))
+                            {
+                                System.IO.File.Delete(oldVariationPath);
+                            }
+                        }
 
-						if (!string.IsNullOrEmpty(variation.ImageUrl))
-						{
-							string oldVariationPath = Path.Combine(variationUploadDir, variation.ImageUrl);
-							if (System.IO.File.Exists(oldVariationPath))
-							{
-								System.IO.File.Delete(oldVariationPath);
-							}
-						}
+                        using (var fileStream = new FileStream(newVariationPath, FileMode.Create))
+                        {
+                            await VariationImages[i].CopyToAsync(fileStream);
+                        }
 
-						using (var fileStream = new FileStream(newVariationPath, FileMode.Create))
-						{
-							await VariationImages[i].CopyToAsync(fileStream);
-						}
+                        variation.ImageUrl = newVariationImage;
+                    }
+                }
 
-						variation.ImageUrl = newVariationImage;
-					}
-				}
-                // Cập nhật tổng quantity từ variations
+                // Xử lý thêm variations mới
+                if (product.Variations != null && product.Variations.Count > existingProduct.Variations.Count)
+                {
+                    for (int i = existingProduct.Variations.Count; i < product.Variations.Count; i++)
+                    {
+                        var newVariation = product.Variations[i];
+
+                        string newVariationImage = null;
+                        if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
+                        {
+                            string variationUploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/variations");
+                            newVariationImage = Guid.NewGuid().ToString() + "_" + VariationImages[i].FileName;
+                            string newVariationPath = Path.Combine(variationUploadDir, newVariationImage);
+
+                            using (var fileStream = new FileStream(newVariationPath, FileMode.Create))
+                            {
+                                await VariationImages[i].CopyToAsync(fileStream);
+                            }
+                        }
+
+                        var variation = new ProductVariationModel
+                        {
+                            ProductId = product.Id,
+                            MaterialId = newVariation.MaterialId,
+                            ColorId = newVariation.ColorId,
+                            Price = newVariation.Price,
+                            Stock = newVariation.Stock,
+                            ImageUrl = newVariationImage
+                        };
+
+                        _dataContext.Variations.Add(variation);
+                    }
+                }
+
                 existingProduct.Quantity = existingProduct.Variations.Sum(v => v.Stock);
                 _dataContext.Update(existingProduct);
-                existingProduct.Quantity = existingProduct.Variations.Sum(v => v.Stock);
                 await _dataContext.SaveChangesAsync();
-				TempData["success"] = "Product and variations updated successfully";
-				return RedirectToAction("Index");
-			}
 
-			return View(product);
-		}
+                TempData["success"] = "Product and variations updated successfully";
+                return RedirectToAction("Index");
+            }
+
+            return View(product);
+        }
+
         [HttpPost]
         public IActionResult DeleteVariation(int variationId, int productId)
         {
