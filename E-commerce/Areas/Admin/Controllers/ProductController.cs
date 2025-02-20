@@ -108,6 +108,19 @@ namespace E_commerce.Areas.Admin.Controllers
 
                     model.Image = uniqueFileName;
                 }
+                if (model.ImageUpload2 != null)
+                {
+                    string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ImageUpload2.FileName;
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await model.ImageUpload2.CopyToAsync(fileStream);
+                    }
+
+                    model.Image2 = uniqueFileName;
+                }
                 if (model.Variations != null && model.Variations.Count > 0)
                 {
                     model.Quantity = model.Variations.Sum(v => v.Stock);
@@ -141,6 +154,7 @@ namespace E_commerce.Areas.Admin.Controllers
                                 ColorId = variationData.ColorId,
                                 Price = variationData.Price,
                                 Stock = variationData.Stock,
+                                Size = variationData.Size,
                                 ProductId = model.Id,
                                 ImageUrl = uniqueFileName
                             };
@@ -161,9 +175,6 @@ namespace E_commerce.Areas.Admin.Controllers
 
                 return RedirectToAction(nameof(Index));
             }
-
-
-
             return View(model);
         }
 		public async Task<IActionResult> Edit(long Id)
@@ -182,8 +193,9 @@ namespace E_commerce.Areas.Admin.Controllers
 			ViewBag.Materials = new SelectList(_dataContext.Materials, "Id", "Name");
 			ViewBag.Colors = new SelectList(_dataContext.Colors, "Id", "Name");
             ViewBag.OldImage = product.Image;
+			ViewBag.OldImage2 = product.Image2;
 
-            return View(product);
+			return View(product);
 		}
 
         [HttpPost]
@@ -235,9 +247,31 @@ namespace E_commerce.Areas.Admin.Controllers
 
                     existingProduct.Image = newImageName;
                 }
+				if (product.ImageUpload2 != null)
+				{
+					string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+					string newImageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload2.FileName;
+					string newFilePath = Path.Combine(uploadDir, newImageName);
 
-                // Cập nhật các variations đã có
-                for (int i = 0; i < existingProduct.Variations.Count; i++)
+					if (!string.IsNullOrEmpty(existingProduct.Image2))
+					{
+						string oldFilePath = Path.Combine(uploadDir, existingProduct.Image2);
+						if (System.IO.File.Exists(oldFilePath))
+						{
+							System.IO.File.Delete(oldFilePath);
+						}
+					}
+
+					using (var fileStream = new FileStream(newFilePath, FileMode.Create))
+					{
+						await product.ImageUpload2.CopyToAsync(fileStream);
+					}
+
+					existingProduct.Image2 = newImageName;
+				}
+
+				// Cập nhật các variations đã có
+				for (int i = 0; i < existingProduct.Variations.Count; i++)
                 {
                     var variation = existingProduct.Variations[i];
                     var updatedVariation = product.Variations[i];
@@ -245,8 +279,9 @@ namespace E_commerce.Areas.Admin.Controllers
                     variation.ColorId = updatedVariation.ColorId;
                     variation.Price = updatedVariation.Price;
                     variation.Stock = updatedVariation.Stock;
+					variation.Size = updatedVariation.Size;
 
-                    if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
+					if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
                     {
                         string variationUploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/variations");
                         string newVariationImage = Guid.NewGuid().ToString() + "_" + VariationImages[i].FileName;
@@ -297,7 +332,8 @@ namespace E_commerce.Areas.Admin.Controllers
                             ColorId = newVariation.ColorId,
                             Price = newVariation.Price,
                             Stock = newVariation.Stock,
-                            ImageUrl = newVariationImage
+							Size = newVariation.Size,
+							ImageUrl = newVariationImage
                         };
 
                         _dataContext.Variations.Add(variation);

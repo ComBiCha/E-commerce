@@ -9,6 +9,8 @@ using System.Security.Claims;
 using Stripe.Checkout;
 using Stripe;
 using System.Text;
+using System.Drawing;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Model;
 
 namespace E_commerce.Controllers
 {
@@ -64,6 +66,8 @@ namespace E_commerce.Controllers
 
 				var materialName = variation.Material?.Name ?? "Unknown Material";
 				var colorName = variation.Color?.Name ?? "Unknown Color";
+				var size = variation?.Size ?? 1;
+
 
 				var sessionListItem = new SessionLineItemOptions
 				{
@@ -73,7 +77,7 @@ namespace E_commerce.Controllers
 						Currency = "usd",
 						ProductData = new SessionLineItemPriceDataProductDataOptions
 						{
-							Name = $"{cart.ProductName} ({materialName} - {colorName})"
+							Name = $"{cart.ProductName} ({materialName} - {colorName} - Size:{size})"
 						}
 					},
 					Quantity = cart.Quantity
@@ -215,10 +219,11 @@ namespace E_commerce.Controllers
 			emailBody.AppendLine("**Products in Your Order:**");
 			foreach (var detail in orderDetails)
 			{
-				var productImageUrl = $"{baseUrl}/media/products/{detail.Product.Image}";
+				var productImageUrl = $"{baseUrl}/media/variations/{detail.Variation.ImageUrl}";
 				var materialName = detail.Variation?.Material?.Name ?? "Unknown Material";
 				var colorName = detail.Variation?.Color?.Name ?? "Unknown Color";
-				emailBody.AppendLine($"- **Product Name**: {detail.Product.Name} ({materialName} - {colorName})");
+				var size = detail.Variation?.Size ?? 1;
+				emailBody.AppendLine($"- **Product Name**: {detail.Product.Name} ({materialName} - {colorName} - Size:{size})");
 				emailBody.AppendLine($"  - Quantity: {detail.Quantity}");
 				emailBody.AppendLine($"  - Price per Unit: ${detail.Price:F2}");
 				emailBody.AppendLine($"  - Total: ${detail.Quantity * detail.Price:F2}");

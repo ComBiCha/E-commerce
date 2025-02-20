@@ -35,7 +35,7 @@
                 <th>@item.Id</th>
                 <td>@item.OrderCode</td>
                 <td>@item.UserName</td>
-                <td>@item.Product.Name - [@item.Variation.Material.Name|@item.Variation.Color.Name]</td>
+                <td>@item.Product.Name - [@item.Variation.Material.Name|@item.Variation.Color.Name|Size:@item.Variation.Size]</td>
                 <td>@item.Price</td>
                 <td><img src="~/media/variations/@item.Variation.ImageUrl" width="120" /></td>
                 <td>@item.Quantity</td>
