@@ -15,7 +15,9 @@ namespace E_commerce.Models
         public ColorModel Color { get; set; }
 
         public decimal Price { get; set; }  // Giá riêng cho biến thể (nếu có)
+        public int Size { get; set; }
         public int Stock { get; set; }  // Số lượng tồn kho
+
 
         public string ImageUrl { get; set; } // Ảnh biến thể
         [NotMapped]
