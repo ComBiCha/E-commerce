@@ -432,7 +432,7 @@ ul.sub-menu {
 **************************/
 
 #footer {
-	background: #404040;
+	background: #333333;
 }
 
 .footer-title {
@@ -466,11 +466,16 @@ ul.sub-menu {
 		color: #bfbfbf;
 	}
 
-.companyinfo img {
-  margin-top: 57px!important;
-  width: 86vw;
-  text-align: center;
+.companyinfo {
+	display: flex;
+	justify-content: center; /* Căn giữa theo chiều ngang */
+	align-items: center; /* Căn giữa theo chiều dọc nếu cần */
 }
+
+	.companyinfo img {
+		margin-top: 57px;
+		width: 86vw;
+	}
 
 .footer-top .col-sm-3 {
 	overflow: hidden;
@@ -2584,7 +2589,6 @@ h2.title {
 
 
 #header {
-	margin-top: -15px;
 	position: fixed;
 	width: 100%;
 	z-index: 999;
