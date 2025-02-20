@@ -47,6 +47,12 @@
         <span asp-validation-for="ImageUpload" class="text-danger" />
         <img id="imgpreview" src="@Url.Content("~/media/products/" + ViewBag.OldImage)" alt="Current Image" class="pt-2" style="max-width: 200px; max-height: 200px;" />
     </div>
+    <div class="form-group">
+        <label>Image 2</label>
+        <input asp-for="ImageUpload2" class="form-control-file" />
+        <span asp-validation-for="ImageUpload2" class="text-danger" />
+        <img id="imgpreview2" src="@Url.Content("~/media/products/" + ViewBag.OldImage2)" alt="Current Image2" class="pt-2" style="max-width: 200px; max-height: 200px;" />
+    </div>
     <h3>Product Variations</h3>
     <div id="variations">
         @for (int i = 0; i < Model.Variations.Count; i++)
@@ -76,6 +82,11 @@
                 </div>
 
                 <div class="form-group">
+                    <label asp-for="Variations[i].Size">Size</label>
+                    <input asp-for="Variations[i].Size" type="number" class="form-control" required />
+                </div>
+
+                <div class="form-group">
                     <label>Variation Image</label>
                     <input type="file" name="VariationImages" class="form-control" />
                     @if (!string.IsNullOrEmpty(Model.Variations[i].ImageUrl))
@@ -97,18 +108,24 @@
     }
     <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
     <script>
-        function readURL(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    $('#imgpreview').attr('src', e.target.result);
-                };
-                reader.readAsDataURL(input.files[0]);
+                $(document).ready(function () {
+            function readURL(input, previewId) {
+                if (input.files && input.files[0]) {
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        $("#" + previewId).attr("src", e.target.result).width(200).height(200).show();
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
             }
-        }
 
-        $("#ImageUpload").change(function () {
-            readURL(this);
+            $("#ImageUpload").change(function () {
+                readURL(this, "imgpreview");
+            });
+
+            $("#ImageUpload2").change(function () {
+                readURL(this, "imgpreview2");
+            });
         });
     </script>
     <script>
@@ -158,6 +175,11 @@
                         <div class="form-group">
                             <label>Stock</label>
                             <input type="number" name="Variations[${index}].Stock" class="form-control" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Size</label>
+                            <input type="number" name="Variations[${index}].Size" class="form-control" required />
                         </div>
 
                         <div class="form-group">
