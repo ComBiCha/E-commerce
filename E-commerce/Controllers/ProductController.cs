@@ -2,6 +2,8 @@
 using E_commerce.Models;
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,10 +12,12 @@ namespace E_commerce.Controllers
 	public class ProductController : Controller
 	{
 		private readonly DataContext _dataContext;
-		public ProductController(DataContext context)
+        private readonly UserManager<AppUserModel> _userManager;
+        public ProductController(DataContext context, UserManager<AppUserModel> userManager)
 		{
 			_dataContext = context;
-		}
+            _userManager = userManager;
+        }
         public async Task<IActionResult> Index(int page = 1)
         {
             int pageSize = 9;  // S? l??ng s?n ph?m trên m?i trang
@@ -52,6 +56,15 @@ namespace E_commerce.Controllers
         {
             ViewBag.Keyword = searchTerm ?? $"{category} {brand}";
 
+            var userId = await _userManager.GetUserAsync(User);
+            var wishlist = _dataContext.Wishlists
+                .Where(w => w.UserId == userId.Id)
+                .Select(w => w.ProductId)
+                .ToList();
+
+            // Truyền danh sách Wishlist vào ViewBag
+            ViewBag.Wishlist = wishlist;
+
             var brandCounts = _dataContext.Brands
                 .Select(b => new
                 {
@@ -86,18 +99,20 @@ namespace E_commerce.Controllers
         {
             if (Id == null) return RedirectToAction("Index");
 
-			var productsById = _dataContext.Products
-				.Include(p => p.Ratings)
-				.Include(p => p.Variations)
-					.ThenInclude(v => v.Material) // Load Material của Variations
-				.Include(p => p.Variations)
-					.ThenInclude(v => v.Color) // Load Color của Variations
-				.FirstOrDefault(p => p.Id == Id);
+            // Load product with Brand, Category, and other related data
+            var productsById = _dataContext.Products
+                .Include(p => p.Brand) // Include Brand navigation property
+                .Include(p => p.Category) // Include Category navigation property
+                .Include(p => p.Ratings)
+                .Include(p => p.Variations)
+                    .ThenInclude(v => v.Material) // Load Material of Variations
+                .Include(p => p.Variations)
+                    .ThenInclude(v => v.Color) // Load Color of Variations
+                .FirstOrDefault(p => p.Id == Id);
 
+            if (productsById == null) return NotFound();
 
-			if (productsById == null) return NotFound();
-
-            // Lấy danh sách sản phẩm liên quan
+            // Get related products
             var relatedProducts = await _dataContext.Products
                 .Where(p => p.CategoryId == productsById.CategoryId && p.Id != productsById.Id)
                 .Take(4)
@@ -109,6 +124,7 @@ namespace E_commerce.Controllers
                 .GroupBy(x => x.Index / 3)
                 .ToList();
 
+            // Load brand counts
             var brandCounts = _dataContext.Brands
                 .Select(b => new
                 {
@@ -118,10 +134,12 @@ namespace E_commerce.Controllers
                 })
                 .ToList();
 
+            // Load contact information
             var contact = _dataContext.Contacts.FirstOrDefault();
             ViewBag.BrandCounts = brandCounts;
             ViewBag.Contact = contact;
 
+            // Create the view model
             var viewModel = new ProductDetailsViewModel
             {
                 ProductDetails = productsById,
@@ -131,6 +149,7 @@ namespace E_commerce.Controllers
 
             return View(viewModel);
         }
+
 
         [HttpPost]
 		[ValidateAntiForgeryToken]

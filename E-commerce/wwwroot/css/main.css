@@ -432,7 +432,7 @@ ul.sub-menu {
 **************************/
 
 #footer {
-	background: #404040;
+	background: #333333;
 }
 
 .footer-title {
@@ -466,11 +466,16 @@ ul.sub-menu {
 		color: #bfbfbf;
 	}
 
-.companyinfo img {
-  margin-top: 57px!important;
-  width: 86vw;
-  text-align: center;
+.companyinfo {
+	display: flex;
+	justify-content: center; /* Căn giữa theo chiều ngang */
+	align-items: center; /* Căn giữa theo chiều dọc nếu cần */
 }
+
+	.companyinfo img {
+		margin-top: 57px;
+		width: 86vw;
+	}
 
 .footer-top .col-sm-3 {
 	overflow: hidden;
@@ -744,6 +749,7 @@ ul.sub-menu {
 	padding-top: 15px;
 }
 
+
 .left-sidebar h2, .brands_products h2 {
 	color: #FE980F;
 	font-family: 'Roboto', sans-serif;
@@ -755,19 +761,6 @@ ul.sub-menu {
 	position: relative;
 	z-index: 3;
 }
-
-
-	.left-sidebar h2:before {
-		content: " ";
-		position: absolute;
-		background: #fff;
-		bottom: -6px;
-		width: 130px;
-		height: 30px;
-		z-index: -1;
-		left: 50%;
-		margin-left: -65px;
-	}
 
 
 .category-products .panel {
@@ -910,15 +903,6 @@ h2.title {
 	position: relative;
 }
 
-.product-image-wrapper {
-	overflow: visible;
-	margin-bottom: 30px;
-}
-
-.single-products {
-	position: relative;
-}
-
 .new, .sale {
 	position: absolute;
 	top: 0;
@@ -940,20 +924,6 @@ h2.title {
 }
 
 
-.productinfo p {
-	font-family: 'Roboto', sans-serif;
-	font-size: 14px;
-	font-weight: 400;
-	color: #696763;
-}
-
-.productinfo img {
-	width: 100%;
-}
-
-.productinfo {
-	position: relative;
-}
 
 .product-overlay {
 	background: #FE980F;
@@ -967,10 +937,6 @@ h2.title {
 	opacity:;
 }
 
-.single-products:hover .product-overlay {
-	display: block;
-	height: 100%;
-}
 
 
 .product-overlay .overlay-content {
@@ -2586,5 +2552,5 @@ h2.title {
 #header {
 	position: fixed;
 	width: 100%;
-	z-index: 999;
+	z-index:999;
 }

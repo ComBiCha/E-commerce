@@ -51,7 +51,7 @@
 						<a asp-action="Contact" asp-controller="Home" class="contact-info d-flex align-items-center justify-content-center">
 							<p>
 								<i class="fa fa-plus" aria-hidden="true"></i>
-								Contact
+								Contact Us
 							</p>
 						</a>
 					</div>
@@ -131,7 +131,7 @@
 
 
 	<section style="background-color:black">
-		<div class="container-fluid">
+		<div class="container-fluid p-0 m-0">
 			<div class="row">
 				@Html.Partial("_NotificationPartical")
 				@RenderBody()
@@ -301,7 +301,6 @@
 
 				if (layoutText) {
 					// Bỏ hiệu ứng transition trên các trang khác
-					layoutText.style.transition = "none"; // Tắt mọi hiệu ứng
 					layoutText.style.transform = "none"; // Không hiệu ứng
 					layoutText.style.opacity = "1"; // Hiển thị MERDI thẳng
 				}

@@ -104,9 +104,6 @@
 	text-align: center;
 }
 
-.companyinfo h2{
-	font-size: 20px;
-}
 
 .address {
 	margin-top: 48px;
@@ -250,9 +247,7 @@ ul.sub-menu{
 	margin-left: 30px;
 }
 
-.companyinfo{
-	text-align: center;
-}
+
 
 .footer-widget .col-sm-3{
 	display: inline-block;
@@ -418,9 +413,7 @@ ul.sub-menu{
 	font-size: 12px;
 }
 
-.companyinfo h2, .companyinfo p{
-	text-align: center;
-}
+
 
 .video-gallery{
 	margin-top: 30px;
