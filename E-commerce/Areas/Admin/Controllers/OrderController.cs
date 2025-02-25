@@ -50,12 +50,41 @@ namespace E_commerce.Areas.Admin.Controllers
         }*/
         public async Task<IActionResult> ViewOrder(string ordercode)
         {
-            var order = await _dataContext.Orders.FirstOrDefaultAsync(o => o.OrderCode == ordercode);
-            ViewBag.Order = order;
+            var order = await _dataContext.Orders
+                .FirstOrDefaultAsync(o => o.OrderCode == ordercode);
 
-            var DetailsOrder = await _dataContext.OrderDetails.Include(o=>o.Product).Include(o => o.Variation).Include(o => o.Variation.Material).Include(o => o.Variation.Color).Where(o=>o.OrderCode==ordercode).ToListAsync();
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            var userEmail = order.UserName;
+            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            decimal discountRate = user?.GetDiscountRate() ?? 0m; // Lấy mức giảm giá từ UserModel
+            decimal productTotal = await _dataContext.OrderDetails
+                .Where(o => o.OrderCode == ordercode)
+                .SumAsync(o => o.Price * o.Quantity); // Tính tổng giá sản phẩm
+
+            decimal discountAmount = productTotal * discountRate; // Số tiền giảm giá
+
+            ViewBag.Order = order;
+            ViewBag.DiscountRate = discountRate; // Gửi Discount Rate sang View
+            ViewBag.DiscountAmount = discountAmount; // Số tiền giảm giá
+            ViewBag.ProductTotal = productTotal;
+
+            var DetailsOrder = await _dataContext.OrderDetails
+                .Include(o => o.Product)
+                    .ThenInclude(p => p.Warranty)
+                .Include(o => o.Variation)
+                .Include(o => o.Variation.Material)
+                .Include(o => o.Variation.Color)
+                .Where(o => o.OrderCode == ordercode)
+                .ToListAsync();
+
             return View(DetailsOrder);
         }
+
+
         /*public async Task<IActionResult> Delete(int Id)
         {
             OrderController order = await _dataContext.Orders.FindAsync(Id);
@@ -66,13 +95,14 @@ namespace E_commerce.Areas.Admin.Controllers
         }*/
 
         [HttpPost]
+        [HttpPost]
+        [HttpPost]
         public async Task<IActionResult> UpdateOrder(string ordercode, int status)
         {
             var order = await _dataContext.Orders.FirstOrDefaultAsync(o => o.OrderCode == ordercode);
-
             if (order == null)
             {
-                return NotFound();
+                return NotFound(new { success = false, message = "Order not found" });
             }
 
             order.Status = status;
@@ -80,13 +110,31 @@ namespace E_commerce.Areas.Admin.Controllers
             try
             {
                 await _dataContext.SaveChangesAsync();
+
+                // Nếu đơn hàng hoàn thành, cộng điểm cho user
+                if (status == 5)
+                {
+                    var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == order.UserName);
+                    if (user != null)
+                    {
+                        var totalAmount = await _dataContext.OrderDetails
+                            .Where(od => od.OrderCode == ordercode)
+                            .SumAsync(od => od.Price * od.Quantity);
+
+                        user.Points += Convert.ToInt32(totalAmount); // Chuyển decimal thành int gần nhất
+                        await _dataContext.SaveChangesAsync();
+                    }
+                }
+
                 return Ok(new { success = true, message = "Order status updated successfully" });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while updateing the order status.");
+                return StatusCode(500, new { success = false, message = "An error occurred while updating the order status.", error = ex.Message });
             }
         }
+
+
 
         [HttpGet]
         public async Task<IActionResult> Delete(string ordercode)

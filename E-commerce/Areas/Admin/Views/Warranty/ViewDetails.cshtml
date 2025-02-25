@@ -62,17 +62,17 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">Product Name:</dt>
-        <dd class="col-sm-10">@Model.Warranty.Product.Name</dd>
+        <dd class="col-sm-10">@Model.Warranty.Product.Name - @Model.Warranty.Variation.Material.Name - @Model.Warranty.Variation.Color.Name - @Model.Warranty.Variation.Size</dd>
 
         <dt class="col-sm-2">Product Description:</dt>
         <dd class="col-sm-10">@Html.Raw(@Model.Warranty.Product.Description)</dd>
 
         <dt class="col-sm-2">Product Price:</dt>
-        <dd class="col-sm-10">@Model.Warranty.Product.Price.ToString("C")</dd>
+        <dd class="col-sm-10">@((ViewBag.ProductTotal - ViewBag.DiscountAmount + ViewBag.Order.ShippingCost).ToString("C"))</dd>
 
         <dt class="col-sm-2">Product Image:</dt>
         <dd class="col-sm-10">
-            <img src="~/media/products/@Model.Warranty.Product.Image" width="200" />
+            <img src="~/media/variations/@Model.Warranty.Variation.ImageUrl" width="200" />
         </dd>
     </dl>
 

@@ -229,11 +229,40 @@ namespace E_commerce.Controllers
         }
         public async Task<IActionResult> ViewOrder(string ordercode)
         {
-            var order = await _dataContext.Orders.FirstOrDefaultAsync(o => o.OrderCode == ordercode);
+            var order = await _dataContext.Orders
+                .FirstOrDefaultAsync(o => o.OrderCode == ordercode);
+
+            if (order == null)
+            {
+                return NotFound();
+            }
+
+            var userEmail = order.UserName;
+            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            decimal discountRate = user?.GetDiscountRate() ?? 0m; // Lấy mức giảm giá từ UserModel
+            decimal productTotal = await _dataContext.OrderDetails
+                .Where(o => o.OrderCode == ordercode)
+                .SumAsync(o => o.Price * o.Quantity); // Tính tổng giá sản phẩm
+
+            decimal discountAmount = productTotal * discountRate; // Số tiền giảm giá
+
             ViewBag.Order = order;
-			var DetailsOrder = await _dataContext.OrderDetails.Include(o => o.Product).ThenInclude(p => p.Warranty).Include(o => o.Variation).Include(o => o.Variation.Material).Include(o => o.Variation.Color).Where(o => o.OrderCode == ordercode).ToListAsync();
+            ViewBag.DiscountRate = discountRate; // Gửi Discount Rate sang View
+            ViewBag.DiscountAmount = discountAmount; // Số tiền giảm giá
+            ViewBag.ProductTotal = productTotal;
+
+            var DetailsOrder = await _dataContext.OrderDetails
+                .Include(o => o.Product)
+                    .ThenInclude(p => p.Warranty)
+                .Include(o => o.Variation)
+                .Include(o => o.Variation.Material)
+                .Include(o => o.Variation.Color)
+                .Where(o => o.OrderCode == ordercode)
+                .ToListAsync();
+
             return View(DetailsOrder);
         }
+
         public async Task<IActionResult> MyWarranties()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Lấy User ID từ Claims
@@ -303,29 +332,66 @@ namespace E_commerce.Controllers
             if (string.IsNullOrEmpty(email))
             {
                 TempData["error"] = "Unable to identify the user. Please log in again.";
-                return RedirectToAction("Login", "Account"); // Nếu không đăng nhập, chuyển hướng về Login
+                return RedirectToAction("Login", "Account");
             }
 
-            // Kiểm tra đơn hàng có tồn tại và thuộc về người dùng hiện tại không
+            // Tìm đơn hàng theo OrderCode và UserName
             var order = await _dataContext.Orders
                 .FirstOrDefaultAsync(o => o.OrderCode == orderCode && o.UserName == email);
 
             if (order == null)
             {
                 TempData["error"] = "Order not found or you do not have permission to cancel this order.";
-                return RedirectToAction("PersonalOrder"); // Chuyển hướng về danh sách đơn hàng cá nhân
+                return RedirectToAction("PersonalOrder");
             }
 
+            // Nếu đơn hàng đã được xử lý hoặc vận chuyển thì không cho hủy
+            if (order.Status > 2) // 1 = Đơn mới, 2 = Xác nhận, 3 = Đang giao, 4 = Hoàn thành
+            {
+                TempData["error"] = "Order has already been processed and cannot be canceled.";
+                return RedirectToAction("PersonalOrder");
+            }
+
+            // Lấy danh sách OrderDetails dựa trên OrderCode
+            var orderDetails = await _dataContext.OrderDetails
+                .Include(od => od.Variation) // Lấy thông tin Variation
+                .ThenInclude(v => v.Product) // Lấy thông tin Product
+                .Where(od => od.OrderCode == orderCode)
+                .ToListAsync();
+
+            // Hoàn lại số lượng sản phẩm & giảm số lượng đã bán
+            foreach (var orderDetail in orderDetails)
+            {
+                if (orderDetail.Variation != null)
+                {
+                    orderDetail.Variation.Stock += orderDetail.Quantity; // Cộng lại số lượng đã mua
+
+                    if (orderDetail.Variation.Product != null)
+                    {
+                        orderDetail.Variation.Product.Sold -= orderDetail.Quantity; // Giảm số lượng đã bán
+                        if (orderDetail.Variation.Product.Sold < 0)
+                        {
+                            orderDetail.Variation.Product.Sold = 0; // Đảm bảo không bị số âm
+                        }
+                        _dataContext.Products.Update(orderDetail.Variation.Product);
+                    }
+
+                    _dataContext.Variations.Update(orderDetail.Variation);
+                }
+            }
 
             // Cập nhật trạng thái đơn hàng thành "Đã hủy"
             order.Status = 6;
-
             _dataContext.Orders.Update(order);
+
+            // Lưu thay đổi vào database
             await _dataContext.SaveChangesAsync();
 
-            TempData["success"] = "Order has been canceled successfully.";
-            return RedirectToAction("PersonalOrder"); // Chuyển hướng về danh sách đơn hàng cá nhân
+            TempData["success"] = "Order has been canceled successfully, stock has been restored, and sold count has been adjusted.";
+            return RedirectToAction("PersonalOrder");
         }
+
+
         [HttpPost]
         public async Task<IActionResult> ConfirmDelivery(string orderCode)
         {

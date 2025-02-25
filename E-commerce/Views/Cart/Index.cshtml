@@ -60,9 +60,14 @@
 						<tr>
 							<td colspan="5"></td>
 							<td colspan="2" class="text-right">
-								<strong>Grand Total: <span style="color:#FE980F">$@Model.GrandTotal.ToString()</span></strong>
+								<strong>Grand Total: <span style="color:#FE980F">$@Model.GrandTotal.ToString("0.00")</span></strong><br>
+								<strong>
+									Discount (@((Model.GrandTotal > 0) ? (Model.DiscountAmount / Model.GrandTotal * 100) : 0)%):
+									<span style="color:green">-$@Model.DiscountAmount.ToString("0.00")</span>
+								</strong><br>
 								<strong>Shipping Cost: <span style="color:#FE980F">$@Model.ShippingCost.ToString()</span></strong>
 								<p><a asp-action="DeleteShippingPrice" asp-controller="Cart">Recalculate ShippingCost</a></p>
+								<strong>Final Total: <span style="color:#FE980F">$@Model.FinalTotal.ToString("0.00")</span></strong>
 							</td>
 						</tr>
 

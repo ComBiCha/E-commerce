@@ -2,6 +2,35 @@
 
 @{
     ViewData["Title"] = "Portal";
+
+    // Xác định hạng hiện tại và điểm cần thiết để lên hạng tiếp theo
+    int points = Model.Points;
+    string rank = "Bronze";
+    int nextRankPoints = 10000;
+
+    if (points >= 50000)
+    {
+        rank = "Diamond";
+        nextRankPoints = 50000;
+    }
+    else if (points >= 40000)
+    {
+        rank = "Platinum";
+        nextRankPoints = 50000;
+    }
+    else if (points >= 20000)
+    {
+        rank = "Gold";
+        nextRankPoints = 40000;
+    }
+    else if (points >= 10000)
+    {
+        rank = "Silver";
+        nextRankPoints = 20000;
+    }
+
+    int progressToNextRank = (int)(((double)points / nextRankPoints) * 100);
+    if (progressToNextRank > 100) progressToNextRank = 100;
 }
 
 <style>
@@ -38,6 +67,17 @@
         <h2>Thông tin cá nhân</h2>
         <p>Tên: @Model.UserName</p>
         <p>Email: @Model.Email</p>
+        <div class="user-points">
+            <h3>Points: @Model.Points</h3>
+            <p>Current Rank: <strong>@rank</strong></p>
+            @if (rank != "Diamond")
+            {
+                <p>Need <strong>@(nextRankPoints - points) Points</strong> To rank-up <strong>@(rank == "Platinum" ? "Diamond" : (rank == "Gold" ? "Platinum" : (rank == "Silver" ? "Gold" : "Silver")))</strong></p>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: @progressToNextRank%;"></div>
+                </div>
+            }
+        </div>
         <div class="button-group">
             @Html.ActionLink("Chỉnh sửa thông tin", "EditPersonal", new { id = Model.Id }, new { @class = "btn btn-primary action-link-button" })
             @*@Html.ActionLink("Đăng xuất", "SignOut", "Login", new { @class = "btn btn-danger action-link-button" })*@
@@ -61,3 +101,32 @@
         }
 
         document.getElementsByClassName("tab-button")[0].click();</script>
+
+<style>
+    .user-points {
+        margin-top: 20px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .progress-bar-container {
+        width: 100%;
+        height: 20px;
+        background-color: #ddd;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-top: 10px;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: #28a745;
+        text-align: center;
+        color: white;
+        line-height: 20px;
+        font-size: 14px;
+        border-radius: 10px;
+    }
+</style>
