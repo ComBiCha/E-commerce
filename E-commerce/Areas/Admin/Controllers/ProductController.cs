@@ -3,6 +3,7 @@ using E_commerce.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Model;
 
@@ -354,18 +355,47 @@ namespace E_commerce.Areas.Admin.Controllers
         [HttpPost]
         public IActionResult DeleteVariation(int variationId, int productId)
         {
-            var variation = _dataContext.Variations.FirstOrDefault(v => v.Id == variationId);
-            if (variation == null)
+            try
             {
-                return NotFound();
-            }
+                var variation = _dataContext.Variations.Find(variationId);
+                if (variation == null)
+                {
+                    TempData["ErrorMessage"] = "Variation không tồn tại!";
+                    return RedirectToAction("Edit", new { id = productId });
+                }
 
-            // Xóa variation
-            _dataContext.Variations.Remove(variation);
-            _dataContext.SaveChanges();
+                _dataContext.Variations.Remove(variation);
+                _dataContext.SaveChanges();
+
+                TempData["SuccessMessage"] = "Xóa Variation thành công!";
+            }
+            catch (DbUpdateException ex)
+            {
+                if (ex.InnerException is SqlException sqlEx)
+                {
+                    if (sqlEx.Message.Contains("FK_OrderDetails_Variations"))
+                    {
+                        TempData["ErrorMessage"] = "Không thể xóa Variation vì có đơn hàng đang sử dụng nó!";
+                    }
+                    else if (sqlEx.Message.Contains("FK_Warranties_Variations"))
+                    {
+                        TempData["ErrorMessage"] = "Không thể xóa Variation vì đang có bảo hành liên kết!";
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Lỗi khi xóa Variation: " + ex.Message;
+                    }
+                }
+                else
+                {
+                    TempData["ErrorMessage"] = "Lỗi không xác định khi xóa Variation!";
+                }
+            }
 
             return RedirectToAction("Details", new { id = productId });
         }
+
+
 
 
         [HttpPost]
@@ -390,32 +420,52 @@ namespace E_commerce.Areas.Admin.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> AddQuantity(int Id)
+        public async Task<IActionResult> AddQuantity(int variationId)
         {
-            var productbyquantity = await _dataContext.ProductQuantities.Where(pq => pq.ProductId == Id).ToListAsync();
-            ViewBag.ProductByQuantity = productbyquantity;
-            ViewBag.Id = Id;
-            return View();
-        }
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult StoreProductQuantity(ProductQuantityModel productQuantityModel)
-        {
-            var product = _dataContext.Products.Find(productQuantityModel.ProductId);
-            if(product==null)
+            var variation = await _dataContext.Variations
+                .Include(v => v.Product) // Đảm bảo Product có dữ liệu
+                .Include(v => v.ProductQuantities)
+                .FirstOrDefaultAsync(v => v.Id == variationId);
+
+            if (variation == null)
             {
                 return NotFound();
             }
-            product.Quantity += productQuantityModel.Quantity;
 
-            productQuantityModel.Quantity = productQuantityModel.Quantity;
-            productQuantityModel.ProductId = productQuantityModel.ProductId;
-            productQuantityModel.DateCreated = DateTime.Now;
+            var productQuantities = variation.ProductQuantities.OrderByDescending(q => q.DateCreated).ToList();
+            Console.WriteLine($"ViewBag.ProductByQuantity Count: {productQuantities.Count}");
+            ViewBag.ProductByQuantity = productQuantities;
 
-            _dataContext.Add(productQuantityModel);
-            _dataContext.SaveChangesAsync();
-            TempData["success"] = "Quantity added successfully";
-            return RedirectToAction("AddQuantity", "Product", new { Id = productQuantityModel.ProductId });
+
+            var model = new ProductQuantityModel
+            {
+                VariationId = variation.Id,
+                Variation = variation // Gán luôn Variation vào Model
+            };
+
+            return View(model);
         }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> StoreProductQuantity(ProductQuantityModel productQuantityModel)
+        {
+            var variation = await _dataContext.Variations.FindAsync(productQuantityModel.VariationId);
+            if (variation == null)
+            {
+                return NotFound();
+            }
+
+            variation.Stock += productQuantityModel.Quantity;
+            productQuantityModel.DateCreated = DateTime.Now;
+            _dataContext.ProductQuantities.Add(productQuantityModel);
+
+            await _dataContext.SaveChangesAsync();
+
+            TempData["success"] = "Quantity added successfully";
+            return RedirectToAction("Details", new { Id = variation.ProductId });
+        }
+
     }
 }

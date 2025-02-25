@@ -15,9 +15,10 @@ namespace E_commerce.Controllers
 			_dataContext = dataContext;
 		}
 
-		public IActionResult Index()
-		{
-			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+        public async Task<IActionResult> Index()
+        {
+            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
 			var shippingPriceCookie = Request.Cookies["ShippingPrice"];
 			decimal shippingPrice = 0;
 
@@ -34,6 +35,10 @@ namespace E_commerce.Controllers
 	.Where(v => variationIds.Contains(v.Id))
 	.ToDictionary(v => v.Id);
 
+			decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
+			decimal discountRate = user?.GetDiscountRate() ?? 0m;
+			decimal discountAmount = grandTotal * discountRate;
+			decimal finalTotal = grandTotal - discountAmount + shippingPrice;
 
 			// Gán thông tin Variation vào từng CartItemModel
 			foreach (var item in cartItems)
@@ -47,9 +52,11 @@ namespace E_commerce.Controllers
 			CartItemViewModel cartVM = new()
 			{
 				CartItems = cartItems,
-				GrandTotal = cartItems.Sum(x => x.Quantity * x.Price),
-				ShippingCost = shippingPrice
-			};
+				GrandTotal = grandTotal,
+                ShippingCost = shippingPrice,
+                DiscountAmount = discountAmount,
+                FinalTotal = finalTotal
+            };
 
 			return View(cartVM);
 		}

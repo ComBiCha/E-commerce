@@ -22,5 +22,6 @@ namespace E_commerce.Models
         public string ImageUrl { get; set; } // Ảnh biến thể
         [NotMapped]
         public IFormFile ImageUpload { get; set; } // Hỗ trợ upload file
+        public ICollection<ProductQuantityModel> ProductQuantities { get; set; } = new List<ProductQuantityModel>();
     }
 }

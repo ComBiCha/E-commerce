@@ -78,7 +78,7 @@
 
                 <div class="form-group">
                     <label asp-for="Variations[i].Stock">Stock</label>
-                    <input asp-for="Variations[i].Stock" type="number" class="form-control" required />
+                    <input asp-for="Variations[i].Stock" type="number" class="form-control" value="0" readonly />
                 </div>
 
                 <div class="form-group">
@@ -173,8 +173,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Stock</label>
-                            <input type="number" name="Variations[${index}].Stock" class="form-control" required />
+                            <input type="hidden" name="Variations[${index}].Stock" value="0" />
                         </div>
 
                         <div class="form-group">

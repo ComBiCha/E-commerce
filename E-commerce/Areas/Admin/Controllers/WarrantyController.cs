@@ -1,4 +1,5 @@
-﻿using E_commerce.Repository;
+﻿using E_commerce.Models;
+using E_commerce.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,8 +31,25 @@ namespace E_commerce.Areas.Admin.Controllers
             var request = await _context.WarrantyRequests
                 .Include(r => r.Warranty)
                 .Include(r => r.User)
-                .Include(r => r.Warranty.Product) // Assuming Warranty has a reference to Product
+                .Include(r => r.Warranty.Product)
+                .Include(r => r.Warranty.Variation)
+                .Include(r => r.Warranty.Variation.Material)
+                .Include(r => r.Warranty.Variation.Color)
                 .FirstOrDefaultAsync(r => r.Id == id);
+
+            var order = await _context.Orders
+                .FirstOrDefaultAsync(o => o.OrderCode == request.Warranty.OrderCode);
+            var userEmail = order.UserName;
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            decimal discountRate = user?.GetDiscountRate() ?? 0m; // Lấy mức giảm giá từ UserModel
+            decimal productTotal = request.Warranty.Product.Price;
+
+            decimal discountAmount = productTotal * discountRate; // Số tiền giảm giá
+
+            ViewBag.Order = order;
+            ViewBag.DiscountRate = discountRate; // Gửi Discount Rate sang View
+            ViewBag.DiscountAmount = discountAmount; // Số tiền giảm giá
+            ViewBag.ProductTotal = productTotal;
 
             if (request == null)
             {

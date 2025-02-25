@@ -81,15 +81,26 @@
 							@foreach (var variation in Model.Variations)
 							{
 								<div class="variation-item">
-									<img src="~/media/variations/@variation.ImageUrl" alt="@variation." width="80" height="80" />
+									<img src="~/media/variations/@variation.ImageUrl" alt="@variation.Material.Name @variation.Color.Name" width="80" height="80" />
 									<p>@variation.Material.Name - @variation.Color.Name - Size:@variation.Size - $@variation.Price</p>
-									<button class="btn btn-default select-variation" data-variation_id="@variation.Id">
-										<i class="fa fa-check"></i> Select
-									</button>
+
+									@if (variation.Stock > 0)
+									{
+										<button class="btn btn-default select-variation" data-variation_id="@variation.Id">
+											<i class="fa fa-check"></i> Select
+										</button>
+									}
+									else
+									{
+										<button class="btn btn-danger" disabled>
+											<i class="fa fa-minus-square"></i> Out of Order
+										</button>
+									}
 								</div>
 							}
 						</div>
 					}
+
 				</div>
 
 			</div>
@@ -212,6 +223,11 @@
 			let selectedVariationId = null;
 
 			$('.select-variation').click(function () {
+				if ($(this).hasClass("disabled")) {
+					Swal.fire("This variation is out of order.");
+					return;
+				}
+
 				selectedVariationId = $(this).data("variation_id");
 
 				// Highlight variation đã chọn

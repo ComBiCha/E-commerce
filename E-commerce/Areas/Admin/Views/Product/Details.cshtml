@@ -39,7 +39,15 @@
         <td>@Model.Brand.Name</td>
     </tr>
 </table>
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
 <h4>Variations</h4>
 <table class="table table-bordered">
     <thead>
@@ -50,6 +58,7 @@
             <th>Quantity</th>
             <th>Size</th>
             <th>Picture</th>
+            <th>Add Quantity</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -69,6 +78,10 @@
                     }
                 </td>
                 <td>
+                    <!-- Nút "+" để mở trang thêm số lượng -->
+                    <a href="@Url.Action("AddQuantity", "Product", new { variationId = variation.Id })" class="btn btn-success">+</a>
+                </td>
+                <td>
                     <form asp-action="DeleteVariation" method="post" onsubmit="return confirm('Are you sure you want to delete this variation?');">
                         <input type="hidden" name="variationId" value="@variation.Id" />
                         <input type="hidden" name="productId" value="@Model.Id" />
@@ -79,6 +92,9 @@
         }
     </tbody>
 </table>
+
+
+
 
 @if (!Model.Variations.Any()) // Nếu không còn variations, hiển thị nút xóa sản phẩm
 {
