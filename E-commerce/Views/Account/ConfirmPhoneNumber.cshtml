@@ -1,0 +1,34 @@
+﻿<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<h2>Enter OTP</h2>
+<p>OTP has been sent to: <span id="phone-display"></span></p>
+
+<input type="text" id="otp-code" class="form-control" placeholder="Enter OTP" />
+<button type="button" class="btn btn-success" onclick="verifyOtp()">Verify OTP</button>
+
+<script>
+    // Lấy số điện thoại từ sessionStorage
+    document.getElementById('phone-display').innerText = sessionStorage.getItem('phoneNumber') || "your phone";
+
+    function verifyOtp() {
+        const code = document.getElementById('otp-code').value;
+        if (!code) {
+            alert("Please enter the OTP code.");
+            return;
+        }
+
+        window.confirmationResult.confirm(code)
+            .then(result => {
+                alert("Phone number verified successfully!");
+                window.location.href = "/Account/VerifyPhoneNumberSuccess"; // Redirect sau khi xác minh thành công
+            })
+            .catch(error => {
+                alert("Invalid OTP! Please try again.");
+                console.error("Error verifying OTP:", error);
+            });
+    }
+</script>

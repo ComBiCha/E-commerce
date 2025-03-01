@@ -60,11 +60,20 @@
 						<tr>
 							<td colspan="5"></td>
 							<td colspan="2" class="text-right">
+								<form asp-controller="Cart" asp-action="ApplyCoupon" method="post">
+									<input type="text" name="couponCode" placeholder="Enter Coupon Code" required />
+									<button type="submit">Apply</button>
+								</form>
 								<strong>Grand Total: <span style="color:#FE980F">$@Model.GrandTotal.ToString("0.00")</span></strong><br>
 								<strong>
 									Discount (@((Model.GrandTotal > 0) ? (Model.DiscountAmount / Model.GrandTotal * 100) : 0)%):
 									<span style="color:green">-$@Model.DiscountAmount.ToString("0.00")</span>
 								</strong><br>
+								@if (!string.IsNullOrEmpty(Model.CouponCode))
+								{
+									<strong>Discount Coupon: <span style="color:blue">@Model.CouponCode | <span style="color:green">-$@Model.DiscountAmount2.ToString("0.00")</span></span></strong>
+									<br>
+								}
 								<strong>Shipping Cost: <span style="color:#FE980F">$@Model.ShippingCost.ToString()</span></strong>
 								<p><a asp-action="DeleteShippingPrice" asp-controller="Cart">Recalculate ShippingCost</a></p>
 								<strong>Final Total: <span style="color:#FE980F">$@Model.FinalTotal.ToString("0.00")</span></strong>
@@ -204,5 +213,25 @@
 				}
 			});
 		 });
+	</script>
+	<script>
+		$(function () {
+			var message = '@TempData["success"]';
+			if (message != '')
+				Swal.fire({
+					icon: "success",
+					title: "Yayyy",
+					text: message,
+				});
+		});
+		$(function () {
+			var message = '@TempData["error"]';
+			if (message != '')
+				Swal.fire({
+					icon: "error",
+					title: "Oops...",
+					text: message,
+				});
+		});
 	</script>
 }

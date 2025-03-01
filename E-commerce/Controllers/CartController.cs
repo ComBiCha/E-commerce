@@ -30,15 +30,19 @@ namespace E_commerce.Controllers
 			// Lấy danh sách Variation từ database dựa trên VariationId
 			var variationIds = cartItems.Select(x => x.VariationId).Distinct().ToList();
 			var variations = _dataContext.Variations
-	.Include(v => v.Material)
-	.Include(v => v.Color)// Load thêm Material vào Variation
-	.Where(v => variationIds.Contains(v.Id))
-	.ToDictionary(v => v.Id);
+			.Include(v => v.Material)
+			.Include(v => v.Color)// Load thêm Material vào Variation
+			.Where(v => variationIds.Contains(v.Id))
+			.ToDictionary(v => v.Id);
+
+			string discountStr = HttpContext.Session.GetString("DiscountAmount");
+			decimal discountAmount2 = string.IsNullOrEmpty(discountStr) ? 0 : Convert.ToDecimal(discountStr);
+
 
 			decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
 			decimal discountRate = user?.GetDiscountRate() ?? 0m;
 			decimal discountAmount = grandTotal * discountRate;
-			decimal finalTotal = grandTotal - discountAmount + shippingPrice;
+			decimal finalTotal = grandTotal - discountAmount - discountAmount2 + shippingPrice;
 
 			// Gán thông tin Variation vào từng CartItemModel
 			foreach (var item in cartItems)
@@ -49,12 +53,16 @@ namespace E_commerce.Controllers
 				}
 			}
 
+			string couponCode = HttpContext.Session.GetString("CouponCode") ?? "";
+
 			CartItemViewModel cartVM = new()
 			{
 				CartItems = cartItems,
 				GrandTotal = grandTotal,
                 ShippingCost = shippingPrice,
                 DiscountAmount = discountAmount,
+				DiscountAmount2 = discountAmount2,
+				CouponCode = couponCode,
                 FinalTotal = finalTotal
             };
 
@@ -243,5 +251,46 @@ namespace E_commerce.Controllers
 			Response.Cookies.Delete("ShippingPrice");
 			return RedirectToAction("Index","Cart");
 		}
+
+		[HttpPost]
+		public async Task<IActionResult> ApplyCoupon(string couponCode)
+		{
+			var coupon = await _dataContext.Coupons.FirstOrDefaultAsync(c => c.Code == couponCode);
+
+			if (coupon == null || coupon.ExpiryDate < DateTime.Now || coupon.UsedCount >= coupon.MaxUsage)
+			{
+				TempData["error"] = "Invalid or expired coupon code!";
+				return RedirectToAction("Index");
+
+			}
+
+			// Lấy giỏ hàng từ session
+			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+			decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
+
+			if (coupon.MinOrderValue.HasValue && grandTotal < coupon.MinOrderValue.Value)
+			{
+				TempData["error"] = $"Minimum order value must be ${coupon.MinOrderValue.Value} to apply this coupon!";
+				return RedirectToAction("Index");
+
+			}
+
+			decimal discount = coupon.IsPercentage ? (grandTotal * coupon.DiscountAmount / 100) : coupon.DiscountAmount;
+			HttpContext.Session.SetString("DiscountAmount", discount.ToString());
+			HttpContext.Session.SetString("CouponCode", couponCode);
+
+			TempData["success"] = $"Coupon applied successfully! Discount: ${discount:F2}";
+			return RedirectToAction("Index");
+
+		}
+
+		public IActionResult RemoveCoupon()
+{
+    HttpContext.Session.Remove("DiscountAmount");
+    TempData["success"] = "Coupon removed successfully!";
+    return RedirectToAction("Index");
+}
+
+
 	}
 }

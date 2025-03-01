@@ -1,4 +1,4 @@
-using E_commerce.Areas.Admin.Repository;
+﻿using E_commerce.Areas.Admin.Repository;
 using E_commerce.Controllers;
 using E_commerce.Models;
 using E_commerce.Repository;
@@ -14,6 +14,11 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration["ConnectionStrings:ConnectedDb"]);
 });
+
+/*// Đọc cấu hình Firebase từ appsettings.json
+var firebaseConfig = builder.Configuration.GetSection("Firebase").Get<Dictionary<string, string>>();
+// Truyền cấu hình vào View
+builder.Services.AddSingleton(firebaseConfig);*/
 
 //Email
 builder.Services.AddTransient<IEmailSender, EmailSender>();

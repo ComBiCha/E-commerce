@@ -353,7 +353,7 @@
 			}
 
 			function removeFromWishlist(productId) {
-				fetch(`/Home/DeleteWishlist?Id=${productId}`, { method: "POST" })
+				fetch(`/Home/DeleteWishlist2?Id=${productId}`, { method: "POST" })
 					.then((response) => response.json())
 					.then((data) => {
 						if (data.success) {
