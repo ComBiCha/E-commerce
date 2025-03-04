@@ -4,20 +4,588 @@
 	var colorName = Model.Variations.FirstOrDefault()?.Color.Name;
 	var selectedVariationId = "";
 }
-<div>
-	<div class="col-sm-3">
-		@Html.Partial("_SideBarPartical")
-	</div>
+<style>
+	.detail-container {
+		position: relative;
+		overflow: hidden;
+		padding: 70px 0px 0px 0px;
+	}
 
-	<div class="col-sm-9 padding-right">
+	.col-sm-6{
+		padding-right: 0px !important;
+		padding-left: 0px !important;
+	}
+
+	.product-details{
+		display: flex; /* Để xếp hai hình ngang nhau */
+		justify-content: space-between; /* Đặt khoảng cách đều giữa hình ảnh */
+		align-items: center; /* Căn giữa theo chiều dọc */
+		margin: 0;
+		padding: 0;
+		background-color: #e7e7e7;
+	}
+
+	.view-productPrimary {
+		position: relative !important;
+		margin-top: -31.9vh;
+		z-index: 2;
+		padding-top: 110px;
+		box-sizing: border-box;
+		display: table;
+		height: inherit;
+		margin-bottom: 0;
+		margin-right: 10vw;
+		top: 0;
+		width: 40vw;
+}
+
+		.view-productPrimary img {
+		height: 100%;
+		width: 100%;
+		background-color: #dcdcdc;
+		transform: scale(1.5);
+		vertical-align: middle;
+
+	}
+
+	.view-productSecondary {
+		position: relative !important;
+		margin-top: -13.9vh;
+		z-index: 2;
+		padding-top: 110px;
+		box-sizing: border-box;
+		display: table;
+		height: inherit;
+		margin-bottom: 0;
+		margin-left: 10vw;
+		margin-right: 10vw;
+		top: 0;
+		width: 40vw;
+	}
+
+		.view-productSecondary img {
+			height: 70%; /* Giảm chiều cao xuống 70% */
+			width: auto; /* Tự động điều chỉnh chiều rộng theo tỷ lệ */
+			background-color: #dcdcdc;
+			transform: scale(1); /* Đặt lại scale mặc định */
+			vertical-align: middle;
+			margin: auto; /* Canh giữa hình trong khung */
+			display: block;
+		}
+
+	.product-table-wrapper {
+		position: absolute; /* Đặt vị trí tuyệt đối để dễ canh chỉnh */
+		top: 50%; 
+		left: 50%; 
+		transform: translate(-50%, -50%); /* Đảm bảo căn chính giữa */
+		z-index: 3;
+		background-color: rgba(255, 255, 255, 0.8);
+		padding: 20px 20px 0px 20px;
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+		border-radius: 3px;
+		max-width: 350px; /* Giới hạn độ rộng cứng */
+		width: 100%;
+		box-sizing: border-box;
+	}
+
+	.productNameAndPriceContainer {
+		display: flex; /* Sử dụng flexbox */
+		flex-direction: column; /* Căn theo chiều dọc từ trên xuống */
+		align-items: center; /* Căn giữa theo chiều ngang */
+		justify-content: center; /* Căn giữa theo chiều dọc */
+		text-align: center; /* Canh giữa văn bản */
+		padding: 20px 0px 20px 0px; /* Thêm khoảng cách bên trong */
+		word-wrap: break-word; /* Tự động xuống dòng nếu chuỗi quá dài */
+	}
+
+	.product-name {
+		font-family: Arial;
+		font-size: 1.7rem;
+		font-weight: bold;
+		margin-bottom: 1.8rem; /* Khoảng cách giữa các phần tử */
+		text-transform: uppercase;
+		overflow-wrap: break-word;
+	}
+
+	.product-price {
+		font-size: 1.9rem;
+		color: black;
+		font-weight: 600;
+		margin-bottom: 1.8rem;
+		max-width: 100%;
+	}
+
+
+	.product-variation-section {
+		position: relative;
+	}
+	.product-variations{
+		font-size: 1.6rem;
+		color: #443e3e;
+		margin-bottom: 1.8rem;
+		max-width: 100%;
+		cursor:pointer;
+		white-space: normal !important;
+	}
+
+	.variation-dropdown {
+		position: absolute;
+		top: 20%;
+		left: 0;
+		background: white;
+		border: 1px solid #ddd;
+		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+		z-index: 1000;
+		width: 100%;
+		max-height: 200px;
+		overflow-y: auto;
+	}
+
+	.variation-option {
+		padding: 10px;
+		cursor: pointer;
+	}
+
+		.variation-option:hover {
+			background: #f8f9fa;
+		}
+
+
+	.product-availability {
+		font-size: 1.3rem;
+		color: #443e3e;
+		font-weight: bold;
+		margin: 0;
+		text-transform: uppercase;
+		max-width: 100%;
+	}
+
+
+	.product-delivery-info {
+		font-size: 1.4rem;
+		color: #443e3e;
+		max-width: 100%; /* Giới hạn chiều rộng */
+		text-align: center;
+		word-wrap: break-word;
+	}
+
+	.add-to-cart {
+		background-color: #000;
+		color: #fff;
+		border: none;
+		padding: 10px 20px;
+		font-size: 16px;
+		border-radius: 2px;
+		cursor: pointer;
+		width: -webkit-fill-available;
+		transition: transform 0.5s ease;
+	}
+
+		.add-to-cart:hover {
+			transform: scale(0.95); /* Thu nhỏ nút một chút */
+			background-color: black;
+			color: white;
+		}
+
+		.add-to-cart.out-of-order {
+			background-color: gray; /* Màu xám cho trạng thái hết hàng */
+			cursor: not-allowed;
+		}
+	.new-section {
+		background-color: black; /* Màu nền tùy chỉnh */
+		padding: 20px; /* Khoảng cách padding cho toàn bộ khung */
+		color: white;
+	}
+
+	.product-variants-container {
+		background-color: black; /* Màu nền cho khung bên trái */
+		padding: 10px;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.detail-right-contain {
+		background-color: black; /* Màu nền cho khung bên phải */
+		padding: 20px;
+		border-radius: 8px;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	/* Tổng container với border */
+	.product-detail-container {
+		border: 1px solid #ddd;
+		padding: 20px;
+		border-radius: 5px;
+		text-align: center; /* Căn giữa nội dung */
+		background-color: #fff;
+		box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Thêm hiệu ứng đổ bóng */
+	}
+
+	/* Hình ảnh sản phẩm */
+	.product-detail-image img {
+		max-width: 15vw;
+		height: auto;
+		margin: 0 auto;
+		display: block;
+		border-radius: 5px; /* Làm mềm các góc của hình ảnh */
+	}
+
+	/* Cam kết */
+	.commitment {
+	}
+
+		.commitment img {
+			width: 3.5rem; /* Định kích thước icon */
+			height: 3.5rem;
+		}
+
+		.commitment p {
+			margin-top: 1rem;
+			font-size: 1.2rem;
+			font-weight: 600;
+			color: #333; /* Màu chữ cam kết */
+		}
+
+			.commitment p::after {
+				content: ""; /* Thêm phần tử gạch chân */
+				display: block;
+				width: 25%; /* Chiều dài gạch chân (bằng 50% chiều rộng chữ) */
+				height: 2px; /* Độ dày gạch chân */
+				background-color: #333; /* Màu sắc gạch chân */
+				margin: 0px auto; /* Căn giữa và thêm khoảng cách */
+			}
+
+	/* Chi tiết sản phẩm */
+	.product-detail-text h3 {
+		margin-top: 5rem;
+		font-size: 2rem;
+		font-weight: bold;
+		text-align: left;
+		color: #000; /* Màu tiêu đề */
+	}
+
+	.product-detail-text p {
+		font-size: 1.5rem;
+		color: #555;
+		text-align: left;
+		line-height: 1.6;
+		margin-top: 10px;
+	}
+	
+	.product-detail-text li{
+		color: black;
+		text-align: left;
+		padding-left: 2rem;
+		font-size: 1.3rem;
+	}
+	
+	.product-detail-text li::before {
+		content: "•"; /* Dấu chấm */
+		position: absolute;
+		left: 5rem; /* Đặt dấu chấm ở bên trái */
+		color: #333; /* Màu dấu chấm */
+		font-size: 2rem; /* Kích thước dấu chấm */
+		line-height: 1; /* Đặt chiều cao dòng */
+	}
+
+	.product-details-list {
+		margin-top: 10px;
+		padding-left: 20px; /* Thụt vào danh sách */
+		font-size: 1.3rem;
+		color: #333; /* Màu chữ */
+	}
+
+		.product-details-list li {
+			text-align: left;
+			margin-bottom: 5px; /* Khoảng cách giữa các dòng */
+			list-style: none; /* Ẩn dấu chấm mặc định */
+			position: relative;
+			padding-left: 1.5rem;
+		}
+
+
+	.variant-contain {
+		border-bottom: 1px solid #ccc;
+	}
+
+	.material-contain {
+		font-family: "Arial", sans-serif;
+		border-bottom: 1px solid #ccc;
+		padding-top: 3rem;
+		padding-bottom: 1.5rem;
+		color: white;
+	}
+
+	.material-description {
+		margin-top: 1rem;
+		font-size: 1.3rem;
+		margin-bottom: 1.5rem;
+	}
+
+	.material-contain .content {
+		max-height: 0; /* Nội dung ban đầu ẩn */
+		overflow: hidden; /* Ẩn nội dung tràn */
+		transition: max-height 0.5s ease; /* Hiệu ứng trượt mượt */
+	}
+
+		.material-contain .content.open {
+			max-height: 500px; /* Đặt chiều cao tối đa khi mở (tùy chỉnh theo nội dung) */
+		}
+
+	.material-list {
+		list-style: none; /* Tắt dấu chấm mặc định */
+		padding-left: 20px; /* Khoảng cách lùi trái */
+	}
+
+		.material-list li {
+			margin-bottom: 10px; /* Khoảng cách giữa các mục */
+			position: relative; /* Đặt relative để căn chỉnh */
+			padding-left: 20px; /* Khoảng cách lùi trái cho nội dung */
+			font-size: 1.3rem;
+		}
+
+			.material-list li::before {
+				content: ''; /* Thêm dấu chấm */
+				position: absolute;
+				left: 0;
+				top: 50%;
+				transform: translateY(-50%);
+				width: 8px; /* Kích thước dấu chấm */
+				height: 8px;
+				background-color: white; /* Màu của dấu chấm */
+				border-radius: 50%; /* Làm tròn dấu chấm */
+				opacity: 0; /* Ẩn dấu chấm ban đầu */
+				transition: opacity 0.3s ease; /* Hiệu ứng khi xuất hiện */
+			}
+
+	.material-contain .content.open .material-list li::before {
+		opacity: 1; /* Hiển thị dấu chấm khi nội dung được mở */
+	}
+
+
+
+	.shipping-contain {
+		border-bottom: 1px solid #ccc;
+		padding-top: 3rem;
+		padding-bottom: 1.5rem;
+	}
+
+	.payment-contain {
+		border-bottom: 1px solid #ccc;
+		padding-top: 3rem;
+		padding-bottom: 1.5rem;
+	}
+
+	.packaging-contain {
+		border-bottom: 1px solid #ccc;
+		padding-top: 3rem;
+		padding-bottom: 1.5rem;
+	}
+
+
+	.variants-title {
+		font-size: 1.7rem;
+		font-weight: bold;
+		margin-bottom: 10px;
+		padding-right: 20px; /* Tạo không gian cho dấu '+' hoặc '-' */
+	}
+
+	.toggle-icon {
+		font-size: 1.7rem;
+		margin-left: 10px;
+		transition: transform 0.2s ease;
+	}
+
+	.toggle-button.active .toggle-icon {
+		content: '-'; /* Chuyển thành dấu '-' khi được kích hoạt */
+	}
+
+	.variant-slider {
+		display: flex;
+		align-items: center;
+		position: relative;
+		overflow: hidden;
+		max-width: 100%;
+	}
+
+	.variants-list {
+		display: flex;
+		gap: 10px;
+		scroll-behavior: smooth;
+		max-width: calc(4 * 100px); /* Hiển thị 4 biến thể, mỗi biến thể 100px */
+		flex-wrap: nowrap;
+	}
+
+	.variant-image {
+		width: 15vw;
+		height: 35vh;
+		object-fit: cover;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: transform 0.3s ease, box-shadow 0.3s ease;
+	}
+
+	.slider-btn {
+		background: #fff;
+		border: 1px solid #ccc;
+		padding: 5px 10px;
+		cursor: pointer;
+		position: absolute;
+		top: 50%;
+		transform: translateY(-50%);
+		z-index: 1;
+	}
+
+		.slider-btn.prev {
+			left: 10px;
+		}
+
+		.slider-btn.next {
+			right: 10px;
+		}
+
+	.content {
+		max-height: 0; /* Ban đầu ẩn nội dung */
+		overflow: hidden;
+		transition: max-height 0.4s ease; /* Tạo hiệu ứng trượt */
+		max-width: 55rem;
+	}
+
+		.content.open {
+			max-height: 500px; /* Điều chỉnh chiều cao tối đa để nội dung trượt xuống */
+		}
+
+	.toggle-button {
+		cursor: pointer;
+		font-weight: bold;
+		margin-bottom: 10px;
+	}
+
+	.shipping-table {
+		width: 100%;
+		border-collapse: collapse;
+		margin: 20px 0;
+		font-size: 16px;
+		text-align: left;
+	}
+
+		.shipping-table th, .shipping-table td {
+			border: 1px solid #ddd;
+			padding: 12px;
+			vertical-align: middle;
+		}
+
+		.shipping-table th {
+			background-color: #f4f4f4;
+			font-weight: bold;
+			color: black;
+		}
+
+		.shipping-table td small {
+			font-size: 14px;
+			color: #ccc;
+		}
+
+	.payment-grid {
+		display: flex;
+		gap: 8rem; /* khoảng cách giữa 2 cột */
+		font-size: 1.3rem;
+		padding-left: 2.5rem;
+	}
+
+		.payment-grid ul {
+			list-style-type: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		.payment-grid li {
+			margin-bottom: 1.1rem; /* khoảng cách giữa các mục trong cột */
+			position: relative;
+			padding-left: 3rem;
+		}
+
+			.payment-grid li::before {
+				content: '';
+				position: absolute;
+				left: 0;
+				top: 50%;
+				transform: translateY(-50%);
+				width: 23px; /* Kích thước hình ảnh */
+				height: 14px;
+				background-image: url('https://www.gucci.com/_ui/responsive/common/20250211062345/images/sprite-hd-standard.png'); /* Thay link này bằng đường dẫn ảnh của bạn */
+				background-repeat: no-repeat;
+				background-size: 531px 510px; /* Tùy chỉnh kích thước tổng của sprite */
+			}
+
+	.visa::before {
+		background-position: -327px -433px;
+	}
+
+	.master::before {
+		background-position: -252px -433px;
+	}
+
+	.apple-pay::before {
+		background-position: -469px -420px;
+	}
+
+	.amazon-pay::before {
+		background-position: -469px -404px;
+	}
+
+	.amex::before {
+		background-position: -409px -407px;
+	}
+
+	.paypal::before {
+		background-position: -277px -433px;
+	}
+
+	.discover::before {
+		background-position: -152px -433px;
+	}
+
+	.jcb::before {
+		background-position: -202px -433px;
+	}
+
+	.gift-images {
+		display: flex; /* Dùng flexbox để bố trí các hình ảnh */
+		justify-content: space-between; /* Tạo khoảng cách đều giữa các hình */
+		align-items: center; /* Căn giữa theo chiều dọc nếu cần */
+		padding-top: 3.5rem;
+	}
+
+		.gift-images img {
+			width: 50%; /* Mỗi hình chiếm 50% chiều rộng */
+			height: auto; /* Giữ nguyên tỷ lệ hình ảnh */
+			padding-right: 5px;
+			object-fit: cover; /* Tùy chỉnh cắt hình nếu cần */
+			border-radius: 2px; /* Thêm bo góc (tùy chọn) */
+		}
+
+	.gift-content{
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		text-align: center;
+		padding-top: 3rem;
+	}
+
+
+</style>
+
+<div style="font-family: Arial, sans-serif;">
+	<div class="detail-container">
 		<div class="product-details">
 			<!--product-details-->
-			<div class="col-sm-5">
-				<div class="view-product">
-					<img src="~/media/products/@Model.ProductDetails.Image" alt="" />
+			<div class="col-sm-6">
+				<div class="view-productPrimary">
+					<img src="~/media/products/@Model.ProductDetails.Image2" alt="" />
 					@* <h3>ZOOM</h3> *@
 				</div>
-				<div id="similar-product" class="carousel slide" data-ride="carousel">
+				@* <div id="similar-product" class="carousel slide" data-ride="carousel">
 
 					<!-- Wrapper for slides -->
 					<div class="carousel-inner">
@@ -37,7 +605,7 @@
 							<a href=""><img src="images/product-details/similar3.jpg" alt=""></a>
 						</div>
 
-					</div>
+					</div> *@
 
 					<!-- Controls -->
 					@* <a class="left item-control" href="#similar-product" data-slide="prev">
@@ -46,10 +614,83 @@
 					<a class="right item-control" href="#similar-product" data-slide="next">
 						<i class="fa fa-angle-right"></i>
 					</a> *@
-				</div>
+				@*</div>*@
 
 			</div>
-			<div class="col-sm-7">
+
+			<div class="product-table-wrapper">
+				<div class="product-container">
+					<div class="productNameAndPriceContainer">
+						<h1 class="product-name">
+							@Model.ProductDetails.Name
+						</h1> <!-- Tên túi -->
+						<p class="product-price">$@Model.ProductDetails.Price.ToString("#,0")</p> <!-- Giá tiền -->
+						@if (Model.Variations != null && Model.Variations.Any())
+						{
+							var firstVariation = Model.Variations.First();
+							<div class="product-variation-section">
+								<!-- Hiển thị variation đầu tiên -->
+								<p class="product-variations dropdown-toggle">
+									Variations: <span id="current-variation">@firstVariation.Material.Name - @firstVariation.Color.Name</span>
+								</p>
+
+								<!-- Dropdown danh sách các variation -->
+								<div class="variation-dropdown" style="display: none;">
+									@foreach (var variation in Model.Variations)
+									{
+										<div class="variation-option"
+											 data-variation_id="@variation.Id"
+											 data-material="@variation.Material.Name"
+											 data-color="@variation.Color.Name"
+											 data-stock="@variation.Stock">
+											@variation.Material.Name - @variation.Color.Name
+											(@(variation.Stock > 0 ? "Available" : "Out of Order"))
+										</div>
+									}
+								</div>
+
+								<!-- Thông tin chi tiết -->
+								<p class="product-availability">
+									Availability: <span id="current-availability">@((firstVariation.Stock > 0) ? "Available" : "Out of Order")</span>
+								</p>
+								<p class="product-delivery-info">Enjoy complimentary delivery or Collect In Store</p>
+
+								<!-- Nút Add to Cart -->
+								@if (firstVariation.Stock > 0)
+								{
+									<button class="add-to-cart" id="add-to-cart-button" data-product_id="@Model.ProductDetails.Id" data-variation_id="@firstVariation.Id">
+										ADD TO SHOPPING BAG
+									</button>
+								}
+								else
+								{
+									<button class="add-to-cart out-of-order" disabled>
+										OUT OF ORDER
+									</button>
+								}
+							</div>
+						}
+						else
+						{
+							<p class="product-variations">No variations available</p>
+							<p class="product-availability">Out of Order</p>
+							<p class="product-delivery-info">Enjoy complimentary delivery or Collect In Store</p>
+						}
+
+
+					</div>
+				</div>
+			</div>
+
+
+			<div class="col-sm-6">
+				<div class="view-productSecondary">
+					<img src="~/media/products/@Model.ProductDetails.Image" alt="" />
+					@* <h3>ZOOM</h3> *@
+				</div>
+			</div>
+
+			@* <div class="col-sm-6">
 				<div class="product-information">
 					<h2>@Model.ProductDetails.Name</h2>
 					<p>Product ID: @Model.ProductDetails.Id</p>
@@ -103,10 +744,203 @@
 
 				</div>
 
+			 *@
 			</div>
-		</div><!--/product-details-->
+		</div>
+		<!--/product-variants-->
 
-		<div class="category-tab shop-details-tab">
+	<div class="new-section">
+		<div class="container-fluid">
+			<div class="col-sm-8 product-variants-container">
+					<!-- Nội dung cho khung 8 cột -->
+					<div class="variant-contain">
+					<h3 class="variants-title">VARIATIONS (@(Model.Variations?.Count() ?? 0))</h3>
+					<div class="variant-slider">
+@* 						<button class="slider-btn prev" aria-label="Previous">&lt;</button>
+ *@						<div class="variants-list">
+							@foreach (var variation in Model.Variations)
+							{
+								<img src="~/media/variations/@variation.ImageUrl" alt="Variant @variation.Id" class="variant-image" />
+							}
+						</div>
+@* 						<button class="slider-btn next" aria-label="Next">&gt;</button>
+ *@					</div>
+					</div>
+				<div class="material-contain">
+					<h3 class="variants-title toggle-button">MATERIALS AND CARE<span class="toggle-icon">+</span></h3>
+					<div class="content">
+						<p class="material-description">
+							Merdi products are made with carefully selected materials. Please handle with care for longer product life.
+						</p>
+						<ul class="material-list">
+							<li>Protect from direct light, heat and rain. Should it become wet, dry it immediately with a soft cloth</li>
+							<li>Fill the bag with tissue paper to help maintain its shape and absorb humidity, and store in the provided flannel bag</li>
+							<li>Do not carry heavy products that may affect the shape of the bag</li>
+							<li>Clean with a soft, dry cloth</li>
+						</ul>
+					</div>
+				</div>
+			
+				<div class="shipping-contain">
+					<h3 class="variants-title toggle-button">SHIPPING & RETURNS INFO<span class="toggle-icon">+</span></h3>
+					<div class="content">
+						<div style="font-size:1.3rem; padding-top:3.5rem">
+						<p>Shipping</p>
+						<p style="padding: 1rem 0rem 1.5rem 0rem">
+							A signature will be required upon delivery.
+						</p>
+						<p>
+							Pre-order, Made to Order items will ship on the estimated date noted on the product description page. These items will ship through Premium Express once they become available.
+						</p>
+						</div>
+
+
+						<div style="font-size:1.3rem; padding-top:5rem">
+							<p>Returns</p>
+							<p>Returns may be made by mail or in store. You may return items by selecting"Return this Item" from your MY GUCCI account under order details, through your delivery confirmation email or by contacting a Client Advisor. Once the request has been approved, your prepaid shipping label will be emailed to you or will be available for download in your MY GUCCI account.</p>
+							<p style="padding-top: 1.5rem">For Collect-In-Store order, we offer a 30 day return/exchange window in-store or by contacting Client Services. The return window starts on the day when your item was made available for collection.</p>
+							<p>Items must remain in their original condition with all labels attached and intact. Please note, Made to Order and personalized items are not returnable.</p>
+							<p style="padding-top: 1.5rem">Additional information is available during the checkout process or on the FAQs Section.</p>
+						</div>
+						
+
+						<div style="font-size:1.3rem; padding-top:5rem">
+							<table class="shipping-table">
+								<thead>
+									<tr>
+										<th>Shipping Service</th>
+										<th>Shipping Fee</th>
+										<th>Delivery Estimate</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>Premium Express (Continental U.S.)</td>
+										<td>Free</td>
+										<td>
+											2-3 business days.<br>
+											<small>Note that nail polish will ship ground due to shipping restrictions.</small>
+										</td>
+									</tr>
+									<tr>
+										<td>Premium Express (Alaska, Hawaii, Puerto Rico)</td>
+										<td>Free</td>
+										<td>4-5 business days.</td>
+									</tr>
+									<tr>
+										<td>Next Business Day</td>
+										<td>$25</td>
+										<td>
+											Order by 4pm EST on a business day.<br>
+											Delivery between 9am - 8pm, Monday to Friday.
+										</td>
+									</tr>
+									<tr>
+										<td>Collect In-Store</td>
+										<td>Free</td>
+										<td>
+											1-2 business days.<br>
+											<small>Store Collection Period: 14 days.</small>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			
+				<div class="payment-contain">
+					<h3 class="variants-title toggle-button">PAYMENT OPTIONS<span class="toggle-icon">+</span></h3>
+					<div class="content">
+						<div style="padding-top: 3.5rem">
+							<p style="font-size: 1.3rem; padding-bottom:1.5rem">
+								Merdi accepts the following forms of payment for online purchases:
+							</p>
+
+							<div class="payment-grid">
+								<ul>
+									<li class="visa">Visa</li>
+									<li class="master">MasterCard</li>
+									<li class="apple-pay">Apple Pay</li>
+									<li class="amazon-pay">Amazon Pay</li>
+								</ul>
+								<ul>
+									<li class="amex">American Express</li>
+									<li class="paypal">Paypal</li>
+									<li class="discover">Discover</li>
+									<li class="jcb">JCB</li>
+								</ul>
+							</div>
+
+							<div style="padding-top:1.5rem; font-size:1.3rem">
+								<p>New: Shop on Gucci.com with monthly payments.</p>
+								<p style="padding-top:5rem">PayPal may not be used to purchase Made to Order Décor or DIY items.</p>
+								<p style="padding-top:3rem">The full transaction value will be charged to your credit card after we have verified your card details, received credit authorisation, confirmed availability and prepared your order for shipping. For Made To Order, DIY, personalised and selected Décor products, payment will be taken at the time the order is placed.</p>
+							</div>
+						</div>
+					</div>
+				</div>
+				
+				<div class="packaging-contain">
+					<h3 class="variants-title toggle-button">MERDI PACKAGING<span class="toggle-icon">+</span></h3>
+					<div class="content">
+						<div class="gift-images">
+							<img src="https://media.gucci.com/content/WrappingPdp_Standard_528x398/1713444326/WrappingPdp_Packaging-Gucci-Ancora-Apr2024-05_001_Default.jpg" alt="Gift Image 1">
+							<img src="https://media.gucci.com/content/WrappingPdp_Standard_528x398/1713444327/WrappingPdp_Packaging-Gucci-Ancora-Apr2024-07_001_Default.jpg" alt="Gift Image 2">
+						</div>
+
+						<div class="gift-content">
+							<p style="font-size:1.7rem">SIGNATURE PACKAGING</p>
+							<p style="font-size:1.3rem">
+								The House’s signature packaging in Rosso Ancora red. At checkout, personalize your order by selecting one of our distinct packaging options. Please note, images are representative.
+							</p>
+						</div>
+					</div>
+				</div>
+				
+			</div>
+			<div class="col-sm-4 detail-right-contain">
+					<!-- Nội dung cho khung 4 cột -->
+				<div class="product-detail-container">
+					<!-- Hình ảnh sản phẩm -->
+					@if (Model.Variations != null && Model.Variations.Any())
+					{
+						var firstVariation = Model.Variations.First();
+						<div class="product-detail-image">
+							<img src="~/media/variations/@firstVariation.ImageUrl" alt="Variant @firstVariation.Id" class="variant-image" />
+						</div>
+
+						<!-- Cam kết -->
+						<div class="commitment">
+							<img src="~/images/worldwide.png" alt="Globe Icon" />
+							<p>Our Commitment</p>
+						</div>
+
+						<!-- Chi tiết sản phẩm -->
+						<div class="product-detail-text">
+							<h3>PRODUCT DETAILS</h3>
+							<p>
+								@Html.Raw(Model.ProductDetails.Description)
+							</p>
+						</div>
+					}
+					else
+					{
+						
+					}
+					
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+
+
+
+		@* <div class="category-tab shop-details-tab">
 			<!--category-tab-->
 			<div class="col-sm-12">
 				<ul class="nav nav-tabs">
@@ -148,8 +982,8 @@
 				</div>
 
 			</div>
-		</div><!--/category-tab-->
-		<div class="recommended_items">
+		</div> *@<!--/category-tab-->
+		@* <div class="recommended_items">
 			<h2 class="title text-center">Related Products</h2>
 
 			<div id="recommended-item-carousel" class="carousel slide" data-ride="carousel">
@@ -200,7 +1034,7 @@
 							}
 						</div>
 					}
-				</div>
+				</div>	
 
 				@if (@ViewBag.RelatedProducts.Count > 3)
 				{
@@ -213,38 +1047,82 @@
 				}
 			</div>
 		</div>
+ *@
 
-
-	</div>
+@* 	</div>
+ *@
 </div>
 @section Scripts {
 	<script>
-		$(document).ready(function () {
+							$(document).ready(function () {
 			let selectedVariationId = null;
 
-			$('.select-variation').click(function () {
-				if ($(this).hasClass("disabled")) {
-					Swal.fire("This variation is out of order.");
+			// Mặc định chọn variant đầu tiên
+			const setDefaultVariation = function () {
+				const firstOption = $('.variation-option').first();
+				if (firstOption.length > 0) {
+					let material = firstOption.data("material");
+					let color = firstOption.data("color");
+					let stock = firstOption.data("stock");
+
+					selectedVariationId = firstOption.data("variation_id");
+
+					$('#current-variation').text(`${material} - ${color}`);
+					$('#current-availability').text(stock > 0 ? "Available" : "Out of Order");
+
+					// Cập nhật trạng thái nút Add to Cart
+					let addToCartButton = $('#add-to-cart-button');
+					if (stock > 0) {
+						addToCartButton.prop('disabled', false).removeClass('out-of-order');
+					} else {
+						addToCartButton.prop('disabled', true).addClass('out-of-order');
+					}
+
+					addToCartButton.data('variation_id', selectedVariationId);
+				}
+			};
+
+			// Gọi hàm setDefaultVariation để chọn mặc định variant đầu tiên
+			setDefaultVariation();
+
+			// Khi nhấn vào product-variations để mở dropdown
+			$('.product-variations').click(function () {
+				$('.variation-dropdown').toggle();
+			});
+
+			// Khi chọn một variation từ dropdown
+			$('.variation-option').click(function () {
+				let material = $(this).data("material");
+				let color = $(this).data("color");
+				let stock = $(this).data("stock");
+
+				if (stock <= 0) {
+					// Hiển thị thông báo nếu hết hàng
+					Swal.fire("This variation is out of stock.");
 					return;
 				}
 
+				// Cập nhật thông tin variation đã chọn
 				selectedVariationId = $(this).data("variation_id");
+				$('#current-variation').text(`${material} - ${color}`);
+				$('#current-availability').text(stock > 0 ? "Available" : "Out of Order");
 
-				// Highlight variation đã chọn
-				$('.select-variation').removeClass("btn-primary").addClass("btn-default");
-				$(this).removeClass("btn-default").addClass("btn-primary");
+				// Cập nhật trạng thái nút Add to Cart
+				let addToCartButton = $('#add-to-cart-button');
+				addToCartButton.prop('disabled', false).removeClass('out-of-order');
+				addToCartButton.data('variation_id', selectedVariationId);
 
-				Swal.fire("Selected variation: " + selectedVariationId);
+				// Ẩn dropdown
+				$('.variation-dropdown').hide();
 			});
 
-			$('.add-to-cart').click(function () {
-				var productId = $(this).data("product_id");
-
+			// Xử lý thêm vào giỏ hàng
+			$('#add-to-cart-button').click(function () {
+				let productId = $(this).data("product_id");
 				if (!selectedVariationId) {
 					Swal.fire("Please select a variation before adding to cart.");
 					return;
 				}
-
 				$.ajax({
 					type: "POST",
 					url: "@Url.Action("Add", "Cart")",
@@ -261,8 +1139,81 @@
 					}
 				});
 			});
+
+			// Hiển thị thông báo khi nhấn vào nút OUT OF ORDER
+			$('.add-to-cart.out-of-order').click(function () {
+				Swal.fire("This item is out of stock.");
+			});
+
+			// Ẩn dropdown nếu click ra ngoài
+			$(document).click(function (e) {
+				if (!$(e.target).closest('.product-variation-section').length) {
+					$('.variation-dropdown').hide();
+				}
+			});
 		});
 
+
+
+		// ------------------- VARIANTS ------------------------
+
+					document.querySelectorAll(".toggle-button").forEach((button) => {
+			button.addEventListener("click", () => {
+				const content = button.nextElementSibling;
+
+				if (content.classList.contains("open")) {
+					// Đóng nội dung bằng cách giảm max-height về 0
+					content.style.maxHeight = null;
+					content.classList.remove("open");
+				} else {
+					// Đóng tất cả các phần khác nếu muốn
+					document.querySelectorAll(".content.open").forEach((openContent) => {
+						openContent.style.maxHeight = null;
+						openContent.classList.remove("open");
+					});
+
+					// Mở phần nội dung hiện tại
+					content.style.maxHeight = content.scrollHeight + "px";
+					content.classList.add("open");
+				}
+			});
+		});
+
+		// ------------ PLUS/ MINUS ----------------
+				// Lấy tất cả các tiêu đề có class 'toggle-button'
+		const toggleButtons = document.querySelectorAll('.toggle-button');
+
+		// Gắn sự kiện click cho từng tiêu đề
+		toggleButtons.forEach(button => {
+		  button.addEventListener('click', () => {
+			// Chuyển đổi class 'active' cho tiêu đề hiện tại
+			button.classList.toggle('active');
+
+			// Thay đổi dấu '+' thành '-' và ngược lại
+			const icon = button.querySelector('.toggle-icon');
+			if (icon.textContent === '+') {
+			  icon.textContent = '-';
+			} else {
+			  icon.textContent = '+';
+			}
+		  });
+		});
+
+		// ----------------- scrollLeft/Right --------------
+				document.addEventListener("DOMContentLoaded", function () {
+			const slider = document.querySelector(".variants-list");
+			const prevButton = document.querySelector(".slider-btn.prev");
+			const nextButton = document.querySelector(".slider-btn.next");
+			const scrollAmount = slider.querySelector(".variant-image").offsetWidth + 10; // Kích thước + khoảng cách giữa các ảnh
+
+			prevButton.addEventListener("click", function () {
+				slider.scrollLeft -= scrollAmount * 4; // Lùi lại 4 biến thể
+			});
+
+			nextButton.addEventListener("click", function () {
+				slider.scrollLeft += scrollAmount * 4; // Tiến tới 4 biến thể
+			});
+		});
 
 	</script>
 }
