@@ -231,6 +231,7 @@ namespace E_commerce.Controllers
             TempData["success"] = "Compare removed successfully";
             return RedirectToAction("Compare","Home");
         }
+
         public async Task<IActionResult> DeleteWishlist(int Id)
         {
             WishlistModel wishlist = await _datacontext.Wishlists.FindAsync(Id);
@@ -238,6 +239,7 @@ namespace E_commerce.Controllers
             await _datacontext.SaveChangesAsync();
             TempData["success"] = "Wishlist removed successfully";
             return RedirectToAction("Wishlist","Home");
+
         }
 		[HttpPost]
 		public async Task<IActionResult> DeleteWishlist2(int Id)

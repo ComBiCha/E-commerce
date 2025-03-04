@@ -14,5 +14,7 @@ namespace E_commerce.Models.ViewModel
 		public string Name { get; set; }
 		[Required(ErrorMessage = "Email is required")]
 		public string Email { get; set; }
-	}
+
+    }
+
 }
