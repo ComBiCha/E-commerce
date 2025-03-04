@@ -11,5 +11,7 @@ namespace E_commerce.Models
         public string Email { get; set; }
         [DataType(DataType.Password),Required(ErrorMessage = "Please Type Your Password")]
         public string Password { get; set; }
+        [Required]
+        public string PhoneNumber { get; set; }
     }
 }

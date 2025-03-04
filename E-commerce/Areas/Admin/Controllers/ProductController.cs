@@ -447,25 +447,35 @@ namespace E_commerce.Areas.Admin.Controllers
         }
 
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> StoreProductQuantity(ProductQuantityModel productQuantityModel)
-        {
-            var variation = await _dataContext.Variations.FindAsync(productQuantityModel.VariationId);
-            if (variation == null)
-            {
-                return NotFound();
-            }
+		[HttpPost]
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> StoreProductQuantity(ProductQuantityModel productQuantityModel)
+		{
+			var variation = await _dataContext.Variations
+				.Include(v => v.Product) // Load thông tin sản phẩm liên quan
+				.FirstOrDefaultAsync(v => v.Id == productQuantityModel.VariationId);
 
-            variation.Stock += productQuantityModel.Quantity;
-            productQuantityModel.DateCreated = DateTime.Now;
-            _dataContext.ProductQuantities.Add(productQuantityModel);
+			if (variation == null || variation.Product == null)
+			{
+				return NotFound();
+			}
 
-            await _dataContext.SaveChangesAsync();
+			// Cộng vào Stock của Variation
+			variation.Stock += productQuantityModel.Quantity;
 
-            TempData["success"] = "Quantity added successfully";
-            return RedirectToAction("Details", new { Id = variation.ProductId });
-        }
+			// Cộng vào tổng số lượng của Product
+			variation.Product.Quantity += productQuantityModel.Quantity;
 
-    }
+			// Lưu thông tin ProductQuantity
+			productQuantityModel.DateCreated = DateTime.Now;
+			_dataContext.ProductQuantities.Add(productQuantityModel);
+
+			await _dataContext.SaveChangesAsync();
+
+			TempData["success"] = "Quantity added successfully";
+			return RedirectToAction("Details", new { Id = variation.ProductId });
+		}
+
+
+	}
 }

@@ -233,6 +233,51 @@
 	<script src="~/js/main.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.all.min.js"></script>
 	<script src="//cdn.datatables.net/2.1.7/js/dataTables.min.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"></script>
+
+
+
+
+@* <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+  import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyDrGTcPGZT3XhPNDOcxC5J5J3ztDh8EcLk",
+    authDomain: "ecommerce-fa6f0.firebaseapp.com",
+    projectId: "ecommerce-fa6f0",
+    storageBucket: "ecommerce-fa6f0.firebasestorage.app",
+    messagingSenderId: "980699721921",
+    appId: "1:980699721921:web:f84678c6c5d24797c86440",
+    measurementId: "G-TWXZ166DYE"
+  };
+
+  // Khởi tạo Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+	window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+		'size': 'invisible',
+		'callback': (response) => {
+			console.log("reCAPTCHA verified!");
+		}
+	});
+
+  // Gán Firebase vào window để dùng trong các script khác
+  window.firebaseApp = app;
+  window.firebaseAuth = auth;
+  window.signInWithPhoneNumber = signInWithPhoneNumber;
+
+  console.log("Firebase đã khởi tạo!", window.firebaseApp);
+</script> *@
+
+
+
+
+
+
+
 
 	<script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
 	<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.dataTables.js"></script>

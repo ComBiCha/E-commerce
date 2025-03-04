@@ -1,11 +1,11 @@
-
-﻿using E_commerce.Areas.Admin.Repository;
+using E_commerce.Areas.Admin.Repository;
 using E_commerce.Models;
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Stripe;
 using System.Security.Claims;
 
 namespace E_commerce.Controllers
@@ -17,13 +17,13 @@ namespace E_commerce.Controllers
 		public readonly DataContext _dataContext;
 		public readonly IEmailSender _emailSender;
 
-		public AccountController(SignInManager<AppUserModel> signInManager, UserManager<AppUserModel> userManager, DataContext dataContext, IEmailSender emailSender)
+        public AccountController(SignInManager<AppUserModel> signInManager, UserManager<AppUserModel> userManager, DataContext dataContext, IEmailSender emailSender)
 		{
 			_signInManager = signInManager;
 			_userManager = userManager;
 			_dataContext = dataContext;
 			_emailSender = emailSender;
-		}
+        }
 
 		public IActionResult Login(string returnUrl)
 		{
@@ -145,51 +145,119 @@ namespace E_commerce.Controllers
 			return View();
 		}
 
+		[HttpPost]
+		public async Task<IActionResult> Create(UserModel user)
+		{
+			if (ModelState.IsValid)
+			{
+				// Kiểm tra xem Email đã tồn tại chưa
+				var existingEmail = await _userManager.FindByEmailAsync(user.Email);
+				if (existingEmail != null)
+				{
+					ModelState.AddModelError("Email", "Email này đã được sử dụng.");
+					return View(user);
+				}
+
+				// Kiểm tra xem số điện thoại đã tồn tại chưa
+				var existingPhone = await _userManager.Users.FirstOrDefaultAsync(u => u.PhoneNumber == user.PhoneNumber);
+				if (existingPhone != null)
+				{
+					ModelState.AddModelError("PhoneNumber", "Số điện thoại này đã được sử dụng.");
+					return View(user);
+				}
+
+				// Tạo user mới
+				AppUserModel newUser = new AppUserModel
+				{
+					UserName = user.UserName,
+					Email = user.Email,
+					PhoneNumber = user.PhoneNumber,
+/*					Address = user.Address*/
+				};
+
+				IdentityResult result = await _userManager.CreateAsync(newUser, user.Password);
+
+				if (result.Succeeded)
+				{
+					var addToRoleResult = await _userManager.AddToRoleAsync(newUser, "User");
+
+					if (addToRoleResult.Succeeded)
+					{
+						TempData["success"] = "Account created successfully";
+						return RedirectToAction("Login", "Account");
+					}
+					else
+					{
+						foreach (IdentityError error in addToRoleResult.Errors)
+						{
+							ModelState.AddModelError("", error.Description);
+						}
+					}
+				}
+				else
+				{
+					foreach (IdentityError error in result.Errors)
+					{
+						ModelState.AddModelError("", error.Description);
+					}
+				}
+			}
+
+			return View(user);
+		}
+
         [HttpPost]
-        public async Task<IActionResult> Create(UserModel user)
+        public async Task<IActionResult> VerifyEmail()
         {
-            if (ModelState.IsValid)
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                AppUserModel newUser = new AppUserModel
-                {
-                    UserName = user.UserName,
-                    Email = user.Email
-                };
-
-                IdentityResult result = await _userManager.CreateAsync(newUser, user.Password);
-
-                if (result.Succeeded)
-                {
-                    // Assign the default role "User" to the newly created account
-                    var addToRoleResult = await _userManager.AddToRoleAsync(newUser, "User");
-
-                    if (addToRoleResult.Succeeded)
-                    {
-                        TempData["success"] = "Account created successfully";
-                        return RedirectToAction("Login", "Account");
-                    }
-                    else
-                    {
-                        // Handle any errors that occurred while adding the user to the role
-                        foreach (IdentityError error in addToRoleResult.Errors)
-                        {
-                            ModelState.AddModelError("", error.Description);
-                        }
-                    }
-                }
-                else
-                {
-                    // Handle errors during account creation
-                    foreach (IdentityError error in result.Errors)
-                    {
-                        ModelState.AddModelError("", error.Description);
-                    }
-                }
+                return RedirectToAction("Portal");
             }
 
-            return View(user);
+            if (user.EmailConfirmed)
+            {
+                TempData["success"] = "Email Verified.";
+                return RedirectToAction("Portal");
+            }
+
+            var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = Url.Action("ConfirmEmail", "Account", new { userId = user.Id, token = token }, Request.Scheme);
+
+            // Gửi email xác thực
+            await _emailSender.SendEmailAsync(user.Email, "Verify Email",
+                $"Please verify your email by <a href='{callbackUrl}'>Click here</a>.");
+
+            TempData["success"] = "Email verification is sent.";
+            return RedirectToAction("Portal");
         }
 
+        [HttpGet]
+        public async Task<IActionResult> ConfirmEmail(string userId, string token)
+        {
+            if (userId == null || token == null)
+            {
+                return RedirectToAction("Portal");
+            }
+
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return RedirectToAction("Portal");
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, token);
+            if (result.Succeeded)
+            {
+                TempData["success"] = "Email is successfully verified!";
+            }
+            else
+            {
+                TempData["error"] = "Error in verify email!";
+            }
+
+            return RedirectToAction("Portal");
+        }
 
         public async Task<IActionResult> Logout(string returnUrl = "/")
 		{
@@ -369,6 +437,7 @@ namespace E_commerce.Controllers
                     if (orderDetail.Variation.Product != null)
                     {
                         orderDetail.Variation.Product.Sold -= orderDetail.Quantity; // Giảm số lượng đã bán
+                        orderDetail.Variation.Product.Quantity += orderDetail.Quantity;
                         if (orderDetail.Variation.Product.Sold < 0)
                         {
                             orderDetail.Variation.Product.Sold = 0; // Đảm bảo không bị số âm
@@ -380,8 +449,36 @@ namespace E_commerce.Controllers
                 }
             }
 
-            // Cập nhật trạng thái đơn hàng thành "Đã hủy"
-            order.Status = 6;
+			// **Gọi API Stripe để hoàn tiền**
+			if (!string.IsNullOrEmpty(order.PaymentIntentId))
+			{
+				try
+				{
+					var refundOptions = new RefundCreateOptions
+					{
+						PaymentIntent = order.PaymentIntentId,
+						Reason = "requested_by_customer"
+					};
+					var refundService = new RefundService();
+					var refund = await refundService.CreateAsync(refundOptions);
+
+					if (refund.Status == "succeeded")
+					{
+						TempData["success"] = "Order has been canceled and refund processed successfully.";
+					}
+					else
+					{
+						TempData["error"] = "Order canceled, but refund processing failed.";
+					}
+				}
+				catch (Exception ex)
+				{
+					TempData["error"] = "Error processing refund: " + ex.Message;
+				}
+			}
+
+			// Cập nhật trạng thái đơn hàng thành "Đã hủy"
+			order.Status = 6;
             _dataContext.Orders.Update(order);
 
             // Lưu thay đổi vào database

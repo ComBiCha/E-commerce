@@ -1,9 +1,10 @@
-using E_commerce.Models;
+﻿using E_commerce.Models;
 using E_commerce.Repository;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Security.Claims;
 
 namespace E_commerce.Controllers
 {
@@ -26,7 +27,7 @@ namespace E_commerce.Controllers
             var products = _datacontext.Products.Include("Category").Include("Brand").ToList();
             var sliders = _datacontext.Sliders.Where(s => s.Status == 1).ToList();
 
-            // L?y danh s�ch c�c brand c�ng v?i s? l??ng s?n ph?m t??ng ?ng
+            // L?y danh sách các brand cùng v?i s? l??ng s?n ph?m t??ng ?ng
             var brandCounts = _datacontext.Brands
                 .Select(b => new
                 {
@@ -45,18 +46,18 @@ namespace E_commerce.Controllers
 
         public async Task<IActionResult> Index(int page = 1)
         {
-            int pageSize = 9;  // S? l??ng s?n ph?m tr�n m?i trang
+            int pageSize = 9;  // S? l??ng s?n ph?m trên m?i trang
             int totalProducts = await _datacontext.Products.CountAsync();  // T?ng s? s?n ph?m
             var products = await _datacontext.Products
                 .Include("Category")
                 .Include("Brand")
-                .Skip((page - 1) * pageSize)  // B? qua c�c s?n ph?m c?a c�c trang tr??c
+                .Skip((page - 1) * pageSize)  // B? qua các s?n ph?m c?a các trang tr??c
                 .Take(pageSize)  // L?y s? l??ng s?n ph?m c?a trang hi?n t?i
                 .ToListAsync();
 
             var sliders = _datacontext.Sliders.Where(s => s.Status == 1).ToList();
 
-            // L?y danh s�ch c�c brand c�ng v?i s? l??ng s?n ph?m t??ng ?ng
+            // L?y danh sách các brand cùng v?i s? l??ng s?n ph?m t??ng ?ng
             var brandCounts = _datacontext.Brands
                 .Select(b => new
                 {
@@ -68,7 +69,7 @@ namespace E_commerce.Controllers
 
             var contact = _datacontext.Contacts.FirstOrDefault();
 
-            // Th�m th�ng tin ph�n trang v�o ViewBag
+            // Thêm thông tin phân trang vào ViewBag
             ViewBag.Page = page;
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
             ViewBag.BrandCounts = brandCounts;
@@ -240,7 +241,25 @@ namespace E_commerce.Controllers
             return RedirectToAction("Wishlist","Home");
 
         }
-        public async Task<IActionResult> Account()
+		[HttpPost]
+		public async Task<IActionResult> DeleteWishlist2(int Id)
+		{
+			var userId = User.FindFirstValue(ClaimTypes.NameIdentifier); // Lấy UserId của người dùng hiện tại
+			var wishlist = await _datacontext.Wishlists
+								.FirstOrDefaultAsync(w => w.UserId == userId && w.ProductId == Id);
+
+			if (wishlist == null)
+			{
+				return Json(new { success = false, message = "Sản phẩm không có trong Wishlist!" });
+			}
+
+			_datacontext.Wishlists.Remove(wishlist);
+			await _datacontext.SaveChangesAsync();
+
+			return Json(new { success = true, message = "Đã xóa khỏi Wishlist!" });
+		}
+
+		public async Task<IActionResult> Account()
         {
             var userId = _userManager.GetUserId(User);
             var user = await _userManager.FindByIdAsync(userId);
