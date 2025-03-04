@@ -937,8 +937,6 @@ h2.title {
 	opacity:;
 }
 
-
-
 .product-overlay .overlay-content {
 	bottom: 0;
 	position: absolute;
@@ -971,35 +969,8 @@ h2.title {
 }
 
 
-
-.add-to-cart {
-	background: #F5F5ED;
-	border: 0 none;
-	border-radius: 0;
-	color: #696763;
-	font-family: 'Roboto', sans-serif;
-	font-size: 15px;
-	margin-bottom: 10px;
-}
-
-	.add-to-cart:hover {
-		background: #FE980F;
-		border: 0 none;
-		border-radius: 0;
-		color: #FFFFFF;
-	}
-
 .add-to {
 	margin-bottom: 10px;
-}
-
-.add-to-cart i {
-	margin-right: 5px;
-}
-
-.add-to-cart:hover {
-	background: #FE980F;
-	color: #FFFFFF;
 }
 
 .choose {
@@ -1175,9 +1146,7 @@ h2.title {
 *******Product Details CSS******
 **************************/
 
-.product-details {
-	overflow: hidden;
-}
+
 
 
 #similar-product {
@@ -1190,36 +1159,6 @@ h2.title {
 	padding-right: 25px;
 }
 
-.product-details {
-	margin-bottom: 40px;
-	overflow: hidden;
-	margin-top: 10px;
-}
-
-
-
-.view-product {
-	position: relative;
-}
-
-	.view-product img {
-		border: 1px solid #F7F7F0;
-		height: 380px;
-		width: 100%;
-	}
-
-	.view-product h3 {
-		background: #FE980F;
-		bottom: 0;
-		color: #FFFFFF;
-		font-family: 'Roboto', sans-serif;
-		font-size: 14px;
-		font-weight: 700;
-		margin-bottom: 0;
-		padding: 8px 20px;
-		position: absolute;
-		right: 0;
-	}
 
 #similar-product .carousel-inner .item {
 	padding-left: 0px;

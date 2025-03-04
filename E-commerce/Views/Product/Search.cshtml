@@ -118,11 +118,102 @@
 		.productinfo {
 		}
 
-			.productinfo img {
-				transition: transform 0.3s;
+		.product-container {
+			position: relative; /* Đặt container làm gốc để định vị tuyệt đối cho product-details */
+			overflow: hidden; /* Đảm bảo phần chi tiết không vượt ra ngoài container */
+		}
+
+		/* Hình ảnh sản phẩm */
+		.product-image {
+			position: relative;
+		}
+			.product-image img {
+			transition: transform 0.8s;
 				width: 100%; /* Đảm bảo hình ảnh luôn full chiều rộng */
+				background-color: #dcdcdc;
 			}
 
+		.primary-image {
+			position: absolute;
+			z-index: 1;
+			opacity: 1;
+			transition: opacity 0.5s ease-in-out; /* Thêm chuyển đổi cho transform và opacity */
+		}
+
+		.secondary-image {
+			z-index: 0;
+			opacity: 0;
+			transition: opacity 0.5s ease-in-out; /* Thêm chuyển đổi cho transform và opacity */
+		}
+
+		.product-container:hover .primary-image {
+			opacity: 0; /* Ẩn ảnh đầu tiên */
+		}
+
+		.product-container:hover .secondary-image {
+			opacity: 1; /* Hiển thị ảnh thứ hai */
+			z-index:1;
+		}
+
+		.product-details {
+			position: absolute; /* Định vị tuyệt đối để che lên các sản phẩm */
+			bottom: 0; /* Đặt ở cạnh dưới của container */
+			left: 0;
+			right: 0;
+			background-color: rgba(255, 255, 255, 0.8); /* Nền mờ nhẹ */
+			padding: 20px;
+			opacity: 0; /* Ban đầu ẩn đi */
+			transform: translateY(100%); /* Dịch xuống ngoài khung nhìn */
+			transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+			z-index: 2; /* Đảm bảo nằm trên hình ảnh và các phần tử khác */
+		}
+
+		.product-name {
+			font-size: 1.6rem;
+			color: black;
+			padding: 0px 0px 20px 0px;
+			font-family: Roboto;
+		}
+
+		.product-price {
+			font-size: 1.7rem;
+			font-weight: 400;
+			color: black;
+			font-family: Roboto;
+		}
+
+		.shop-link {
+			font-family: Roboto;
+			display: inline-block;
+			font-size: 1.3rem;
+			font-weight: 500;
+			color: black;
+			position: relative; /* Để đặt `::after` bên dưới */
+			transition: color 0.3s ease-in-out;
+			text-decoration: none;
+		}
+
+			.shop-link::after {
+				content: ""; /* Thanh underline đen */
+				position: absolute;
+				left: 0;
+				bottom: -2px; /* Đặt ngay dưới chữ */
+				width: 100%; /* Chiều rộng đầy đủ */
+				height: 2px; /* Độ dày underline */
+				background-color: black; /* Màu underline */
+				z-index: 1; /* Hiển thị phía dưới */
+			}
+
+
+		.product-container:hover .product-details {
+			opacity: 1; /* Hiển thị chi tiết */
+			transform: translateY(0); /* Trượt lên */
+		}
+
+		/* Đảm bảo khi hover vào product-details, hình ảnh thứ hai vẫn hiển thị */
+		.product-container:hover .secondary-image {
+			opacity: 1; /* Đảm bảo giữ image2 */
+		}
 	</style>
 	<div class="search-container">
 		<div class="image-header">
@@ -224,10 +315,24 @@
 								<span class="heart-icon @(ViewBag.Wishlist.Contains(item.Id) ? "liked" : "")" data-product-id="@item.Id">
 									<i class="fa fa-heart"></i>
 								</span>
-					</div>
+							</div>
 
 							<div class="productinfo text-center">
-								<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id"><img src="~/media/products/@item.Image" alt="@item.Name" width="100%" /></a>
+								<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id">
+									<div class="product-container">
+										<!-- Hình ảnh sản phẩm -->
+										<div class="product-image">
+											<img class="primary-image" src="~/media/products/@item.Image" alt="@item.Name" width="100%" />
+											<img class="secondary-image" src="~/media/products/@item.Image2" alt="@item.Name" width="100%" />
+										</div>
+										<!-- Chi tiết sản phẩm -->
+										<div class="product-details">
+											<h4 class="product-name">@item.Name</h4>
+											<p class="product-price">$@item.Price.ToString("#,0")</p>
+											<span class="shop-link">SHOP THIS</span>
+										</div>
+									</div>
+								</a>
 								 @* <h2>$@item.Price</h2> 
 								 <p>@item.Name</p> 
 								 <p>Category: @item.Category.Name</p>
