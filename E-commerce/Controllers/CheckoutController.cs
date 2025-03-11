@@ -164,16 +164,32 @@ namespace E_commerce.Controllers
             decimal finalTotal = grandTotal - discountAmount - discountAmount2 + shippingPrice;
 
 			var order = await _datacontext.Orders.FirstOrDefaultAsync(o => o.OrderCode == ordercode);
-			if (order != null)
-			{
-				order.ShippingCost = shippingPrice;
-				order.Address = HttpContext.Session.GetString("ShippingAddress") ?? order.Address;
-				order.UserName = userEmail ?? order.UserName;
-				order.Status = 1; // Cập nhật trạng thái đơn hàng thành "Chờ xác nhận"
-				order.PaymentIntentId = HttpContext.Session.GetString("StripeSessionId") ?? order.PaymentIntentId;
+            if (order != null)
+            {
+                order.ShippingCost = shippingPrice;
+                order.Address = HttpContext.Session.GetString("ShippingAddress") ?? order.Address;
+                order.UserName = userEmail ?? order.UserName;
+                order.Status = 1; // Cập nhật trạng thái đơn hàng thành "Chờ xác nhận"
+                order.PaymentIntentId = HttpContext.Session.GetString("StripeSessionId") ?? order.PaymentIntentId;
 
-				_datacontext.Orders.Update(order);
+                _datacontext.Orders.Update(order);
+                await _datacontext.SaveChangesAsync();
+            }
+            else 
+            {
+				var order1 = new OrderModel
+				{
+					OrderCode = ordercode,
+					ShippingCost = shippingPrice,
+					Address = HttpContext.Session.GetString("ShippingAddress"),
+					UserName = userEmail,
+					Status = 1,
+					CreatedDate = DateTime.Now,
+					PaymentIntentId = HttpContext.Session.GetString("StripeSessionId")
+				};
+				_datacontext.Orders.Add(order1);
 				await _datacontext.SaveChangesAsync();
+
 			}
 
 
