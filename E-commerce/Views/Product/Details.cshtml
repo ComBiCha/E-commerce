@@ -23,6 +23,7 @@
 		margin: 0;
 		padding: 0;
 		background-color: #e7e7e7;
+		min-height:100vh;
 	}
 
 	.view-productPrimary {
@@ -80,7 +81,7 @@
 		transform: translate(-50%, -50%); /* Đảm bảo căn chính giữa */
 		z-index: 3;
 		background-color: rgba(255, 255, 255, 0.8);
-		padding: 20px 20px 0px 20px;
+		padding: 5px 20px 0px 20px;
 		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 		border-radius: 3px;
 		max-width: 350px; /* Giới hạn độ rộng cứng */
@@ -624,10 +625,11 @@
 						<h1 class="product-name">
 							@Model.ProductDetails.Name
 						</h1> <!-- Tên túi -->
-						<p class="product-price">$@Model.ProductDetails.Price.ToString("#,0")</p> <!-- Giá tiền -->
 						@if (Model.Variations != null && Model.Variations.Any())
 						{
+
 							var firstVariation = Model.Variations.First();
+							<p class="product-price" id="product-price">$@firstVariation.Price.ToString("#,0")</p> <!-- Giá tiền -->
 							<div class="product-variation-section">
 								<!-- Hiển thị variation đầu tiên -->
 								<p class="product-variations dropdown-toggle">

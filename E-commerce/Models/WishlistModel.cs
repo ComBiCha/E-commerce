@@ -9,7 +9,7 @@ namespace E_commerce.Models
 		public int Id { get; set; }
 		public long ProductId { get; set; }
 		public string UserId { get; set; }
-		[ForeignKey("ProductId")]
+        [ForeignKey("ProductId")]
 		public ProductModel Product { get; set; }
 	}
 }

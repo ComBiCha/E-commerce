@@ -292,5 +292,96 @@ namespace E_commerce.Controllers
 }
 
 
-	}
+        public async Task<IActionResult> OrderSummaryPartial()
+        {
+            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+
+            var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.UserName == User.Identity.Name);
+            decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
+            string discountStr = HttpContext.Session.GetString("DiscountAmount");
+            decimal discountAmount2 = string.IsNullOrEmpty(discountStr) ? 0 : Convert.ToDecimal(discountStr);
+
+            string couponCode = HttpContext.Session.GetString("CouponCode") ?? "";
+
+            decimal discountRate = user?.GetDiscountRate() ?? 0m;
+            decimal discountAmount = grandTotal * discountRate;
+            var shippingPriceCookie = Request.Cookies["ShippingPrice"];
+            decimal shippingPrice = string.IsNullOrEmpty(shippingPriceCookie) ? 0 : JsonConvert.DeserializeObject<decimal>(shippingPriceCookie);
+            decimal finalTotal = grandTotal - discountAmount - discountAmount2 + shippingPrice;
+
+            CartItemViewModel cartVM = new()
+            {
+                CartItems = cartItems,
+                GrandTotal = grandTotal,
+                ShippingCost = shippingPrice,
+                DiscountAmount = discountAmount,
+                DiscountAmount2 = discountAmount2,
+                CouponCode = couponCode,
+                FinalTotal = finalTotal
+            };
+
+            return PartialView("/Views/Shared/Components/Carts/_OrderSummaryPartial.cshtml", cartVM);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateQuantity([FromBody] UpdateQuantityModel model)
+        {
+            if (model == null)
+            {
+                return Json(new { success = false, error = "Invalid data received!" });
+            }
+
+            Console.WriteLine($"Request: ProductId = {model.ProductId}, VariationId = {model.VariationId}, Quantity = {model.NewQuantity}");
+            List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+            foreach (var item in cart)
+            {
+                Console.WriteLine($"Cart: ProductId = {item.ProductId}, VariationId = {item.VariationId}, Quantity = {item.Quantity}");
+            }
+
+
+            CartItemModel cartItem = cart.FirstOrDefault(c =>
+			c.ProductId == (long)model.ProductId &&
+			c.VariationId == (int)model.VariationId);
+
+
+
+
+            if (cartItem == null)
+            {
+                return Json(new { success = false, error = "Product not found in the cart!" });
+            }
+
+            var variation = await _dataContext.Variations.FirstOrDefaultAsync(v => v.Id == model.VariationId);
+            if (variation == null)
+            {
+                return Json(new { success = false, error = "This product variation does not exist!" });
+            }
+
+            if (model.NewQuantity > variation.Stock)
+            {
+                return Json(new { success = false, error = $"The maximum quantity available for this product is {variation.Stock}." });
+            }
+
+
+
+            cartItem.Quantity = model.NewQuantity;
+            HttpContext.Session.SetJson("Cart", cart);
+
+			decimal newPrice = cartItem.Quantity * cartItem.Price; // Tính giá mới
+            Console.WriteLine($"CartItem NewPrice: {newPrice}");
+
+
+            return Json(new
+            {
+                success = true,
+                newPrice = newPrice
+			});
+        }
+
+
+
+
+
+    }
 }

@@ -112,7 +112,7 @@ a#scrollUp i{
 
 
 .header-middle {
-	background-color: #52511c;
+	background-color: black;
 	position: sticky !important; /* Thanh sẽ dính ở một vị trí cố định */
 	top: 0 !important; /* Cố định ở trên cùng của trang */
 	z-index: 1000; /* Đảm bảo luôn hiển thị trên các phần tử khác */

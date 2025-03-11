@@ -35,36 +35,356 @@
 }
 
 <style>
-    .button-group {
-        display: flex;
-        gap: 10px; /* khoảng cách giữa các nút */
+    .portal-container {
+    background-color: black;
+    position: relative;
+    overflow: hidden;
+    padding: 7rem 0.7rem 15rem 0.7rem;
+    font-family: Arial, Helvetica, sans-serif;
     }
 
-    .action-link-button {
-        display: inline-block;
-        padding: 10px 20px;
-        font-size: 18px;
-        color: white;
-        border-radius: 5px;
-        text-align: center;
-        text-decoration: none;
-        transition: background-color 0.3s;
-        cursor: pointer;
-        border: none;
+    .portal-banner-image {
+    position: relative;
+    width: 100%;
+    height: auto;
+    overflow: visible;
     }
+
+    .portal-banner-image img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    display: block;
+    }
+
+    .portal-banner-image .overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.1); /* Lớp overlay đen với độ mờ */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 2.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    z-index: 2;
+    }
+
+    .portal-banner-image h1 {
+    margin: 0;
+    padding: 0;
+    font-size: 4.6rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+    font-family: Arial, Helvetica, sans-serif;
+    transform: translateY(5rem);
+    }
+
+    .quad {
+    bottom: -24px;
+    height: 48px;
+    left: calc(50%);
+    position: absolute;
+    z-index: 3;
+    }
+
+
+    .quad:before,
+    .quad:after {
+    content: "";
+    position: absolute;
+    display: block;
+    border: 24px solid transparent;
+    }
+
+    .quad:before {
+    border-bottom-color: #b1b1b1; /* Màu tam giác phía trên */
+    top: 0;
+    left: 0;
+    transform: translate(-50%, -50%);
+    }
+
+    .quad:after {
+    border-top-color: #8b8989; /* Màu tam giác phía dưới */
+    bottom: 0;
+    left: 0;
+    transform: translate(-50%, 50%);
+    }
+
+    .quad .logo {
+    position: relative;
+    top: 1rem;
+    z-index: 4;
+    margin-left: -1.45rem;
+    width: 3rem; /* Đặt kích thước của hình ảnh */
+    height: 3rem;
+    object-fit: contain;
+    }
+
+    .quad .logo:before {
+    content: "";
+    }
+
+    .portal-title-choose{
+    position: relative;
+    padding: 2rem;
+    margin-bottom: 5rem;
+    margin-top: 5rem;
+    }
+
+    .tab-container {
+    display: flex;
+    justify-content: space-between; /* Chia đều khoảng cách giữa các hình */
+    gap: 1rem; /* Khoảng cách giữa các mục */
+    flex-wrap: nowrap; /* Không gộp xuống dòng, nếu muốn hỗ trợ responsive thì dùng wrap */
+    }
+
+    .tab-item {
+    text-decoration: none;
+    color: #fff;
+    flex: 1; /* Đảm bảo mỗi hình chiếm đều không gian */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    transform: scale(1);
+    transition: transform 3s all;
+    }
+
+    .tab-content {
+    position: relative;
+    width: 30vw; /* Chiều rộng theo yêu cầu */
+    height: 35vh; /* Chiều cao theo yêu cầu */
+    }
+
+    .tab-content img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Đảm bảo hình không bị méo */
+    object-position:center 50%;
+    border-radius: 8px; /* Tạo góc bo tròn */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-content span {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%);
+    font-size: 2.3rem;
+    font-weight: bold;
+    /* background: rgba(0, 0, 0, 0.5); */
+    color: #fff;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-align: center;
+    width: 80%;
+    text-transform: uppercase;
+    }
+
+    .tab-item:hover {
+    transform: scale(0.95);
+    }
+
+    .tab-main-content {
+    font-family: Arial, sans-serif;
+    padding: 2rem;
+    background-color: #757272;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-image: url('https://media.gucci.com/content/DiaryArticleDouble_Standard_2800x1788/1734516911/DiaryArticleDouble_Gucci-GiftGiving-Dec24-ASE-240720-0022-3044_001_Default.jpg'); /* Đường dẫn đến hình ảnh */
+        background-size: cover; /* Đảm bảo hình nền phủ toàn bộ khối */
+        background-position: center; /* Căn giữa hình nền */
+        background-repeat: no-repeat;
+    }
+
+    .tab-main-content h2 {
+    font-size: 2rem;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    }
+
+    .tab-main-content p {
+    font-size: 1.4rem;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    }
+
+    .tab-main-content .text-danger {
+    color: #d9534f;
+    font-weight: bold;
+    }
+
+    .tab-main-content form {
+    margin-top: 1rem;
+    }
+
+    .tab-main-content .btn {
+    padding: 0.5rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    }
+
+    .tab-main-content .btn-warning {
+    background-color: #f0ad4e;
+    color: #fff;
+    }
+
+    .tab-main-content .btn-warning:hover {
+    background-color: #ec971f;
+    color: #fff;
+    }
+
+    .tab-main-content .user-points {
+    margin-top: 2rem;
+    background-color: #000000;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .tab-main-content .user-points h3 {
+    font-size: 1.5rem;
+    color: #ffffff;
+    }
+
+    .tab-main-content .progress-bar-container {
+    height: 8px;
+    width: 100%;
+    background-color: #e9ecef;
+    border-radius: 50px;
+    margin-top: 1rem;
+    overflow: hidden;
+    }
+
+    .tab-main-content .progress-bar {
+    height: 100%;
+    border-radius: 50px;
+    transition: width 0.4s ease;
+    }
+
+    .tab-main-content .button-group {
+    margin-top: 2rem;
+    text-align: center;
+    }
+
+    .tab-main-content .action-link-button {
+            margin: 0.5rem;
+            padding: 1rem 2rem;
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: white;
+            text-decoration: none;
+            background: transparent;
+            border: 2px solid white;
+            border-radius: 3px; /* Bo góc */
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease; /* Hiệu ứng hover */
+        }
+
+    .tab-main-content .action-link-button:hover {
+         background-color: white; /* Màu nền khi hover */
+         color: black; /* Màu chữ khi hover */
+         text-decoration: none;
+    }
+
+    .rank-diamond {
+        color: #b9f2ff; /* Xanh nhạt */
+        font-weight: bold;
+    }
+
+    .rank-platinum {
+        color: #e5e4e2; /* Màu bạch kim */
+        font-weight: bold;
+    }
+
+    .rank-gold {
+        color: #ffd700; /* Màu vàng */
+        font-weight: bold;
+    }
+
+    .rank-silver {
+        color: #c9c9c9; /* Màu bạc */
+        font-weight: bold;
+    }
+
+    /* Mặc định */
+    .progress-bar {
+        height: 20px;
+        border-radius: 10px;
+        transition: width 0.3s ease;
+    }
+
+    /* Màu theo rank */
+    .progress-bar-diamond {
+        background-color: #b9f2ff; /* Xanh nhạt */
+        box-shadow: 0 4px 6px rgba(185, 242, 255, 0.5);
+    }
+
+    .progress-bar-platinum {
+        background-color: #e5e4e2; /* Bạch kim */
+        box-shadow: 0 4px 6px rgba(229, 228, 226, 0.5);
+    }
+
+    .progress-bar-gold {
+        background-color: #ffd700; /* Vàng */
+        box-shadow: 0 4px 6px rgba(255, 215, 0, 0.5);
+    }
+
+    .progress-bar-silver {
+        background-color: #808080; /* Màu bạc đậm */
+        box-shadow: 0 4px 6px rgba(128, 128, 128, 0.5);
+    }
+
 
 
 </style>
-<div class="container" style=" margin-top: 5.5rem">
-    <h1>Manage Account</h1>
-
-    <div class="tabs">
-        <button class="tab-button" onclick="openTab(event, 'PersonalInfo')">Thông tin cá nhân</button>
-        <button class="tab-button" onclick="openTab(event, 'Orders')"><a asp-action="PersonalOrder" asp-controller="Account">Lịch sử đơn hàng</a></button>
-        <button class="tab-button" onclick="openTab(event, 'Orders')"><a asp-action="MyWarranties" asp-controller="Account">Lịch sử bảo hành</a></button>
+<div class="portal-container">
+    <div class="portal-banner-image">
+        <img src="https://media.gucci.com/content/HeroShortStandard_1600x327/1739286017/HeroShortStandard_Gucci-SS25-Feb25-Gucci-SS25-Shot3-225-SAFE_001_Default.jpg" alt="cart-banner" />
+        <div class="overlay">
+            <h1>Welcome, @Model.UserName </h1>
+        </div>
+        <div class="quad">
+            <img class="logo" src="~/images/banner-cart-removebg-preview.png" alt="Logo">
+        </div>
     </div>
 
-    <div id="PersonalInfo" class="tab-content">
+    <div class="portal-title-choose">
+        <h1 style="margin-bottom:2rem; color:white">Manage Account</h1>
+
+        <div class="tab-container">
+            <a asp-action="Portal" asp-controller="Account" class="tab-item">
+                <div class="tab-content">
+                    <img src="~/images/AccountLandingRecommendedWishlist_Gucci-SS25-Feb25-4135-HW-GUCCI-24-SAFE_001_Light.png" alt="Thông tin cá nhân" />
+                    <span>Personal Informations</span>
+                </div>
+            </a>
+            <a asp-action="PersonalOrder" asp-controller="Account" class="tab-item">
+                <div class="tab-content">
+                    <img src="~/images/AccountLandingRecommendedWishlist_Gucci-SS25-Feb25-4135-HW-GUCCI-27-SAFE_001_Light.png" alt="Lịch sử đơn hàng" />
+                    <span>Personal Orders</span>
+                </div>
+            </a>
+            <a asp-action="MyWarranties" asp-controller="Account" class="tab-item">
+                <div class="tab-content">
+                    <img src="~/images/embossing-per-video-24-10-20230165-1.png" alt="Lịch sử bảo hành" />
+                    <span>Warranty</span>
+                </div>
+            </a>
+        </div>
+    </div>
+
+
+
+
+    <div id="PersonalInfo" class="tab-main-content">
         <h2>Personal Informations</h2>
         <p>Username: @Model.UserName</p>
         <p>Email: @Model.Email</p>
@@ -78,15 +398,25 @@
         <p>Phone number: @Model.PhoneNumber</p>
         <div class="user-points">
             <h3>Points: @Model.Points</h3>
-            <p>Current Rank: <strong>@rank</strong></p>
+            <p>
+                Current Rank:
+                <strong class="rank-@rank.ToLower()">@rank</strong>
+            </p>
             @if (rank != "Diamond")
             {
-                <p>Need <strong>@(nextRankPoints - points) Points</strong> To rank-up <strong>@(rank == "Platinum" ? "Diamond" : (rank == "Gold" ? "Platinum" : (rank == "Silver" ? "Gold" : "Silver")))</strong></p>
+                <p>
+                    Need <strong>@(nextRankPoints - points) Points</strong>
+                    To rank-up
+                    <strong class="rank-@(rank == "Platinum" ? "diamond" : (rank == "Gold" ? "platinum" : (rank == "Silver" ? "gold" : "silver")))">
+                        @(rank == "Platinum" ? "Diamond" : (rank == "Gold" ? "Platinum" : (rank == "Silver" ? "Gold" : "Silver")))
+                    </strong>
+                </p>
                 <div class="progress-bar-container">
-                    <div class="progress-bar" style="width: @progressToNextRank%;"></div>
+                    <div class="progress-bar progress-bar-@rank.ToLower()" style="width: @progressToNextRank%;"></div>
                 </div>
             }
         </div>
+
         <div class="button-group">
             @Html.ActionLink("Chỉnh sửa thông tin", "EditPersonal", new { id = Model.Id }, new { @class = "btn btn-primary action-link-button" })
             @*@Html.ActionLink("Đăng xuất", "SignOut", "Login", new { @class = "btn btn-danger action-link-button" })*@
@@ -135,7 +465,6 @@
 
     .progress-bar {
         height: 100%;
-        background-color: #28a745;
         text-align: center;
         color: white;
         line-height: 20px;
