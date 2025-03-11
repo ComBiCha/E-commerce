@@ -219,7 +219,7 @@ namespace E_commerce.Controllers
 			var wishlist_product = await (from w in _datacontext.Wishlists
 										 join p in _datacontext.Products on w.ProductId equals p.Id
 										 join u in _datacontext.Users on w.UserId equals u.Id
-										 select new { User = u, Product = p, Wishlists = w }).ToListAsync();
+                                          select new { User = u, Product = p, Wishlists = w }).ToListAsync();
 
 			return View(wishlist_product);
 		}

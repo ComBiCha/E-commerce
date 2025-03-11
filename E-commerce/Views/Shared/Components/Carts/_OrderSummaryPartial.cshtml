@@ -1,0 +1,79 @@
+﻿@using E_commerce.Models.ViewModel
+@model CartItemViewModel
+
+<div class="cart-info-container">
+    <h5 class="mb-3 cart-info-title">ORDER SUMMARY</h5>
+    <div class="cart-info-information">
+        <div class="d-flex justify-content-between mb-4">
+            <span>Subtotal</span>
+            <span>$@Model.GrandTotal.ToString("N0")</span>
+        </div>
+        @if (string.IsNullOrEmpty(Model.CouponCode))
+        {
+            <form asp-controller="Cart" asp-action="ApplyCoupon" method="post" style="padding-bottom:1.8rem">
+                <input type="text" name="couponCode" placeholder="Enter Coupon Code" required />
+                <button type="submit">Apply</button>
+            </form>
+        }
+        else
+        {
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem">
+                <span>
+                    Discount Coupon: <span style="color: white;background-color: #6969ef;padding: 0.2rem 0.2rem;font-size: 1.45rem;">@Model.CouponCode</span>
+                </span>
+                <span>- $@Model.DiscountAmount2.ToString("N0")</span>
+            </div>
+        }
+
+        <div class="d-flex justify-content-between mb-4">
+            <span>Discount (@((Model.GrandTotal > 0) ? (Model.DiscountAmount / Model.GrandTotal * 100) : 0)%):</span>
+            <span>- $@Model.DiscountAmount.ToString("N0")</span>
+        </div>
+        <div class="d-flex justify-content-between mb-4">
+            <span>Shipping</span>
+            <span>$@Model.ShippingCost.ToString("N0")</span>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between fw-bold">
+            <span>Estimated Total</span>
+            <span>$@Model.FinalTotal.ToString("N0")</span>
+        </div>
+    </div>
+    <hr>
+    <div>
+        <p class="mb-4 mt-5 view-details" style="font-size:1.5rem; font-weight:bolder;">
+            VIEW DETAILS
+            <span class="view-details-icon">+</span>
+        </p>
+        <p style="font-size:1.4rem;">
+            You will be charged at the time of shipment. If this is a personalized or made-to-order purchase, you will be charged at the time of purchase.
+        </p>
+        <form asp-controller="Checkout" asp-action="Checkout" method="post" enctype="multipart/form-data">
+            <h5>Select Payment Method</h5>
+            <label>
+                <input type="radio" name="paymentMethod" value="stripe" checked /> Pay with Stripe
+            </label>
+            <label>
+                <input type="radio" name="paymentMethod" value="cod" /> Pay with Cash on Delivery (COD)
+            </label>
+            <br />
+
+
+            @if (User.Identity?.IsAuthenticated ?? false)
+            {
+                @if (Model.ShippingCost <= 0)
+                {
+                    <button type="submit" class="custom-button" style="cursor:pointer" disabled>Checkout</button>
+                    <p style="color: #d93b3b; text-align: center; font-size: 1.3rem; font-weight: 600; margin-top: 2rem;">
+                        Please enter your shipping information first!
+                    </p>
+                }
+                else
+                {
+                    <button type="submit" class="custom-button">Checkout</button>
+                }
+            }
+        </form>
+    </div>
+
+</div>

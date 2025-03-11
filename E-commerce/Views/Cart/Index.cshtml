@@ -1,21 +1,131 @@
 ﻿@using E_commerce.Models.ViewModel
 @model CartItemViewModel
-
 @{
     int i = 0;
 }
 
-<section id="cart_items">
-    <div class="container">
-        <div class="breadcrumbs">
-            <ol class="breadcrumb">
-                <li><a href="#">Home</a></li>
-                <li class="active">Shopping Cart</li>
-            </ol>
-        </div>
-        <div class="table-responsive cart_info">
+<div class="cart-container" style="background-color:white; font-family: Arial, Helvetica, sans-serif">
+		<div class="cart-banner-image">
+			<img src="https://media.gucci.com/content/HeroShortStandard_1600x327/1739286017/HeroShortStandard_Gucci-SS25-Feb25-Gucci-SS25-Shot3-225-SAFE_001_Default.jpg" alt="cart-banner" />
+			<div class="overlay">
+				<h1>SHOPPING BAG</h1>
+			</div>
+			<div class="quad">
+				<img class="logo" src="~/images/banner-cart-removebg-preview.png" alt="Logo">
+			</div>
+		</div>
+
+	<div class="container my-4">
+		<div class="row">
+			<!-- Left Section: Your Selections -->
+			<div class="col-sm-8">
+				<h5 class="cart-info-title">YOUR SELECTIONS</h5>
+				@if (Model != null && Model.CartItems != null && Model.CartItems.Count > 0)
+				{
+						@foreach (var item in Model.CartItems)
+						{
+							i++;
+						<div class="d-flex align-items-center mb-3 cart-item-container">
+							<img src="~/media/variations/@item.Variation.ImageUrl" alt="Product" class="img-fluid" style="max-width: 25rem;">
+							<div class="ms-3">
+								<h6 class="text-muted cart-title">@item.ProductName</h6>
+								<p class="text-muted mb-1 cart-style">Style# @item.Variation.Material.Name - @item.Variation.Color.Name</p>
+								<p class="text-muted mb-1 cart-variation">Variation: @item.Variation.Color.Name - @item.Variation.Material.Name</p>
+								<div class="d-flex align-items-center cart-status-container">
+									<p class="mb-0 me-2 cart-status">AVAILABLE</p>
+									<span class="cart-divider"></span>
+									<a class="mb-0 me-2 cart-remove btn btn-danger btn-sm" asp-controller="Cart" asp-action="Remove" asp-route-Id="@item.ProductId">Remove</a>
+								</div>
+							</div>
+
+							<select class="form-select form-select-sm w-auto cart-quantity"
+									data-product-id="@item.ProductId"
+									data-variation-id="@item.VariationId"
+							@(string.IsNullOrEmpty(Model.CouponCode) ? "" : "disabled")>
+								@for (int qty = 1; qty <= Math.Min(20, item.Variation.Stock); qty++)
+								{
+									if (qty == item.Quantity)
+									{
+										<option value="@qty" selected>@qty</option>
+									}
+									else
+									{
+										<option value="@qty">@qty</option>
+									}
+								}
+							</select>
+
+
+							<div class="ms-auto">
+								<p class="text-muted cart-price">$@((item.Quantity * item.Price).ToString("N0"))</p>
+							</div>
+
+
+						</div>
+						}
+				}
+				else
+				{
+					<tr>
+						<td colspan="7"><h4>Your Cart is Empty</h4></td>
+					</tr>
+				}
+				
+			</div>
+
+			<!-- Right Section: Combined Container -->
+			<div class="col-sm-4">
+				<div class="cart-info-wrapper">
+
+					<!-- New Container -->
+					<div class="cart-info-container mt-4">
+						<h5 class="mb-3 cart-info-title">SHIPPING INFORMATION</h5>
+						<table class="table table-condensed">
+							<tr>
+								<div class="form-group">
+									<label>Choose City</label>
+									<select class="css_select" id="tinh" name="tinh" title="Chọn Tỉnh Thành">
+										<option value="0">Tỉnh Thành</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label>Choose District</label>
+									<select class="css_select" id="quan" name="quan" title="Chọn Quận Huyện">
+										<option value="0">Quận Huyện</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label>Choose Sub-district</label>
+									<select class="css_select" id="phuong" name="phuong" title="Chọn Phường Xã">
+										<option value="0">Phường Xã</option>
+									</select>
+								</div>
+								<div class="form-group">
+									<label for="detailAddress">Detailed Address:</label>
+									<textarea name="detailAddress" id="detailAddress" title="detailAddress" rows="3" required></textarea>
+								</div>
+								<button style="margin-bottom:10px" type="button" class="btn btn-add-shipping">Submit</button>
+							</tr>
+						</table>
+					</div>
+
+					<!-- Original Order Summary -->
+					<div id="order-summary">
+						@await Html.PartialAsync("/Views/Shared/Components/Carts/_OrderSummaryPartial.cshtml", Model)
+
+					</div>
+
+					
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+	@*  <div class="cart_info">
             <table class="table table-condensed">
-                <thead>
+                 <thead>
                     <tr class="cart_menu">
                         <td class="name" style="width: 5%;">#</td>
                         <td class="name" style="width: 25%;">Product Name</td>
@@ -56,8 +166,9 @@
 									<p class="cart_total_price">$@((item.Quantity * item.Price).ToString("0.00"))</p>
 								</td>
 							</tr>
-						}
-						<tr>
+						} *@
+
+						@* <tr>
 							<td colspan="5"></td>
 							<td colspan="2" class="text-right">
 								<form asp-controller="Cart" asp-action="ApplyCoupon" method="post">
@@ -125,8 +236,8 @@
 								}
 							</td>
 						</tr>
-					}
-					else
+					} *@
+					@* else
 					{
 						<tr>
 							<td colspan="7"><h4>Your Cart is Empty</h4></td>
@@ -135,12 +246,290 @@
 
                 </tbody>
             </table>
-        </div>
-    </div>
-</section>
+        </div>  *@
+</div>
 
 
 <style>
+
+	.cart-container{
+		position: relative;
+		overflow: hidden;
+		padding: 70px 7px 150px 7px;
+	}
+
+	.cart-banner-image {
+		position: relative;
+		width: 100%;
+		height: auto;
+		overflow: visible;
+	}
+
+		.cart-banner-image img {
+			width: 100%;
+			height: auto;
+			object-fit: cover;
+			display: block;
+		}
+
+		.cart-banner-image .overlay {
+			position: absolute;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: rgba(0, 0, 0, 0.1); /* Lớp overlay đen với độ mờ */
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			color: white;
+			font-size: 2.5rem;
+			font-weight: bold;
+			text-transform: uppercase;
+			z-index: 2;
+		}
+
+		.cart-banner-image h1 {
+			margin: 0;
+			padding: 0;
+			font-size: 4.6rem;
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.6);
+			font-family:Arial, Helvetica, sans-serif;
+			transform: translateY(5rem);
+		}
+
+	.quad {
+		bottom: -24px;
+		height: 48px;
+		left: calc(50%);
+		position: absolute;
+		z-index: 3;
+	}
+
+
+		.quad:before,
+		.quad:after {
+			content: "";
+			position: absolute;
+			display: block;
+			border: 24px solid transparent;
+		}
+
+		.quad:before {
+			border-bottom-color: black; /* Màu tam giác phía trên */
+			top: 0;
+			left: 0;
+			transform: translate(-50%, -50%);
+		}
+
+		.quad:after {
+			border-top-color: black; /* Màu tam giác phía dưới */
+			bottom: 0;
+			left: 0;
+			transform: translate(-50%, 50%);
+		}
+
+		.quad .logo {
+			position: relative;
+			top: 1rem;
+			z-index: 4;
+			margin-left: -1.45rem;
+			width: 3rem; /* Đặt kích thước của hình ảnh */
+			height: 3rem;
+			object-fit: contain;
+		}
+
+		.quad .logo:before{
+				content: "";
+			}
+
+	.container{
+		margin-top: 4.5rem !important;
+	}
+
+	.cart-item-container{
+		border-bottom: 1px solid #ccc;
+	}
+
+			.cart-info-title{
+				font-size: 1.8rem;
+				padding-bottom:1rem;
+				border-bottom: 1px solid #ccc;
+				text-transform: uppercase;
+			}
+
+			.cart-title{
+				font-size: 1.8rem;
+			}
+
+			.cart-style{
+				font-size: 1.3rem;
+			}
+	.cart-variation{
+		font-size: 1.3rem;
+	}
+
+	.cart-status{
+		font-size: 1.3rem;
+		padding-top: 3rem;
+	}
+
+	/* Container status + button */
+	.cart-status-container {
+		display: flex;
+		align-items: center; /* Căn giữa theo chiều dọc */
+		gap: 10px; /* Khoảng cách giữa text và nút */
+	}
+
+	.cart-divider {
+		display: inline-block;
+		width: 0.1rem; /* Độ dày của thanh */
+		height: 1.6rem; /* Chiều cao của thanh */
+		background-color: black; /* Màu sắc thanh gạch */
+		margin-top: 3rem;
+	}
+
+	/* Style cho nút Remove */
+	.cart-remove {
+		background-color: transparent; /* Nền trong suốt */
+		border: none; /* Không có viền */
+		color: #d9534f; /* Màu chữ đỏ */
+		font-size: 1.3rem; /* Cỡ chữ */
+		font-weight: bold; /* Chữ đậm */
+		text-transform: uppercase; /* Viết hoa chữ */
+		cursor: pointer; /* Con trỏ dạng tay khi hover */
+		transition: all 0.3s ease; /* Hiệu ứng mượt mà */
+		margin-top: 3rem;
+	}
+
+		.cart-remove:hover {
+			background-color: transparent;
+			color: #a94442; /* Đổi sang màu đỏ đậm hơn khi hover */
+			text-decoration: underline; /* Gạch chân chữ khi hover */
+		}
+
+	/* Làm cho dropdown to hơn */
+	.cart-quantity {
+		font-size: 1.25rem; /* Tăng kích thước chữ */
+		height: 45px; /* Tăng chiều cao của dropdown */
+		padding: 5px 30px 5px 10px; /* Khoảng cách bên trong */
+		border-radius: 2px; /* Bo góc dropdown */
+		border: 1px solid #ccc; /* Viền mảnh */
+	}
+
+	/* Làm giá to hơn */
+	.cart-price {
+		font-size: 1.8rem; /* Tăng kích thước chữ */
+		margin-top: -6.5rem;
+		margin-right: 2rem;
+	}
+
+	.cart-info-wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem; /* Khoảng cách giữa hai khung */
+	}
+
+	.cart-info-container {
+		position: relative;
+		border: 1px solid #ddd;
+		padding: 2rem;
+		border-radius: 8px;
+		background-color: #f9f9f9;
+	}
+
+	.form-group label{
+		display: inline-block;
+		font-size: 1.5rem;
+		font-weight: 400;
+		font-family: Arial;
+		color: black;
+	}
+
+	.form-group select{
+		word-wrap: normal;
+		font-size: 1.4rem;
+		background-color: #dedede;
+		color: black;
+	}
+
+	.form-group textarea {
+		word-wrap: normal;
+		font-size: 1.4rem;
+		background-color: #dedede;
+		color: black;
+		resize: none;
+	}
+
+	.btn-add-shipping{
+		background-color: black;
+		color: white;
+		border: none;
+		padding: 10px 20px;
+		font-size: 1.3rem;
+		border-radius: 3px;
+		width: 100%;
+		cursor: pointer;
+		transition: transform 0.3s ease;
+		transform: scale(1);
+		text-transform: uppercase;
+	}
+
+		.btn-add-shipping:hover {
+			background-color: black;
+			color:white;
+			transform: scale(0.95);
+	}
+
+	.cart-info-information{
+		font-size: 1.5rem;
+	}
+
+
+	.view-details {
+		display: flex;
+		justify-content: space-between; /* Đẩy nội dung VIEW DETAILS và dấu cộng ra hai đầu */
+		align-items: center; /* Căn giữa theo chiều dọc */
+		margin: 0;
+		cursor: pointer; /* Thêm hiệu ứng tay trỏ khi hover */
+	}
+
+	.view-details-icon {
+		font-size: 2.3rem; /* Cùng kích thước chữ với VIEW DETAILS */
+		transition: transform 0.2s ease; /* Hiệu ứng khi mở/đóng */
+	}
+
+	.view-shorts {
+		display: flex;
+		justify-content: space-between; /* Đẩy nội dung In Stock và giá ra hai đầu */
+		align-items: center; /* Căn giữa theo chiều dọc */
+		margin: 0;
+	}
+
+	.view-shorts-price {
+		font-size: 1.4rem; /* Cùng kích thước chữ với VIEW DETAILS */
+		cursor: pointer; /* Thêm hiệu ứng tay trỏ khi hover */
+		transition: transform 0.2s ease;
+	}
+
+	.custom-button {
+		margin-top: 2rem;
+		background-color: black;
+		color: white;
+		border: none;
+		padding: 10px 20px;
+		font-size: 1.3rem;
+		border-radius: 3px;
+		width: 100%;
+		cursor: pointer;
+		transition: transform 0.3s ease;
+		transform:scale(1);
+	}
+
+		.custom-button:hover {
+			transform: scale(0.95);
+		}
+
 	.text-right {
 		text-align: right;
 	}
@@ -148,9 +537,69 @@
 	.btn-sm {
 		margin-left: 10px;
 	}
+
 </style>
 
 @section Scripts {
+	<script>
+					document.querySelectorAll('.cart-quantity').forEach(select => {
+			select.addEventListener('change', function () {
+				console.log("Quantity change event triggered");
+
+				const productId = this.getAttribute('data-product-id');
+				const variationId = this.getAttribute('data-variation-id');
+				const quantity = this.value;
+
+				console.log("ProductId:", productId, "VariationId:", variationId, "Quantity:", quantity);
+
+				fetch(`/Cart/UpdateQuantity`, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						productId: parseInt(productId, 10),
+						variationId: parseInt(variationId, 10),
+						newQuantity: parseInt(quantity, 10)
+					}),
+				})
+				.then(response => {
+					console.log("Response status:", response.status, response.statusText);
+					return response.json();
+				})
+				.then(data => {
+					console.log("Response data:", data);
+
+					if (data.success) {
+						// Update price and totals on the UI
+						const cartItemContainer = this.closest('.cart-item-container');
+						const priceElement = cartItemContainer.querySelector('.cart-price');
+						priceElement.textContent = `$${data.newPrice.toFixed(2)}`;
+
+						// Reload the partial view for the order summary
+						const orderSummaryContainer = document.getElementById('order-summary');
+							fetch(`/Cart/OrderSummaryPartial`)
+								.then(response => response.text())
+								.then(html => {
+									orderSummaryContainer.innerHTML = html; // Thay thế nội dung HTML cũ
+									console.log("Order summary updated successfully.");
+								})
+								.catch(error => console.error("Error loading partial view:", error));
+
+					} else {
+						console.error("Server error:", data.error);
+						alert(data.error || 'Unable to update quantity.');
+					}
+				})
+				.catch(error => {
+					console.error("Fetch error:", error);
+				});
+			});
+		});
+
+
+	</script>
+
 	<script>
 		$(".btn-add-shipping").click(function () {
 			var tinh = $("#tinh").find('option:selected').text();
@@ -174,6 +623,21 @@
 				});
 			}
 		})
+	</script>
+	<script>
+				document.querySelector('.view-details').addEventListener('click', function () {
+		  const viewShorts = document.querySelector('.view-shorts');
+		  const detailsIcon = document.querySelector('.view-details-icon');
+
+		  if (viewShorts.style.display === 'none' || viewShorts.style.display === '') {
+			viewShorts.style.display = 'flex'; // Hiển thị dòng In Stock
+			detailsIcon.textContent = '-'; // Đổi dấu cộng thành dấu trừ
+		  } else {
+			viewShorts.style.display = 'none'; // Ẩn dòng In Stock
+			detailsIcon.textContent = '+'; // Đổi dấu trừ lại thành dấu cộng
+		  }
+		});
+
 	</script>
 	<script>
 		$(document).ready(function() {

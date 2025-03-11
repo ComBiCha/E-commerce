@@ -4,88 +4,99 @@
     ViewData["Title"] = "My Warranties";
 }
 
-<h2>My Warranty Requests</h2>
-<div>
-    <label for="statusFilter">Filter by Status:</label>
-    <select id="statusFilter" class="form-select" style="width: 200px;">
-        <option value="">All</option>
-        <option value="Đợi duyệt">Đợi duyệt</option>
-        <option value="Đã duyệt">Đã duyệt</option>
-        <option value="Đã tiếp nhận sản phẩm lỗi">Đã tiếp nhận sản phẩm lỗi</option>
-        <option value="Đã khắc phục">Đã khắc phục</option>
-        <option value="Đã hoàn thành">Đã hoàn thành</option>
-        <option value="Bị từ chối">Bị từ chối</option>
-        <option value="Đã bị huỷ">Đã bị huỷ</option>
-    </select>
-</div>
-<table class="table" id="WarrantyTable">
-    <thead>
-        <tr>
-            <th>Warranty Code</th>
-            <th>Product Name</th>
-            <th>Reason</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div class="my-warranties-container">
+    <h2>My Warranty Requests</h2>
+    <div>
+        <label for="statusFilter">Filter by Status:</label>
+        <select id="statusFilter" class="form-select" style="width: 200px;">
+            <option value="">All</option>
+            <option value="Đợi duyệt">Đợi duyệt</option>
+            <option value="Đã duyệt">Đã duyệt</option>
+            <option value="Đã tiếp nhận sản phẩm lỗi">Đã tiếp nhận sản phẩm lỗi</option>
+            <option value="Đã khắc phục">Đã khắc phục</option>
+            <option value="Đã hoàn thành">Đã hoàn thành</option>
+            <option value="Bị từ chối">Bị từ chối</option>
+            <option value="Đã bị huỷ">Đã bị huỷ</option>
+        </select>
+    </div>
+    <table class="table" id="WarrantyTable">
+        <thead>
             <tr>
-                <td>
-                    @item.Warranty.WarrantyCode
-                </td>
-                <td>
-                    @item.Warranty.Product.Name
-                </td>
-                <td>
-                    @item.Reason
-                </td>
-                <td>
-                    @if (item.Status == 0)
-                    {
-                        <span class="badge bg-warning">Đợi duyệt</span>
-                    }
-                    else if (item.Status == 1)
-                    {
-                        <span class="badge bg-success">Đã duyệt</span>
-                    }
-                    else if (item.Status == 2)
-                    {
-                        <span class="badge bg-info">Đã tiếp nhận sản phẩm lỗi</span>
-                    }
-                    else if (item.Status == 3)
-                    {
-                        <span class="badge bg-primary">Đã khắc phục</span>
-                    }
-                    else if (item.Status == 4)
-                    {
-                        <span class="badge bg-dark">Đã hoàn thành</span>
-                    }
-                    else if (item.Status == 5)
-                    {
-                        <span class="badge bg-danger">Bị từ chối</span>
-                    }
-                    else if (item.Status == 6)
-                    {
-                        <span class="badge bg-danger">Đã bị huỷ</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="WarrantyDetails" asp-controller="Account" asp-route-id="@item.Id" class="btn btn-info btn-sm">View Details</a>
-                    @if (item.Status == 0)
-                    {
-                        <a asp-action="CancelWarranty" asp-controller="Account" asp-route-id="@item.Id" class="btn btn-danger btn-sm confirmDeletion">Cancel Warranty</a>
-                    }
-                    else if (item.Status == 1)
-                    {
-                        <a asp-action="CancelWarranty" asp-controller="Account" asp-route-id="@item.Id" class="btn btn-danger btn-sm confirmDeletion">Cancel Warranty</a>
-                    }
-                </td>
+                <th>Warranty Code</th>
+                <th>Product Name</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Action</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @item.Warranty.WarrantyCode
+                    </td>
+                    <td>
+                        @item.Warranty.Product.Name
+                    </td>
+                    <td>
+                        @item.Reason
+                    </td>
+                    <td>
+                        @if (item.Status == 0)
+                        {
+                            <span class="badge bg-warning">Đợi duyệt</span>
+                        }
+                        else if (item.Status == 1)
+                        {
+                            <span class="badge bg-success">Đã duyệt</span>
+                        }
+                        else if (item.Status == 2)
+                        {
+                            <span class="badge bg-info">Đã tiếp nhận sản phẩm lỗi</span>
+                        }
+                        else if (item.Status == 3)
+                        {
+                            <span class="badge bg-primary">Đã khắc phục</span>
+                        }
+                        else if (item.Status == 4)
+                        {
+                            <span class="badge bg-dark">Đã hoàn thành</span>
+                        }
+                        else if (item.Status == 5)
+                        {
+                            <span class="badge bg-danger">Bị từ chối</span>
+                        }
+                        else if (item.Status == 6)
+                        {
+                            <span class="badge bg-danger">Đã bị huỷ</span>
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="WarrantyDetails" asp-controller="Account" asp-route-id="@item.Id" class="btn btn-info btn-sm">View Details</a>
+                        @if (item.Status == 0)
+                        {
+                            <a asp-action="CancelWarranty" asp-controller="Account" asp-route-id="@item.Id" class="btn btn-danger btn-sm confirmDeletion">Cancel Warranty</a>
+                        }
+                        else if (item.Status == 1)
+                        {
+                            <a asp-action="CancelWarranty" asp-controller="Account" asp-route-id="@item.Id" class="btn btn-danger btn-sm confirmDeletion">Cancel Warranty</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<style>
+.my-warranties-container{
+        position: relative;
+        clear: both;
+        background: white;
+        padding: 8rem 2rem 15rem 2rem;
+}    
+</style>
 @section Scripts {
     <script>
         $(document).ready(function () {

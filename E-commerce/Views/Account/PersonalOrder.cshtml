@@ -5,92 +5,104 @@
     int i = 0;
 }
 
-<div>
-    <label for="statusFilter">Filter by Status:</label>
-    <select id="statusFilter" class="form-select" style="width: 200px;">
-        <option value="">All</option>
-        <option value="đơn hàng mới">Đơn hàng mới</option>
-        <option value="đơn hàng đã xác nhận">Đơn hàng đã xác nhận</option>
-        <option value="Đã giao cho đơn vị vận chuyển">Đã giao cho đơn vị vận chuyển</option>
-        <option value="Hàng đã giao tới nơi">Hàng đã giao tới nơi</option>
-        <option value="Đơn hàng đã hoàn thành">Đơn hàng đã hoàn thành</option>
-        <option value="Đơn hàng đã bị huỷ">Đơn hàng đã bị hủy</option>
-    </select>
-</div>
-<div class="row mb-3">
-    <div class="col-md-3">
-        <label for="startDate">Start Date:</label>
-        <input type="date" id="startDate" class="form-control">
+<div class="personal-order-container">
+    <div>
+        <label style="font-size:1.5rem" for="statusFilter">Filter by Status:</label>
+        <select id="statusFilter" class="form-select" style="width: 200px; font-size:1.4rem">
+            <option value="">All</option>
+            <option value="đơn hàng mới">Đơn hàng mới</option>
+            <option value="đơn hàng đã xác nhận">Đơn hàng đã xác nhận</option>
+            <option value="Đã giao cho đơn vị vận chuyển">Đã giao cho đơn vị vận chuyển</option>
+            <option value="Hàng đã giao tới nơi">Hàng đã giao tới nơi</option>
+            <option value="Đơn hàng đã hoàn thành">Đơn hàng đã hoàn thành</option>
+            <option value="Đơn hàng đã bị huỷ">Đơn hàng đã bị hủy</option>
+        </select>
     </div>
-    <div class="col-md-3">
-        <label for="endDate">End Date:</label>
-        <input type="date" id="endDate" class="form-control">
+    <div class="row mb-3 mt-3" style="font-size:1.5rem">
+        <div class="col-md-3">
+            <label for="startDate">Start Date:</label>
+            <input type="date" id="startDate" class="form-control" style="font-size:1.4rem">
+        </div>
+        <div class="col-md-3">
+            <label for="endDate">End Date:</label>
+            <input type="date" id="endDate" class="form-control" style="font-size:1.4rem">
+        </div>
     </div>
-</div>
-<table class="table" id="OrderTable">
-    <thead>
-        <tr>
-            <th>#</th>
-            <th>Order Code</th>
-            <th>Day Order</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-            i = i + 1;
+    <table class="table" id="OrderTable">
+        <thead>
             <tr>
+                <th>#</th>
+                <th>Order Code</th>
+                <th>Day Order</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+    @foreach (var item in Model) {
+                i = i + 1;
+                <tr>
+                    <td>
+                        @i
+                    </td>
                 <td>
-                    @i
+                    @Html.DisplayFor(modelItem => item.OrderCode)
                 </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.OrderCode)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedDate)
-            </td>
-            <td>
-                    @if (@item.Status == 1)
-                    {
-                        <span class="text text-primary">đơn hàng mới</span>
-                    }
-                    else if (@item.Status == 2)
-                    {
-                        <span class="text text-danger">đơn hàng đã xác nhận</span>
-                    }
-                    else if (@item.Status == 3)
-                    {
-                        <span class="text text-warning">Đã giao cho đơn vị vận chuyển</span>
-                    }
-                    else if (@item.Status == 4)
-                    {
-                        <span class="text text-dark">Hàng đã giao tới nơi</span>
-                    }
-                    else if (@item.Status == 5)
-                    {
-                        <span class="text text-success">Đơn hàng đã hoàn thành</span>
-                    }
-                    else if (@item.Status == 6)
-                    {
-                        <span class="text text-danger">Đơn hàng đã bị huỷ</span>
-                    }
-            </td>
-            <td>
-                <a asp-action="ViewOrder" class="btn btn-warning btn-sm" asp-controller="Account" asp-route-OrderCode="@item.OrderCode">View Order</a>
-                    @if (@item.Status == 1)
-                    {
-                        <a asp-action="CancelOrder" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Account" asp-route-OrderCode="@item.OrderCode">Cancel Order</a>
-                    }
-                    else if (@item.Status == 2)
-                    {
-                        <a asp-action="CancelOrder" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Account" asp-route-OrderCode="@item.OrderCode">Cancel Order</a>
-                    }
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CreatedDate)
+                </td>
+                <td>
+                        @if (@item.Status == 1)
+                        {
+                            <span class="text text-primary">đơn hàng mới</span>
+                        }
+                        else if (@item.Status == 2)
+                        {
+                            <span class="text text-danger">đơn hàng đã xác nhận</span>
+                        }
+                        else if (@item.Status == 3)
+                        {
+                            <span class="text text-warning">Đã giao cho đơn vị vận chuyển</span>
+                        }
+                        else if (@item.Status == 4)
+                        {
+                            <span class="text text-dark">Hàng đã giao tới nơi</span>
+                        }
+                        else if (@item.Status == 5)
+                        {
+                            <span class="text text-success">Đơn hàng đã hoàn thành</span>
+                        }
+                        else if (@item.Status == 6)
+                        {
+                            <span class="text text-danger">Đơn hàng đã bị huỷ</span>
+                        }
+                </td>
+                <td>
+                    <a asp-action="ViewOrder" class="btn btn-warning btn-sm" asp-controller="Account" asp-route-OrderCode="@item.OrderCode">View Order</a>
+                        @if (@item.Status == 1)
+                        {
+                            <a asp-action="CancelOrder" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Account" asp-route-OrderCode="@item.OrderCode">Cancel Order</a>
+                        }
+                        else if (@item.Status == 2)
+                        {
+                            <a asp-action="CancelOrder" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Account" asp-route-OrderCode="@item.OrderCode">Cancel Order</a>
+                        }
+                </td>
+            </tr>
+    }
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .personal-order-container{
+        background-color: white;
+        position: relative;
+        overflow: hidden;
+        padding: 8rem 1.7rem 15rem 1.7rem;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+</style>
 
 @section Scripts {
     <script>
