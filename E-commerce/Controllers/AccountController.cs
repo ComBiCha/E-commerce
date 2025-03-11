@@ -2,9 +2,11 @@ using E_commerce.Areas.Admin.Repository;
 using E_commerce.Models;
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
+using E_commerce.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PayPal.Api;
 using Stripe;
 using System.Security.Claims;
 
@@ -422,8 +424,8 @@ namespace E_commerce.Controllers
 
             // Lấy danh sách OrderDetails dựa trên OrderCode
             var orderDetails = await _dataContext.OrderDetails
-                .Include(od => od.Variation) // Lấy thông tin Variation
-                .ThenInclude(v => v.Product) // Lấy thông tin Product
+                .Include(od => od.Variation)
+                .ThenInclude(v => v.Product)
                 .Where(od => od.OrderCode == orderCode)
                 .ToListAsync();
 
@@ -433,60 +435,42 @@ namespace E_commerce.Controllers
                 if (orderDetail.Variation != null)
                 {
                     orderDetail.Variation.Stock += orderDetail.Quantity; // Cộng lại số lượng đã mua
-
                     if (orderDetail.Variation.Product != null)
                     {
                         orderDetail.Variation.Product.Sold -= orderDetail.Quantity; // Giảm số lượng đã bán
                         orderDetail.Variation.Product.Quantity += orderDetail.Quantity;
                         if (orderDetail.Variation.Product.Sold < 0)
                         {
-                            orderDetail.Variation.Product.Sold = 0; // Đảm bảo không bị số âm
+                            orderDetail.Variation.Product.Sold = 0;
                         }
                         _dataContext.Products.Update(orderDetail.Variation.Product);
                     }
-
                     _dataContext.Variations.Update(orderDetail.Variation);
                 }
             }
 
-			// **Gọi API Stripe để hoàn tiền**
-			if (!string.IsNullOrEmpty(order.PaymentIntentId))
-			{
-				try
-				{
-					var refundOptions = new RefundCreateOptions
-					{
-						PaymentIntent = order.PaymentIntentId,
-						Reason = "requested_by_customer"
-					};
-					var refundService = new RefundService();
-					var refund = await refundService.CreateAsync(refundOptions);
+            // ✅ **Xử lý hoàn tiền theo phương thức thanh toán**
+            if (!string.IsNullOrEmpty(order.PaymentIntentId))
+            {
+                if (order.PaymentIntentId.StartsWith("pi_"))
+                {
+                    await ProcessStripeRefund(order.PaymentIntentId);
+                }
+                else if (order.PaymentIntentId.StartsWith("PAYID-"))
+                {
+                    await ProcessPayPalRefund(order.PaymentIntentId);
+                }
+            }
 
-					if (refund.Status == "succeeded")
-					{
-						TempData["success"] = "Order has been canceled and refund processed successfully.";
-					}
-					else
-					{
-						TempData["error"] = "Order canceled, but refund processing failed.";
-					}
-				}
-				catch (Exception ex)
-				{
-					TempData["error"] = "Error processing refund: " + ex.Message;
-				}
-			}
-
-			// Cập nhật trạng thái đơn hàng thành "Đã hủy"
-			order.Status = 6;
+            // Cập nhật trạng thái đơn hàng thành "Đã hủy"
+            order.Status = 6;
             _dataContext.Orders.Update(order);
-
-            // Lưu thay đổi vào database
             await _dataContext.SaveChangesAsync();
 
-            TempData["success"] = "Order has been canceled successfully, stock has been restored, and sold count has been adjusted.";
+            TempData["success"] = "Order has been canceled successfully, stock has been restored, and refund request has been processed.";
             return RedirectToAction("PersonalOrder");
         }
+
 
 
         [HttpPost]
@@ -526,6 +510,83 @@ namespace E_commerce.Controllers
 
             return RedirectToAction("PersonalOrder"); // Chuyển hướng về danh sách đơn hàng cá nhân
         }
+
+        private async Task ProcessStripeRefund(string paymentIntentId)
+        {
+            try
+            {
+                var refundOptions = new RefundCreateOptions
+                {
+                    PaymentIntent = paymentIntentId,
+                    Reason = "requested_by_customer"
+                };
+                var refundService = new RefundService();
+                var refund = await refundService.CreateAsync(refundOptions);
+
+                if (refund.Status == "succeeded")
+                {
+                    TempData["success"] = "Stripe refund processed successfully.";
+                }
+                else
+                {
+                    TempData["error"] = "Stripe refund processing failed.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = "Error processing Stripe refund: " + ex.Message;
+            }
+        }
+
+        private async Task ProcessPayPalRefund(string paymentId)
+        {
+            try
+            {
+                var apiContext = new PayPalSdk().GetAPIContext(); // Lấy APIContext từ PayPalSdk
+
+                // Lấy thông tin Payment từ PayPal
+                var payment = Payment.Get(apiContext, paymentId);
+
+                // Kiểm tra nếu không có giao dịch nào
+                if (payment.transactions.Count == 0 || payment.transactions[0].related_resources.Count == 0)
+                {
+                    TempData["error"] = "No transactions found for this PayPal payment.";
+                    return;
+                }
+
+                // Lấy Sale ID từ giao dịch đầu tiên
+                var saleId = payment.transactions[0].related_resources[0].sale.id;
+
+                // Tạo yêu cầu hoàn tiền
+                var refundRequest = new RefundRequest
+                {
+                    amount = new Amount
+                    {
+                        total = payment.transactions[0].amount.total, // Tổng tiền hoàn
+                        currency = payment.transactions[0].amount.currency // Đơn vị tiền tệ
+                    }
+                };
+
+                // Gọi Refund API
+                var refund = Sale.Refund(apiContext, saleId, refundRequest); // ✅ Gọi đúng cách
+
+                if (refund.state.ToLower() == "completed")
+                {
+                    TempData["success"] = "PayPal refund processed successfully.";
+                }
+                else
+                {
+                    TempData["error"] = "PayPal refund processing failed.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["error"] = "Error processing PayPal refund: " + ex.Message;
+            }
+        }
+
+
+
 
 
     }

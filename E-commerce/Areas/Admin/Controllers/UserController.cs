@@ -195,17 +195,33 @@ namespace E_commerce.Areas.Admin.Controllers
         public async Task<IActionResult> Edit(string id, AppUserModel user)
         {
             var existingUser = await _userManager.FindByIdAsync(id);
-            if(existingUser == null)
+            if (existingUser == null)
             {
                 return NotFound();
             }
+
             if (ModelState.IsValid)
             {
                 existingUser.UserName = user.UserName;
                 existingUser.Email = user.Email;
                 existingUser.PhoneNumber = user.PhoneNumber;
-                existingUser.RoleId = user.RoleId;
 
+                // Lấy Role cũ của user
+                var oldRoles = await _userManager.GetRolesAsync(existingUser);
+
+                // Lấy Role mới từ form
+                var newRole = await _roleManager.FindByIdAsync(user.RoleId);
+                if (newRole == null)
+                {
+                    ModelState.AddModelError("", "Invalid role selected.");
+                    return View(existingUser);
+                }
+
+                // Xóa role cũ và thêm role mới
+                await _userManager.RemoveFromRolesAsync(existingUser, oldRoles);
+                await _userManager.AddToRoleAsync(existingUser, newRole.Name);
+
+                // Cập nhật user
                 var updateUserResult = await _userManager.UpdateAsync(existingUser);
                 if (updateUserResult.Succeeded)
                 {
@@ -217,23 +233,9 @@ namespace E_commerce.Areas.Admin.Controllers
                     return View(existingUser);
                 }
             }
-            else
-            {
-                var roles = await _roleManager.Roles.ToListAsync();
-                ViewBag.Roles = new SelectList(roles, "Id", "Name");
-                TempData["error"] = "Model error";
-                List<string> errors = new List<string>();
-                foreach (var value in ModelState.Values)
-                {
-                    foreach (var error in value.Errors)
-                    {
-                        errors.Add(error.ErrorMessage);
-                    }
-                }
-                string errorMessage = string.Join("\n", errors);
-                return BadRequest(errorMessage);
-            }
-            
+
+            var roles = await _roleManager.Roles.ToListAsync();
+            ViewBag.Roles = new SelectList(roles, "Id", "Name");
             return View(user);
         }
     }
