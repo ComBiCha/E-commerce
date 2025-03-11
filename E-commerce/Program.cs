@@ -21,6 +21,13 @@ var firebaseConfig = builder.Configuration.GetSection("Firebase").Get<Dictionary
 builder.Services.AddSingleton(firebaseConfig);*/
 
 //Email
+var orderSubject = new OrderSubject();
+var emailService = new EmailNotificationService(new EmailSender());
+
+orderSubject.Attach(emailService);
+
+builder.Services.AddSingleton(orderSubject);
+
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 // Add services to the container.
 builder.Services.AddControllersWithViews();
