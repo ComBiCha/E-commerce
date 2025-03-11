@@ -110,19 +110,31 @@
 							<td colspan="5"></td>
 							<td colspan="2" class="text-right">
 								<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Clear"> Clear Cart </a>
-								@if (User.Identity?.IsAuthenticated ?? false)
-								{
-									@if (@Model.ShippingCost <= 0)
-									{
-										<a disabled="disabled" style="margin-top:0px" class="btn btn-primary btn-sm" asp-controller="Checkout" asp-action="CheckOut"> Checkout </a>
-										<p style="color:red">Please enter your shipping information first!</p>
-									}
-									else
-									{
-										<a style="margin-top:0px" class="btn btn-primary btn-sm" asp-controller="Checkout" asp-action="CheckOut"> Checkout </a>
-									}
+								<form asp-controller="Checkout" asp-action="Checkout" method="post" enctype="multipart/form-data">
+									<h5>Select Payment Method</h5>
+									<label>
+										<input type="radio" name="paymentMethod" value="stripe" checked /> Pay with Stripe
+									</label>
+									<label>
+										<input type="radio" name="paymentMethod" value="cod" /> Pay with Cash on Delivery (COD)
+									</label>
+									<br />
 
-								}
+									<a class="btn btn-danger btn-sm" asp-controller="Cart" asp-action="Clear">Clear Cart</a>
+
+									@if (User.Identity?.IsAuthenticated ?? false)
+									{
+										@if (@Model.ShippingCost <= 0)
+										{
+											<button type="submit" class="btn btn-primary btn-sm" disabled>Checkout</button>
+											<p style="color:red">Please enter your shipping information first!</p>
+										}
+										else
+										{
+											<button type="submit" class="btn btn-primary btn-sm">Checkout</button>
+										}
+									}
+								</form>
 							</td>
 						</tr>
 					}

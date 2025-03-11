@@ -129,36 +129,6 @@
 </table>
 
 @section Scripts{
-    @* <script>
-        $(document).ready(function () {
-            $('.select-update-order').change(function () {
-                var status = $(this).val();
-                var ordercode = $(this).closest('tbody').find('.getId').val(); // Lấy giá trị từ input ẩn trong cùng hàng
-
-                $.ajax({
-                    type: "POST",
-                    url: "@Url.Action("UpdateOrder")",
-                    data: { status: status, ordercode: ordercode },
-
-                    success: function (result) {
-                        if (result.success) {
-                            Swal.fire({
-                                icon: "success",
-                                title: "Yayyy",
-                                text: "Update successfully",
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: "error",
-                                title: "Oops...",
-                                text: "Update failed: " + result.message,
-                            });
-                        }   
-                    },
-                });
-            });
-        });
-    </script> *@
     <script>
         $(document).ready(function () {
             // Initialize the JavaScript variable for current status

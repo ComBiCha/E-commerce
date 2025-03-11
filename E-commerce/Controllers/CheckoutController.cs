@@ -4,29 +4,75 @@ using E_commerce.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
-using Stripe.BillingPortal;
-using System.Security.Claims;
 using Stripe.Checkout;
-using Stripe;
+using System.Security.Claims;
 using System.Text;
-using System.Drawing;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Model;
-using Stripe.FinancialConnections;
 
 namespace E_commerce.Controllers
 {
-	public class CheckoutController : Controller
-	{
-		private readonly DataContext _datacontext;
-		private readonly IEmailSender _emailSender;
+    public class CheckoutController : Controller
+    {
+        private readonly DataContext _datacontext;
+        private readonly IEmailSender _emailSender;
 
-		public CheckoutController(DataContext context, IEmailSender emailSender)
-		{
-			_datacontext = context;
-			_emailSender = emailSender;
-		}
+        public CheckoutController(DataContext context, IEmailSender emailSender)
+        {
+            _datacontext = context;
+            _emailSender = emailSender;
+        }
 
-		public async Task<IActionResult> Checkout()
+        public async Task<IActionResult> Checkout()
+        {
+            var userEmail = User.FindFirstValue(ClaimTypes.Email);
+            if (userEmail == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var user = await _datacontext.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+            if (!cartItems.Any())
+            {
+                TempData["error"] = "Your cart is empty!";
+                return RedirectToAction("Cart", "Cart");
+            }
+
+            decimal discountAmount2 = 0;
+            var discountAmountSession = HttpContext.Session.GetString("DiscountAmount");
+            if (!string.IsNullOrEmpty(discountAmountSession))
+            {
+                discountAmount2 = decimal.Parse(discountAmountSession);
+            }
+
+            decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
+            decimal discountRate = user?.GetDiscountRate() ?? 0m;
+            decimal discountAmount = grandTotal * discountRate;
+            decimal finalTotal = grandTotal - discountAmount - discountAmount2;
+
+			var shippingPriceCookie = Request.Cookies["ShippingPrice"];
+			decimal shippingPrice = 0;
+			if (shippingPriceCookie != null)
+			{
+				shippingPrice = JsonConvert.DeserializeObject<decimal>(shippingPriceCookie);
+			}
+
+			var order = new OrderModel
+			{
+				OrderCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper(), // Tạo mã đơn hàng
+				CreatedDate = DateTime.Now
+			};
+
+			var paymentMethod = HttpContext.Session.GetString("PaymentMethod") ?? "stripe";
+			Console.WriteLine($"Payment Method: {paymentMethod}");
+
+			var paymentService = PaymentServiceFactory.GetPaymentService(paymentMethod, _datacontext);
+            var redirectUrl = await paymentService.ProcessPayment(order, cartItems, shippingPrice, discountAmount2+discountAmount);
+
+            return Redirect(redirectUrl);
+        }
+
+		[HttpPost]
+		public async Task<IActionResult> Checkout(string paymentMethod)
 		{
 			var userEmail = User.FindFirstValue(ClaimTypes.Email);
 			if (userEmail == null)
@@ -49,251 +95,151 @@ namespace E_commerce.Controllers
 				discountAmount2 = decimal.Parse(discountAmountSession);
 			}
 
-
 			decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
 			decimal discountRate = user?.GetDiscountRate() ?? 0m;
 			decimal discountAmount = grandTotal * discountRate;
 			decimal finalTotal = grandTotal - discountAmount - discountAmount2;
 
-			var domain = "http://localhost:5139/";
-			var options = new Stripe.Checkout.SessionCreateOptions
-			{
-				SuccessUrl = domain + $"Checkout/OrderConfirmation?ordercode={Guid.NewGuid()}",
-				CancelUrl = domain + "Cart",
-				LineItems = new List<SessionLineItemOptions>(),
-				Mode = "payment"
-			};
-
-			// Thêm các sản phẩm vào Stripe Checkout
-			foreach (var cart in cartItems)
-			{
-				var variation = await _datacontext.Variations
-					.Include(v => v.Material)
-					.Include(v => v.Color)
-					.FirstOrDefaultAsync(v => v.Id == cart.VariationId);
-
-				if (variation == null)
-				{
-					TempData["error"] = "One or more items in your cart are no longer available.";
-					return RedirectToAction("Cart", "Cart");
-				}
-
-				var sessionListItem = new SessionLineItemOptions
-				{
-					PriceData = new SessionLineItemPriceDataOptions
-					{
-						UnitAmount = (long)(cart.Price * 100),
-						Currency = "usd",
-						ProductData = new SessionLineItemPriceDataProductDataOptions
-						{
-							Name = $"{cart.ProductName} ({variation.Material?.Name ?? "Unknown"} - {variation.Color?.Name ?? "Unknown"} - Size:{variation.Size})"
-						}
-					},
-					Quantity = cart.Quantity
-				};
-
-				options.LineItems.Add(sessionListItem);
-			}
-
-			// Thêm phí vận chuyển nếu có
 			var shippingPriceCookie = Request.Cookies["ShippingPrice"];
 			decimal shippingPrice = 0;
 			if (shippingPriceCookie != null)
 			{
 				shippingPrice = JsonConvert.DeserializeObject<decimal>(shippingPriceCookie);
-				var shippingLineItem = new SessionLineItemOptions
-				{
-					PriceData = new SessionLineItemPriceDataOptions
-					{
-						UnitAmount = (long)(shippingPrice * 100),
-						Currency = "usd",
-						ProductData = new SessionLineItemPriceDataProductDataOptions
-						{
-							Name = "Shipping Fee",
-						}
-					},
-					Quantity = 1
-				};
-				options.LineItems.Add(shippingLineItem);
 			}
 
-			// **Thêm dòng giảm giá**
-			// **Áp dụng giảm giá với Coupon**
-			if (discountAmount > 0)
-			{
-				var couponOptions = new Stripe.CouponCreateOptions
-				{
-					AmountOff = (long)((discountAmount + discountAmount2) * 100),
-					Currency = "usd",
-					Duration = "once"
-				};
-				var couponService = new Stripe.CouponService();
-				var coupon = couponService.Create(couponOptions);
+			// Kiểm tra nếu paymentMethod null thì dùng giá trị mặc định
+			paymentMethod = paymentMethod ?? "stripe";
+			Console.WriteLine($"Payment Method: {paymentMethod}");
 
-				options.Discounts = new List<SessionDiscountOptions>
-		{
-			new SessionDiscountOptions
-			{
-				Coupon = coupon.Id
-			}
-		};
-			}
+			// Lưu PaymentMethod vào session
+			HttpContext.Session.SetString("PaymentMethod", paymentMethod);
 
-/*			if (discountAmount2 > 0)
+			var order = new OrderModel
 			{
-				var couponOptions = new Stripe.CouponCreateOptions
-				{
-					AmountOff = (long)(discountAmount2 * 100),
-					Currency = "usd",
-					Duration = "once"
-				};
-				var couponService = new Stripe.CouponService();
-				var coupon = couponService.Create(couponOptions);
+				OrderCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper(),
+				CreatedDate = DateTime.Now
+			};
 
-				options.Discounts = new List<SessionDiscountOptions>
-	{
-		new SessionDiscountOptions
-		{
-			Coupon = coupon.Id
+			var paymentService = PaymentServiceFactory.GetPaymentService(paymentMethod, _datacontext);
+			var redirectUrl = await paymentService.ProcessPayment(order, cartItems, shippingPrice, discountAmount2 + discountAmount);
+
+			return Redirect(redirectUrl);
 		}
-	};
-			}*/
-
-
-			var service = new Stripe.Checkout.SessionService();
-			Stripe.Checkout.Session session = service.Create(options);
-			HttpContext.Session.SetString("StripeSessionId", session.Id);
-			return Redirect(session.Url);
-		}
-
-
 
 
 		public async Task<IActionResult> OrderConfirmation(string ordercode)
-		{
+        {
+			Console.WriteLine($"OrderCode received: {ordercode}");
 			var userEmail = User.FindFirstValue(ClaimTypes.Email);
-			if (userEmail == null)
+            if (userEmail == null)
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var user = await _datacontext.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+            if (!cartItems.Any())
+            {
+                TempData["error"] = "No items in the cart to process!";
+                return RedirectToAction("Cart", "Cart");
+            }
+
+            decimal shippingPrice = 0;
+            var shippingPriceCookie = Request.Cookies["ShippingPrice"];
+            if (shippingPriceCookie != null)
+            {
+                shippingPrice = JsonConvert.DeserializeObject<decimal>(shippingPriceCookie);
+            }
+
+            decimal discountAmount2 = 0;
+            var discountAmountSession = HttpContext.Session.GetString("DiscountAmount");
+            if (!string.IsNullOrEmpty(discountAmountSession))
+            {
+                discountAmount2 = decimal.Parse(discountAmountSession);
+            }
+
+            decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
+            decimal discountRate = user?.GetDiscountRate() ?? 0m;
+            decimal discountAmount = grandTotal * discountRate;
+            decimal finalTotal = grandTotal - discountAmount - discountAmount2 + shippingPrice;
+
+			var order = await _datacontext.Orders.FirstOrDefaultAsync(o => o.OrderCode == ordercode);
+			if (order != null)
 			{
-				return RedirectToAction("Login", "Account");
+				order.ShippingCost = shippingPrice;
+				order.Address = HttpContext.Session.GetString("ShippingAddress") ?? order.Address;
+				order.UserName = userEmail ?? order.UserName;
+				order.Status = 1; // Cập nhật trạng thái đơn hàng thành "Chờ xác nhận"
+				order.PaymentIntentId = HttpContext.Session.GetString("StripeSessionId") ?? order.PaymentIntentId;
+
+				_datacontext.Orders.Update(order);
+				await _datacontext.SaveChangesAsync();
 			}
 
-			var user = await _datacontext.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
-			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
-			if (!cartItems.Any())
-			{
-				TempData["error"] = "No items in the cart to process!";
-				return RedirectToAction("Cart", "Cart");
-			}
-
-			var shippingPriceCookie = Request.Cookies["ShippingPrice"];
-			decimal shippingPrice = shippingPriceCookie != null ? JsonConvert.DeserializeObject<decimal>(shippingPriceCookie) : 0;
-
-			decimal discountAmount2 = 0;
-			var discountAmountSession = HttpContext.Session.GetString("DiscountAmount");
-			if (!string.IsNullOrEmpty(discountAmountSession))
-			{
-				discountAmount2 = decimal.Parse(discountAmountSession);
-			}
-
-
-			decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
-			decimal discountRate = user?.GetDiscountRate() ?? 0m;
-			decimal discountAmount = grandTotal * discountRate;
-			decimal finalTotal = grandTotal - discountAmount - discountAmount2 + shippingPrice;
-
-			var shippingAddress = HttpContext.Session.GetString("ShippingAddress");
-
-			var service = new Stripe.Checkout.SessionService();
-			var session = service.Get(HttpContext.Session.GetString("StripeSessionId"));
-
-			// Tạo đơn hàng mới
-			var order = new OrderModel
-			{
-				OrderCode = ordercode,
-				ShippingCost = shippingPrice,
-				Address = shippingAddress,
-				UserName = userEmail,
-				Status = 1,
-				CreatedDate = DateTime.Now,
-				PaymentIntentId = session.PaymentIntentId
-			};
-			_datacontext.Add(order);
-			await _datacontext.SaveChangesAsync();
 
 			foreach (var cart in cartItems)
-			{
-				var variation = await _datacontext.Variations
-					.Include(v => v.Material)
-					.Include(v => v.Color)
-					.Include(v => v.Product)
-					.FirstOrDefaultAsync(v => v.Id == cart.VariationId);
+            {
+                var variation = await _datacontext.Variations
+                    .Include(v => v.Material)
+                    .Include(v => v.Color)
+                    .Include(v => v.Product)
+                    .FirstOrDefaultAsync(v => v.Id == cart.VariationId);
 
+                if (variation == null)
+                {
+                    continue;
+                }
 
+                decimal itemTotal = cart.Quantity * cart.Price;
+                decimal itemDiscount = itemTotal * discountRate;
+                decimal itemDiscountFromCoupon = (itemTotal / grandTotal) * discountAmount2;
+                decimal totalDiscountForItem = itemDiscount + itemDiscountFromCoupon;
 
-				if (variation == null)
-				{
-					continue;
-				}
+                var orderDetail = new OrderDetails
+                {
+                    UserName = userEmail,
+                    OrderCode = ordercode,
+                    ProductId = variation.ProductId,
+                    VariationId = variation.Id,
+                    Price = cart.Price,
+                    Quantity = cart.Quantity,
+                    DiscountAmount = totalDiscountForItem
+                };
+                _datacontext.OrderDetails.Add(orderDetail);
 
-				// Tính toán giảm giá theo tỉ lệ giảm giá của user
-				decimal itemTotal = cart.Quantity * cart.Price;
-				decimal itemDiscount = itemTotal * discountRate;
-				decimal itemDiscountFromCoupon = (itemTotal / grandTotal) * discountAmount2;
-				decimal totalDiscountForItem = itemDiscount + itemDiscountFromCoupon;
+                if (variation.Product.WarrantyPeriod > 0)
+                {
+                    var warranty = new WarrantyModel
+                    {
+                        WarrantyCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper(),
+                        ProductId = variation.ProductId,
+                        VariationId = variation.Id,
+                        OrderCode = ordercode,
+                        ExpirationDate = DateTime.Now.AddMonths(variation.Product.WarrantyPeriod),
+                        CreatedDate = DateTime.Now
+                    };
+                    _datacontext.Warranties.Add(warranty);
+                }
 
-				var orderDetail = new OrderDetails
-				{
-					UserName = userEmail,
-					OrderCode = ordercode,
-					ProductId = variation.ProductId,
-					VariationId = variation.Id,
-					Price = cart.Price, // Giá gốc
-					Quantity = cart.Quantity,
-					DiscountAmount = totalDiscountForItem // Lưu số tiền đã giảm
-				};
+                variation.Stock -= cart.Quantity;
+                variation.Product.Sold += cart.Quantity;
+                variation.Product.Quantity -= cart.Quantity;
+                _datacontext.Update(variation);
+                _datacontext.Update(variation.Product);
+            }
 
-				_datacontext.Add(orderDetail);
+            var code = HttpContext.Session.GetString("CouponCode");
+            if (!string.IsNullOrEmpty(code))
+            {
+                var coupon = await _datacontext.Coupons.FirstOrDefaultAsync(c => c.Code == code);
+                if (coupon != null)
+                {
+                    coupon.UsedCount += 1;
+                    _datacontext.Update(coupon);
+                }
+            }
+            await _datacontext.SaveChangesAsync();
 
-				// Tạo mã bảo hành nếu sản phẩm có thời hạn bảo hành
-				if (variation.Product.WarrantyPeriod > 0)
-				{
-					var warrantyCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper(); // Mã bảo hành ngẫu nhiên
-					var warranty = new WarrantyModel
-					{
-						WarrantyCode = warrantyCode,
-						ProductId = variation.ProductId,
-						VariationId = variation.Id,
-						OrderCode = ordercode,
-						ExpirationDate = DateTime.Now.AddMonths(variation.Product.WarrantyPeriod), // Lấy thời hạn bảo hành từ sản phẩm
-						CreatedDate = DateTime.Now
-					};
-					_datacontext.Add(warranty);
-				}
-
-
-				// Cập nhật kho hàng
-				variation.Stock -= cart.Quantity;
-				variation.Product.Sold += cart.Quantity;
-				variation.Product.Quantity -= cart.Quantity;
-				_datacontext.Update(variation);
-				_datacontext.Update(variation.Product);
-			}
-
-			var code = HttpContext.Session.GetString("CouponCode");
-			if (!string.IsNullOrEmpty(code))
-			{
-				var coupon = await _datacontext.Coupons.FirstOrDefaultAsync(c => c.Code == code);
-				if (coupon != null)
-				{
-					coupon.UsedCount += 1;
-					_datacontext.Update(coupon);
-				}
-			}
-
-
-			await _datacontext.SaveChangesAsync();
-
-			// Gửi email xác nhận đơn hàng
 			var orderDetails = await _datacontext.OrderDetails
 				.Where(od => od.OrderCode == ordercode)
 				.Include(od => od.Product)
@@ -337,10 +283,13 @@ namespace E_commerce.Controllers
 
 			await _emailSender.SendEmailAsync(userEmail, "Order Successfully", emailBody.ToString());
 
-			TempData["success"] = "Checkout successfully";
 			HttpContext.Session.Remove("Cart");
-			HttpContext.Session.Remove("DiscountAmount");
-			return RedirectToAction("Index", "Cart");
-		}
-	}
+            HttpContext.Session.Remove("DiscountAmount");
+            HttpContext.Session.Remove("CouponCode");
+            HttpContext.Session.Remove("ShippingAddress");
+
+            return View(order);
+        }
+    }
 }
+

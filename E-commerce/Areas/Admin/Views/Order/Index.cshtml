@@ -46,6 +46,7 @@
             <th scope="col">Order Date</th>
             <th scope="col">Order Status</th>
             <th scope="col">Actions</th>
+            <th scope="col">Clone Order</th>
         </tr>
     </thead>
     <tbody>
@@ -89,6 +90,11 @@
                     {
                         <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Order" asp-route-ordercode="@item.OrderCode">Delete</a>
                     }
+                </td>
+                <td>
+                    <button class="btn btn-primary btn-sm" onclick="cloneOrder('@item.OrderCode')">
+                        Clone Order
+                    </button>
                 </td>
             </tr>
         }
@@ -138,4 +144,25 @@
             });
         });
     </script>
+    <script>
+        function cloneOrder(orderCode) {
+            if (confirm("Are you sure you want to clone this order?")) {
+                fetch(`/Admin/Order/CloneOrder?ordercode=${orderCode}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert("Order cloned successfully! New Order Code: " + data.newOrderCode);
+                            location.reload();
+                        } else {
+                            alert("Failed to clone order: " + data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        }
+    </script>
+
 }
