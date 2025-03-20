@@ -1,9 +1,8 @@
 ﻿using E_commerce.Models;
-using E_commerce.Repository;
+using E_commerce.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace E_commerce.Areas.Admin.Controllers
 {
@@ -11,122 +10,115 @@ namespace E_commerce.Areas.Admin.Controllers
     [Authorize(Roles = "Admin")]
     public class RoleController : Controller
     {
-        private readonly DataContext _dataContext;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        public RoleController(DataContext context, RoleManager<IdentityRole> roleManager)
+        private readonly RoleManagerDecorator _roleManager;
+
+        public RoleController(RoleManagerDecorator roleManager)
         {
-            _dataContext = context;
             _roleManager = roleManager;
         }
+
         public async Task<IActionResult> Index(int pg = 1)
         {
-            List<IdentityRole> role = _dataContext.Roles.ToList(); //33 datas
+            const int pageSize = 10;
+            if (pg < 1) pg = 1;
 
-
-            const int pageSize = 10; //10 items/trang
-
-            if (pg < 1) //page < 1;
-            {
-                pg = 1; //page ==1
-            }
-            int recsCount = role.Count(); //33 items;
-
+            var roles = await _roleManager.GetAllRolesAsync();
+            int recsCount = roles.Count;
             var pager = new Paginate(recsCount, pg, pageSize);
 
-            int recSkip = (pg - 1) * pageSize; //(3 - 1) * 10; 
-
-            //category.Skip(20).Take(10).ToList()
-
-            var data = role.Skip(recSkip).Take(pager.PageSize).ToList();
+            int recSkip = (pg - 1) * pageSize;
+            var data = roles.Skip(recSkip).Take(pager.PageSize).ToList();
 
             ViewBag.Pager = pager;
-
             return View(data);
         }
+
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(IdentityRole role)
         {
-            if (!_roleManager.RoleExistsAsync(role.Name).GetAwaiter().GetResult())
+            var result = await _roleManager.CreateRoleAsync(role.Name);
+            if (result.Succeeded)
             {
-                _roleManager.CreateAsync(new IdentityRole(role.Name)).GetAwaiter().GetResult();
-				TempData["success"] = "Role added successfully!";
-			}
-            return Redirect("Index");
+                TempData["success"] = "Role added successfully!";
+                return RedirectToAction("Index");
+            }
+
+            ViewData["ErrorMessage"] = string.Join(", ", result.Errors.Select(e => e.Description));
+            return View(role);
         }
+
         [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return NotFound();
-            }
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
             var role = await _roleManager.FindByIdAsync(id);
+            if (role == null) return NotFound();
+
             return View(role);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(string id, IdentityRole model)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return NotFound();
-            }
+            if (string.IsNullOrEmpty(id)) return NotFound();
+
+            var role = await _roleManager.FindByIdAsync(id);
+            if (role == null) return NotFound();
+
             if (ModelState.IsValid)
             {
-                var role = await _roleManager.FindByIdAsync(id);
-
-                if (role == null)
-                {
-                    return NotFound();
-                }
-
                 role.Name = model.Name;
+                var result = await _roleManager.UpdateRoleAsync(role);
 
-                try
+                if (result.Succeeded)
                 {
-                    await _roleManager.UpdateAsync(role);
                     TempData["success"] = "Role updated successfully!";
                     return RedirectToAction("Index");
                 }
-                catch (Exception ex)
-                {
-                    ModelState.AddModelError("", "An error occurred while updating the role.");
-                }
+
+                ViewData["ErrorMessage"] = "Có lỗi xảy ra khi cập nhật role!";
             }
 
-            return View(model ?? new IdentityRole { Id = id });
+            return View(model);
         }
-        [HttpGet]
+
         public async Task<IActionResult> Delete(string id)
         {
-            if (string.IsNullOrEmpty(id))
-            {
-                return NotFound();
-            }
-            var role = await _roleManager.FindByIdAsync(id);
+            Console.WriteLine($"ID Role cần xóa: {id}");
+            if (string.IsNullOrEmpty(id)) return NotFound();
 
+            var role = await _roleManager.FindByIdAsync(id);
             if (role == null)
             {
+                Console.WriteLine("Không tìm thấy Role!");
                 return NotFound();
             }
 
-            try
+            var result = await _roleManager.DeleteRoleAsync(role);
+            if (result.Succeeded)
             {
-                await _roleManager.DeleteAsync(role);
+                Console.WriteLine("Xóa Role thành công!");
                 TempData["success"] = "Role deleted successfully!";
-
             }
-            catch (Exception ex)
+            else
             {
-                ModelState.AddModelError("", "An error occurred while deleting the role.");
+                Console.WriteLine("Lỗi khi xóa Role!");
+                TempData["error"] = "Có lỗi xảy ra khi xóa Role!";
             }
+
             return RedirectToAction("Index");
         }
+
+
+
     }
 }

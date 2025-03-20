@@ -110,7 +110,16 @@
                         <span class="text text-danger">Đơn hàng đã bị huỷ</span>
                     }
                 </td>
-                <td></td>
+                <td>
+                    @if (@ViewBag.Order.Status == 1)
+                    {
+                        <a asp-action="CancelOrder" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Account" asp-route-OrderCode="@ViewBag.Order.OrderCode">Cancel Order</a>
+                    }
+                    else if (@ViewBag.Order.Status == 2)
+                    {
+                        <a asp-action="CancelOrder" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Account" asp-route-OrderCode="@ViewBag.Order.OrderCode">Cancel Order</a>
+                    }
+                </td>
                 <td></td>
                 <td></td>
                 <td></td>

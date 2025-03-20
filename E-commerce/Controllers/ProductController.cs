@@ -52,50 +52,57 @@ namespace E_commerce.Controllers
 
             return View(products);
         }
-        public async Task<IActionResult> Search(string searchTerm, string category, string brand)
-        {
-            ViewBag.Keyword = searchTerm ?? $"{category} {brand}";
+		public async Task<IActionResult> Search(string searchTerm, string category, string brand)
+		{
+			ViewBag.Keyword = searchTerm ?? $"{category} {brand}";
 
-            var userId = await _userManager.GetUserAsync(User);
-            var wishlist = _dataContext.Wishlists
-                .Where(w => w.UserId == userId.Id)
-                .Select(w => w.ProductId)
-                .ToList();
+			// Lấy thông tin user (nếu có)
+			var user = await _userManager.GetUserAsync(User);
+			var wishlist = new List<long>(); // Khởi tạo danh sách trống
 
-            // Truyền danh sách Wishlist vào ViewBag
-            ViewBag.Wishlist = wishlist;
+			if (user != null)
+			{
+				wishlist = _dataContext.Wishlists
+					.Where(w => w.UserId == user.Id)
+					.Select(w => w.ProductId)
+					.ToList();
+			}
 
-            var brandCounts = _dataContext.Brands
-                .Select(b => new
-                {
-                    b.Name,
-                    b.Slug,
-                    ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
-                })
-                .ToList();
-            var contact = _dataContext.Contacts.FirstOrDefault();
-            ViewBag.BrandCounts = brandCounts;
-            ViewBag.Contact = contact;
+			// Truyền danh sách Wishlist vào ViewBag
+			ViewBag.Wishlist = wishlist;
 
-            IQueryable<ProductModel> products = _dataContext.Products.Include(p => p.Category).Include(p => p.Brand);
+			var brandCounts = _dataContext.Brands
+				.Select(b => new
+				{
+					b.Name,
+					b.Slug,
+					ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
+				})
+				.ToList();
+			var contact = _dataContext.Contacts.FirstOrDefault();
+			ViewBag.BrandCounts = brandCounts;
+			ViewBag.Contact = contact;
 
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                products = products.Where(p => p.Name.Contains(searchTerm) || p.Category.Name.Contains(searchTerm));
-            }
-            if (!string.IsNullOrEmpty(category))
-            {
-                products = products.Where(p => p.Category.Slug == category);
-            }
-            if (!string.IsNullOrEmpty(brand))
-            {
-                products = products.Where(p => p.Brand.Name == brand);
-            }
+			IQueryable<ProductModel> products = _dataContext.Products.Include(p => p.Category).Include(p => p.Brand);
 
-            return View(await products.ToListAsync());
-        }
+			if (!string.IsNullOrEmpty(searchTerm))
+			{
+				products = products.Where(p => p.Name.Contains(searchTerm) || p.Category.Name.Contains(searchTerm));
+			}
+			if (!string.IsNullOrEmpty(category))
+			{
+				products = products.Where(p => p.Category.Slug == category);
+			}
+			if (!string.IsNullOrEmpty(brand))
+			{
+				products = products.Where(p => p.Brand.Name == brand);
+			}
 
-        public async Task<IActionResult> Details(long Id)
+			return View(await products.ToListAsync());
+		}
+
+
+		public async Task<IActionResult> Details(long Id)
         {
             if (Id == null) return RedirectToAction("Index");
 

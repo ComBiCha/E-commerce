@@ -76,6 +76,23 @@
                     <button type="submit" class="custom-button">Checkout</button>
                 }
             }
+            else
+            {
+                <label for="guestEmail">Enter your email:</label>
+                <input type="email" id="guestEmail" name="guestEmail" required />
+
+                @if (Model.ShippingCost <= 0)
+                {
+                    <button type="submit" class="custom-button" style="cursor:pointer" disabled>Checkout</button>
+                    <p style="color: #d93b3b; text-align: center; font-size: 1.3rem; font-weight: 600; margin-top: 2rem;">
+                        Please enter your shipping information first!
+                    </p>
+                }
+                else
+                {
+                    <button type="submit" class="custom-button">Checkout</button>
+                }
+            }
         </form>
     </div>
 

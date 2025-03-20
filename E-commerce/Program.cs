@@ -2,10 +2,12 @@
 using E_commerce.Controllers;
 using E_commerce.Models;
 using E_commerce.Repository;
+using E_commerce.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Stripe;
+using Stripe.Climate;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -39,6 +41,29 @@ builder.Services.AddSwaggerGen(c =>
 
 builder.Services.AddScoped<BrandApiController>();
 builder.Services.AddScoped<CategoryApiController>();
+
+// Đăng ký UserManager và RoleManager trước
+builder.Services.AddScoped<UserManager<AppUserModel>>();
+builder.Services.AddScoped<RoleManager<IdentityRole>>();
+
+// Thêm UserFacade vào DI container
+builder.Services.AddScoped<UserFacade>();
+
+// Đăng ký RoleManagerDecorator sau khi đã có RoleManager
+builder.Services.AddScoped<RoleManagerDecorator>();
+
+builder.Services.AddSingleton<CouponFactory>();
+builder.Services.AddScoped<CouponManager>();
+builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddLogging(logging =>
+{
+    logging.AddConsole();
+    logging.AddDebug();
+});
+
+
+builder.Services.AddScoped<IProductService, ProductService>();
 
 
 builder.Services.AddDistributedMemoryCache();

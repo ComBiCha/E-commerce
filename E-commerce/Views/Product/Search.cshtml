@@ -313,9 +313,20 @@
 						<div class="single-products">
 							<div class="product-top">
 							<span class="new-label">New</span>
-								<span class="heart-icon @(ViewBag.Wishlist.Contains(item.Id) ? "liked" : "")" data-product-id="@item.Id">
-									<i class="fa fa-heart"></i>
-								</span>
+								@if (User.Identity?.IsAuthenticated ?? false)
+								{
+									<span class="heart-icon @(ViewBag.Wishlist.Contains(item.Id) ? "liked" : "")" data-product-id="@item.Id">
+										<i class="fa fa-heart"></i>
+									</span>
+								}
+								else
+								{
+									<a href="/Account/Login">
+										<span class="heart-icon" data-product-id="@item.Id">
+											<i class="fa fa-heart"></i>
+										</span>
+									</a>
+								}
 							</div>
 
 							<div class="productinfo text-center">

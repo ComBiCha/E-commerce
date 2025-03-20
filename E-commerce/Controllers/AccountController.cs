@@ -397,17 +397,10 @@ namespace E_commerce.Controllers
         }
         public async Task<IActionResult> CancelOrder(string orderCode)
         {
-            // Lấy Email của người dùng hiện tại từ Claims
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            if (string.IsNullOrEmpty(email))
-            {
-                TempData["error"] = "Unable to identify the user. Please log in again.";
-                return RedirectToAction("Login", "Account");
-            }
 
             // Tìm đơn hàng theo OrderCode và UserName
             var order = await _dataContext.Orders
-                .FirstOrDefaultAsync(o => o.OrderCode == orderCode && o.UserName == email);
+                .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
 
             if (order == null)
             {
@@ -468,7 +461,7 @@ namespace E_commerce.Controllers
             await _dataContext.SaveChangesAsync();
 
             TempData["success"] = "Order has been canceled successfully, stock has been restored, and refund request has been processed.";
-            return RedirectToAction("PersonalOrder");
+            return RedirectToAction("Home");
         }
 
 

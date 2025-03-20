@@ -15,12 +15,25 @@ namespace E_commerce.Repository
         public async Task<string> ProcessPayment(OrderModel order, List<CartItemModel> cartItems, decimal shippingPrice, decimal discountAmount)
         {
             var domain = "http://localhost:5139/";
+
+            // **1. Lưu order vào database trước khi gọi Stripe**
+            order.Status = 0; // Trạng thái chờ thanh toán
+            order.CreatedDate = DateTime.UtcNow;
+
+            _datacontext.Orders.Add(order);
+            await _datacontext.SaveChangesAsync();  // Lưu vào DB ngay lập tức
+
+            // **2. Khởi tạo session cho Stripe**
             var options = new Stripe.Checkout.SessionCreateOptions
             {
-                SuccessUrl = domain + $"Checkout/OrderConfirmation?ordercode={order.OrderCode}",
+                SuccessUrl = domain + "Checkout/OrderConfirmationStripe?session_id={CHECKOUT_SESSION_ID}&orderCode=" + order.OrderCode,
                 CancelUrl = domain + "Cart",
                 LineItems = new List<SessionLineItemOptions>(),
-                Mode = "payment"
+                Mode = "payment",
+                Metadata = new Dictionary<string, string>
+        {
+            { "ordercode", order.OrderCode } // Lưu ordercode vào metadata để truy xuất sau này
+        }
             };
 
             foreach (var cart in cartItems)
@@ -68,9 +81,9 @@ namespace E_commerce.Repository
                 });
 
                 options.Discounts = new List<SessionDiscountOptions>
-            {
-                new SessionDiscountOptions { Coupon = coupon.Id }
-            };
+        {
+            new SessionDiscountOptions { Coupon = coupon.Id }
+        };
             }
 
             var service = new Stripe.Checkout.SessionService();
@@ -78,6 +91,8 @@ namespace E_commerce.Repository
 
             return session.Url;
         }
+
+
     }
 
 }
