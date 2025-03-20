@@ -10,9 +10,11 @@ namespace E_commerce.Controllers
 	public class CartController : Controller
 	{
 		private readonly DataContext _dataContext;
-		public CartController(DataContext dataContext)
+		private readonly CouponManager _couponManager;
+		public CartController(DataContext dataContext, CouponManager couponManager)
 		{
 			_dataContext = dataContext;
+			_couponManager = couponManager;
 		}
 
         public async Task<IActionResult> Index()
@@ -252,44 +254,44 @@ namespace E_commerce.Controllers
 			return RedirectToAction("Index","Cart");
 		}
 
-		[HttpPost]
-		public async Task<IActionResult> ApplyCoupon(string couponCode)
-		{
-			var coupon = await _dataContext.Coupons.FirstOrDefaultAsync(c => c.Code == couponCode);
+        [HttpPost]
+        public async Task<IActionResult> ApplyCoupon(string couponCode)
+        {
+            // Lấy giỏ hàng từ session
+            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+            decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
 
-			if (coupon == null || coupon.ExpiryDate < DateTime.Now || coupon.UsedCount >= coupon.MaxUsage)
-			{
-				TempData["error"] = "Invalid or expired coupon code!";
-				return RedirectToAction("Index");
+            // Áp dụng coupon
+            var (success, message, discount) = await _couponManager.ApplyCouponAsync(couponCode, grandTotal);
+            if (success)
+            {
+                HttpContext.Session.SetString("DiscountAmount", discount.ToString());
+                HttpContext.Session.SetString("CouponCode", couponCode);
+                TempData["success"] = message;
+            }
+            else
+            {
+                TempData["error"] = message;
+            }
 
-			}
+            return RedirectToAction("Index");
+        }
 
-			// Lấy giỏ hàng từ session
-			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
-			decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
+        public IActionResult RemoveCoupon()
+        {
+            HttpContext.Session.Remove("DiscountAmount");
+            HttpContext.Session.Remove("CouponCode");
+            TempData["success"] = "Coupon removed successfully!";
+            return RedirectToAction("Index");
+        }
 
-			if (coupon.MinOrderValue.HasValue && grandTotal < coupon.MinOrderValue.Value)
-			{
-				TempData["error"] = $"Minimum order value must be ${coupon.MinOrderValue.Value} to apply this coupon!";
-				return RedirectToAction("Index");
 
-			}
-
-			decimal discount = coupon.IsPercentage ? (grandTotal * coupon.DiscountAmount / 100) : coupon.DiscountAmount;
-			HttpContext.Session.SetString("DiscountAmount", discount.ToString());
-			HttpContext.Session.SetString("CouponCode", couponCode);
-
-			TempData["success"] = $"Coupon applied successfully! Discount: ${discount:F2}";
-			return RedirectToAction("Index");
-
-		}
-
-		public IActionResult RemoveCoupon()
+/*        public IActionResult RemoveCoupon()
 {
     HttpContext.Session.Remove("DiscountAmount");
     TempData["success"] = "Coupon removed successfully!";
     return RedirectToAction("Index");
-}
+}*/
 
 
         public async Task<IActionResult> OrderSummaryPartial()

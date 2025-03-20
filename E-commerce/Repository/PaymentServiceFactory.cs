@@ -1,4 +1,7 @@
-﻿namespace E_commerce.Repository
+﻿using E_commerce.Services;
+using PayPal.Api;
+
+namespace E_commerce.Repository
 {
     public class PaymentServiceFactory
     {
@@ -8,9 +11,9 @@
             {
                 "stripe" => new StripePaymentService(context),
                 "cod" => new CODPaymentService(context),
+                "paypal" => new PayPalPaymentAdapter(new PayPalSdk(), context),
                 _ => throw new NotImplementedException("Payment method not supported")
             };
         }
     }
-
 }

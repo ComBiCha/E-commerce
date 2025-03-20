@@ -89,7 +89,7 @@
                 $.get('@Url.Action("GetRevenue2", "Statistic")', { year: year, month: month, day: day }, function (data) {
                     console.log("Doanh thu nhận được:", data.totalRevenue);  // Kiểm tra trong Console
                     if (isNaN(data.totalRevenue) || data.totalRevenue === null) {
-                        $("#totalRevenue").text("0 VNĐ"); // Tránh lỗi hiển thị
+                        $("#totalRevenue").text("0 $"); // Tránh lỗi hiển thị
                     } else {
                         $("#totalRevenue").text(new Intl.NumberFormat().format(data.totalRevenue) + " $");
                     }
@@ -119,7 +119,7 @@
                     columns: [
                         { data: "orderCode" },
                         { data: "createdDate", render: function (data) { return new Date(data).toLocaleDateString(); } },
-                        { data: "revenue", render: function (data) { return new Intl.NumberFormat().format(data) + " VNĐ"; } },
+                        { data: "revenue", render: function (data) { return new Intl.NumberFormat().format(data) + " $"; } },
                         { data: "status" },
                         {
                             data: "orderCode",

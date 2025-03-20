@@ -29,6 +29,7 @@ namespace E_commerce.Repository
         public DbSet<MaterialModel> Materials { get; set; }
         public DbSet<ColorModel> Colors { get; set; }
 		public DbSet<CouponModel> Coupons { get; set; }
+        public DbSet<CouponUsageModel> CouponUsages { get; set; }
 
         public DbSet<E_commerce.Models.UserModel> UserModel { get; set; }
     }
