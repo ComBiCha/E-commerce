@@ -7,25 +7,32 @@
 
     public class OrderPrototype
     {
-        public int Id { get; }
-        public string OrderCode { get; }
-        public string UserName { get; }
-        public DateTime CreatedDate { get; }
-        public int Status { get; }
+        public int Id { get; set; }
+        public string OrderCode { get; set; }
+        public decimal ShippingCost { get; set; }
+        public string Address { get; set; }
+        public string UserName { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public int Status { get; set; }
+        public string PaymentIntentId { get; set; }
 
-        public OrderPrototype(int id, string orderCode, string userName, DateTime createdDate, int status)
+        public OrderPrototype(int id, string orderCode, decimal shippingCost, string address, string userName, DateTime createdDate, int status, string paymentIntentId)
         {
             Id = id;
             OrderCode = orderCode;
+            ShippingCost = shippingCost;
+            Address = address;
             UserName = userName;
             CreatedDate = createdDate;
             Status = status;
+            PaymentIntentId = paymentIntentId;
         }
 
         public OrderPrototype Clone()
         {
-            return new OrderPrototype(Id, OrderCode, UserName, CreatedDate, Status);
+            return (OrderPrototype)this.MemberwiseClone();
         }
     }
+
 
 }

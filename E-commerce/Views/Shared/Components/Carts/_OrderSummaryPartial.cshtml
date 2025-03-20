@@ -49,19 +49,19 @@
             You will be charged at the time of shipment. If this is a personalized or made-to-order purchase, you will be charged at the time of purchase.
         </p>
         <form asp-controller="Checkout" asp-action="Checkout" method="post" enctype="multipart/form-data">
-            <h5>Select Payment Method</h5>
-            <label>
+            <h5 style="font-size:1.5rem;font-weight:bolder" class="mb-4 mt-5">Select Payment Method</h5>
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <label class="payment-method">
                 <input type="radio" name="paymentMethod" value="stripe" checked /> Pay with Stripe
             </label>
-            <label>
+            <label class="payment-method">
                 <input type="radio" name="paymentMethod" value="paypal" /> Pay with Paypal
             </label>
-            <label>
+            <label class="payment-method">
                 <input type="radio" name="paymentMethod" value="cod" /> Pay with Cash on Delivery (COD)
             </label>
-            <br />
-
-
+            </div>
+          
             @if (User.Identity?.IsAuthenticated ?? false)
             {
                 @if (Model.ShippingCost <= 0)
