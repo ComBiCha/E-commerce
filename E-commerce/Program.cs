@@ -9,6 +9,9 @@ using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Thêm UserFacade vào DI container
+builder.Services.AddScoped<UserFacade>();
+
 //Connection db
 builder.Services.AddDbContext<DataContext>(options =>
 {
