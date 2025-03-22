@@ -226,9 +226,11 @@ namespace E_commerce.Areas.Admin.Controllers
                 existingProduct.BrandId = product.BrandId;
                 existingProduct.WarrantyPeriod = product.WarrantyPeriod;
 
+                string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+
+                // Xử lý ảnh chính (ImageUpload)
                 if (product.ImageUpload != null)
                 {
-                    string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
                     string newImageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload.FileName;
                     string newFilePath = Path.Combine(uploadDir, newImageName);
 
@@ -248,109 +250,74 @@ namespace E_commerce.Areas.Admin.Controllers
 
                     existingProduct.Image = newImageName;
                 }
-				if (product.ImageUpload2 != null)
-				{
-					string uploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
-					string newImageName = Guid.NewGuid().ToString() + "_" + product.ImageUpload2.FileName;
-					string newFilePath = Path.Combine(uploadDir, newImageName);
 
-					if (!string.IsNullOrEmpty(existingProduct.Image2))
-					{
-						string oldFilePath = Path.Combine(uploadDir, existingProduct.Image2);
-						if (System.IO.File.Exists(oldFilePath))
-						{
-							System.IO.File.Delete(oldFilePath);
-						}
-					}
+                // Xử lý ảnh phụ (ImageUpload2)
+                if (product.ImageUpload2 != null)
+                {
+                    string newImageName2 = Guid.NewGuid().ToString() + "_" + product.ImageUpload2.FileName;
+                    string newFilePath2 = Path.Combine(uploadDir, newImageName2);
 
-					using (var fileStream = new FileStream(newFilePath, FileMode.Create))
-					{
-						await product.ImageUpload2.CopyToAsync(fileStream);
-					}
+                    if (!string.IsNullOrEmpty(existingProduct.Image2))
+                    {
+                        string oldFilePath2 = Path.Combine(uploadDir, existingProduct.Image2);
+                        if (System.IO.File.Exists(oldFilePath2))
+                        {
+                            System.IO.File.Delete(oldFilePath2);
+                        }
+                    }
 
-					existingProduct.Image2 = newImageName;
-				}
+                    using (var fileStream = new FileStream(newFilePath2, FileMode.Create))
+                    {
+                        await product.ImageUpload2.CopyToAsync(fileStream);
+                    }
 
-				// Cập nhật các variations đã có
-				for (int i = 0; i < existingProduct.Variations.Count; i++)
+                    existingProduct.Image2 = newImageName2;
+                }
+
+                // Cập nhật thông tin các biến thể sản phẩm
+                for (int i = 0; i < existingProduct.Variations.Count; i++)
                 {
                     var variation = existingProduct.Variations[i];
                     var updatedVariation = product.Variations[i];
+
                     variation.MaterialId = updatedVariation.MaterialId;
                     variation.ColorId = updatedVariation.ColorId;
                     variation.Price = updatedVariation.Price;
                     variation.Stock = updatedVariation.Stock;
-					variation.Size = updatedVariation.Size;
+                    variation.Size = updatedVariation.Size;
 
-					if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
+                    // Xử lý ảnh của biến thể
+                    if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
                     {
                         string variationUploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/variations");
-                        string newVariationImage = Guid.NewGuid().ToString() + "_" + VariationImages[i].FileName;
-                        string newVariationPath = Path.Combine(variationUploadDir, newVariationImage);
+                        string newVariationImageName = Guid.NewGuid().ToString() + "_" + VariationImages[i].FileName;
+                        string newVariationFilePath = Path.Combine(variationUploadDir, newVariationImageName);
 
                         if (!string.IsNullOrEmpty(variation.ImageUrl))
                         {
-                            string oldVariationPath = Path.Combine(variationUploadDir, variation.ImageUrl);
-                            if (System.IO.File.Exists(oldVariationPath))
+                            string oldVariationFilePath = Path.Combine(variationUploadDir, variation.ImageUrl);
+                            if (System.IO.File.Exists(oldVariationFilePath))
                             {
-                                System.IO.File.Delete(oldVariationPath);
+                                System.IO.File.Delete(oldVariationFilePath);
                             }
                         }
 
-                        using (var fileStream = new FileStream(newVariationPath, FileMode.Create))
+                        using (var fileStream = new FileStream(newVariationFilePath, FileMode.Create))
                         {
                             await VariationImages[i].CopyToAsync(fileStream);
                         }
 
-                        variation.ImageUrl = newVariationImage;
+                        variation.ImageUrl = newVariationImageName;
                     }
                 }
 
-                // Xử lý thêm variations mới
-                if (product.Variations != null && product.Variations.Count > existingProduct.Variations.Count)
-                {
-                    for (int i = existingProduct.Variations.Count; i < product.Variations.Count; i++)
-                    {
-                        var newVariation = product.Variations[i];
-
-                        string newVariationImage = null;
-                        if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
-                        {
-                            string variationUploadDir = Path.Combine(_webHostEnvironment.WebRootPath, "media/variations");
-                            newVariationImage = Guid.NewGuid().ToString() + "_" + VariationImages[i].FileName;
-                            string newVariationPath = Path.Combine(variationUploadDir, newVariationImage);
-
-                            using (var fileStream = new FileStream(newVariationPath, FileMode.Create))
-                            {
-                                await VariationImages[i].CopyToAsync(fileStream);
-                            }
-                        }
-
-                        var variation = new ProductVariationModel
-                        {
-                            ProductId = product.Id,
-                            MaterialId = newVariation.MaterialId,
-                            ColorId = newVariation.ColorId,
-                            Price = newVariation.Price,
-                            Stock = newVariation.Stock,
-							Size = newVariation.Size,
-							ImageUrl = newVariationImage
-                        };
-
-                        _dataContext.Variations.Add(variation);
-                    }
-                }
-
-                existingProduct.Quantity = existingProduct.Variations.Sum(v => v.Stock);
-                _dataContext.Update(existingProduct);
                 await _dataContext.SaveChangesAsync();
-
-                TempData["success"] = "Product and variations updated successfully";
-                return RedirectToAction("Index");
+                return RedirectToAction(nameof(Index));
             }
 
             return View(product);
         }
+
 
         [HttpPost]
         public IActionResult DeleteVariation(int variationId, int productId)

@@ -281,7 +281,7 @@ namespace E_commerce.Controllers
 			emailBody.AppendLine($"**Total Items:** {cartItems.Count}");
 			emailBody.AppendLine();
 
-			var baseUrl = "http://localhost:5139/";
+			var baseUrl = "http://sangrk-001-site1.ptempurl.com/";
 			emailBody.AppendLine("**Products in Your Order:**");
 			foreach (var detail in orderDetails)
 			{
@@ -469,7 +469,7 @@ namespace E_commerce.Controllers
                 .Include(od => od.Variation)
                 .ToListAsync();
 
-            var baseUrl = "http://localhost:5139/";
+            var baseUrl = "http://sangrk-001-site1.ptempurl.com/";
             var emailBody = new StringBuilder();
             emailBody.AppendLine("Dear Customer,");
             emailBody.AppendLine("We have successfully received your order. Here are the details:");
