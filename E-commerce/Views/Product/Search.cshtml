@@ -404,6 +404,50 @@
 
 
 		@section Scripts {
+
+	<script>
+
+		function resetFilters() {
+			console.log("Nút Reset đã được ấn!");
+		}
+
+		document.addEventListener("DOMContentLoaded", function () {
+			const resetButton = document.getElementById("resetFilters");
+
+			if (!resetButton) {
+				console.error("Không tìm thấy nút Reset!");
+				return;
+			}
+
+			resetButton.addEventListener("click", function () {
+				console.log("Nút Reset đã được ấn");
+
+				// 1. Reset tất cả checkbox trong nhóm "Color" và "Material"
+				const checkboxes = document.querySelectorAll('.color-options input[type="checkbox"], .material-options input[type="checkbox"]');
+				if (checkboxes.length === 0) {
+					console.error("Không tìm thấy checkbox nào!");
+				} else {
+					checkboxes.forEach(checkbox => {
+						checkbox.checked = false;
+					});
+					console.log("Đã reset checkbox");
+				}
+
+				// 2. Lấy URL hiện tại và xóa tham số "colors" và "materials"
+				const url = new URL(window.location.href);
+				url.searchParams.delete("colors");
+				url.searchParams.delete("materials");
+
+				// 3. Cập nhật URL mà không tải lại trang
+				window.history.replaceState({}, '', url);
+				console.log("Đã cập nhật URL: " + url.toString());
+
+				// 4. (Tùy chọn) Cập nhật kết quả lọc sau khi reset
+				document.getElementById("filterForm").submit();
+			});
+		});
+	</script>
+
 			<script>
 				$(document).ready(function () {
 					$('.add-btn-wishlist').click(function () {
