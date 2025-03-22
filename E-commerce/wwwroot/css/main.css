@@ -51,20 +51,7 @@ h1, h2, h3, h4, h5, h6 {
 	background-color: #000;
 }
 
-a#scrollUp {
-	bottom: 0px;
-	right: 10px;
-	padding: 5px 10px;
-	background: #52511c;
-	color: #FFF;
-	-webkit-animation: bounce 2s ease infinite;
-	animation: bounce 2s ease infinite;
-}
 
-
-a#scrollUp i{
-  font-size: 50px;
-}
 
 
 
