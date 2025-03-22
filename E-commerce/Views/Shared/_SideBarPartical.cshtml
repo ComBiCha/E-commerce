@@ -299,9 +299,10 @@
 			<span class="filter-title">Gender</span>
 			<div class="dropdown-content">
 				<ul>
-					<li>All</li>
-					<li>Men</li>
-					<li>Women</li>
+					<a asp-action="Search" asp-controller="Product"><li>All</li></a>
+					<a asp-action="Search" asp-controller="Product" asp-route-category="Men's"><li>Men</li></a>
+					<a asp-action="Search" asp-controller="Product" asp-route-category="Women's"><li>Women</li></a>
+
 				</ul>
 			</div>
 		</div>
@@ -310,14 +311,15 @@
 			<span class="filter-title">Category</span>
 			<div class="dropdown-content">
 				<ul>
-					<li>All</li>
-					<li>Bags</li>
-					<li>Shoes</li>
+					<a asp-action="Search" asp-controller="Product"><li>All</li></a>
+					<a asp-action="Search" asp-controller="Product" asp-route-brand="Bags"><li>Bags</li></a>
+					<a asp-action="Search" asp-controller="Product" asp-route-brand="Shoes"><li>Shoes</li></a>
+
 				</ul>
 			</div>
 		</div>
 
-		<div class="filter-item">
+		@* <div class="filter-item">
 			<span class="filter-title">Filter</span>
 			<div class="dropdown-filter">
 				<div class="filter-section">
@@ -368,16 +370,79 @@
 				</div>
 
 			</div>
+		</div> *@
+		<div class="filter-item">
+			<span class="filter-title">Filter</span>
+			<div class="dropdown-filter">
+				<form id="filterForm" method="get" action="/Product/Search">
+					<input type="hidden" name="searchTerm" value="@Context.Request.Query["searchTerm"]">
+					<input type="hidden" name="category" value="@Context.Request.Query["category"]">
+					<input type="hidden" name="brand" value="@Context.Request.Query["brand"]">
+					<input type="hidden" name="sortOrder" value="@Context.Request.Query["sortOrder"]">
+
+					<div class="filter-section">
+						<h3 class="filter-heading">COLOR</h3>
+						<ul class="filter-options color-options">
+							<li><input type="checkbox" name="colors" value="Brown"><label>Brown</label></li>
+							<li><input type="checkbox" name="colors" value="Black"><label>Black</label></li>
+							<li><input type="checkbox" name="colors" value="Bright Green"><label>Bright Green</label></li>
+							<li><input type="checkbox" name="colors" value="Red"><label>Red</label></li>
+							<li><input type="checkbox" name="colors" value="White"><label>White</label></li>
+							<li><input type="checkbox" name="colors" value="White&Black"><label>White&Black</label></li>
+							<li><input type="checkbox" name="colors" value="Orange"><label>Orange</label></li>
+						</ul>
+					</div>
+
+					<div class="filter-section">
+						<h3 class="filter-heading">MATERIAL</h3>
+						<ul class="filter-options material-options">
+							<li><input type="checkbox" name="materials" value="Leather"><label>Leather</label></li>
+							<li><input type="checkbox" name="materials" value="Canvas"><label>Canvas</label></li>
+							<li><input type="checkbox" name="materials" value="GC selected"><label>GC selected</label></li>
+						</ul>
+					</div>
+
+					<div class="dropdown-footer" id="sortby-column">
+						<hr class="divider">
+						<p class="footer-text">
+							You can select several options at once
+						</p>
+						<div class="footer-buttons">
+							<button type="submit" class="btn btn-apply">Apply</button>
+							<button type="reset" class="btn btn-reset">Reset</button>
+						</div>
+					</div>
+				</form>
+			</div>
 		</div>
+
 
 
 		<div class="filter-item">
 			<span class="filter-title">Sort By</span>
 			<div class="dropdown-content">
 				<ul>
-					<li>Newest</li>
+					<a asp-action="Search"
+					   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
+					   asp-route-category="@Context.Request.Query["category"]"
+					   asp-route-brand="@Context.Request.Query["brand"]"
+					   asp-route-sortOrder="best_selling">
+					<li>Best Selling</li>
+					</a>
+					<a asp-action="Search"
+					   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
+					   asp-route-category="@Context.Request.Query["category"]"
+					   asp-route-brand="@Context.Request.Query["brand"]"
+					   asp-route-sortOrder="price_desc">
 					<li>Price: High to Low</li>
+					</a>
+					<a asp-action="Search"
+					   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
+					   asp-route-category="@Context.Request.Query["category"]"
+					   asp-route-brand="@Context.Request.Query["brand"]"
+					   asp-route-sortOrder="price_asc">
 					<li>Price: Low to High</li>
+					</a>
 				</ul>
 			</div>
 		</div>

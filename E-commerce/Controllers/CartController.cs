@@ -234,9 +234,9 @@ namespace E_commerce.Controllers
 			{
 				var cookieOptions = new CookieOptions
 				{
-					HttpOnly = true,
+					HttpOnly = false,
 					Expires = DateTimeOffset.UtcNow.AddMinutes(30),
-					Secure = true
+					Secure = false,
 				};
 
 				Response.Cookies.Append("ShippingPrice", shippingPriceJson, cookieOptions);
