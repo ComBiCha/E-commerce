@@ -14,7 +14,7 @@ namespace E_commerce.Repository
 
         public async Task<string> ProcessPayment(OrderModel order, List<CartItemModel> cartItems, decimal shippingPrice, decimal discountAmount)
         {
-            var domain = "http://localhost:5139/";
+            var domain = "http://sangrk-001-site1.ptempurl.com/";
 
             // **1. Lưu order vào database trước khi gọi Stripe**
             order.Status = 0; // Trạng thái chờ thanh toán

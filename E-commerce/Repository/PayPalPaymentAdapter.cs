@@ -19,7 +19,7 @@ namespace E_commerce.Repository
         {
             decimal totalAmount = cartItems.Sum(x => x.Quantity * x.Price) + shippingPrice - discountAmount;
             string orderCode = order.OrderCode;
-            var domain = "http://localhost:5139/";
+            var domain = "http://sangrk-001-site1.ptempurl.com/";  
 
             var payment = new Payment
             {
