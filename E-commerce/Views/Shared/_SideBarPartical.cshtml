@@ -23,6 +23,20 @@
 			transition: color 0.3s ease;
 		}
 
+		#filterForm {
+			display: flex;
+			gap: 20rem;
+			margin-top:3rem;
+			flex-wrap: wrap;
+			align-items: flex-start;
+			position: absolute;
+			top: 30%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			padding: 0;
+			box-sizing: border-box;
+		}
+
 		.dropdown-content {
 			display: none;
 			position: absolute;
@@ -41,7 +55,7 @@
 			position: absolute;
 			top: 165%;
 			left: -90vw;
-			padding: 40px 0px 40px 200px;
+			padding: 40px 30px 40px 30px;
 			background-color: white;
 			border: 1px solid #ddd;
 			box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -50,6 +64,28 @@
 			width: 100vw;
 			box-sizing: border-box;
 			overflow-y: auto;
+			cursor: default;
+		}
+
+		a {
+			color: black;
+			 text-decoration: none;
+		}
+
+		a:hover{
+			color:white;
+		}
+
+		.filter-item ul li a {
+			display: block; /* Biến liên kết thành khối để bao phủ toàn bộ thẻ <li> */
+			color: black;
+			text-decoration: none;
+		}
+
+		.dropdown-content li:hover a,
+		.dropdown-content li.active a {
+			color: white; /* Đổi màu chữ khi active hoặc hover */
+			text-decoration: none; /* Giữ liên kết không gạch chân */
 		}
 
 		.filter-item::after {
@@ -75,7 +111,7 @@
 				font-weight: 600;
 				padding: 10px 1rem; 
 				border-bottom: 1px solid #ddd; /* Đường gạch dưới */
-				transition: background-color 0.3s ease, color 0.3s ease; /* Hiệu ứng mượt khi hover */
+				transition: background-color 0.3s ease; /* Hiệu ứng mượt khi hover */
 				cursor: pointer;
 				position: relative;
 			}
@@ -94,6 +130,8 @@
 						content: "\2713"; /* Biểu tượng checkmark */
 						position: absolute;
 						right: 1rem; /* Căn sang bên phải */
+					top: 50%; /* Đưa đến giữa dòng */
+					transform: translateY(-50%);
 						color: white; /* Màu dấu checkmark */
 						font-size: 1.5rem; /* Kích thước dấu checkmark */
 					}
@@ -104,13 +142,13 @@
 				}
 		
 
+
 		.filter-item:hover .dropdown-content {
 			display: block;
 		}
 
 		.filter-item:hover .dropdown-filter{
 			display: flex;
-			gap: 20px;
 			flex-wrap: wrap; /* Cho phép các mục bên trong dropdown nằm ngang hoặc xuống dòng nếu cần */
 			align-items: flex-start;
 		}
@@ -119,13 +157,13 @@
 			flex: 1; /* Các phần COLOR và MATERIAL sẽ có cùng chiều rộng */
 			display: flex;
 			flex-direction: column; /* Duy trì bố cục theo chiều dọc */
-			gap: 40px; /* Khoảng cách giữa các phần */
+			gap: 20px; /* Khoảng cách giữa các phần */
 		}
 
 		.filter-heading {
 			font-size: 3rem;
 			font-weight: bold;
-			color: #7a791e;
+			color: black;
 		}
 
 		.color-options,
@@ -134,12 +172,12 @@
 			padding: 0;
 			margin: 0; /* Căn giữa toàn bộ grid */
 			display: grid;
-			gap: 10px;
+			gap: 15px;
 			overflow-y: auto;
 		}
 
 		.color-options {
-			grid-template-columns: repeat(4, 1fr); /* COLOR: 4 cột */
+			grid-template-columns: repeat(3, 1fr); /* COLOR: 3 cột */
 		}
 
 		.material-options {
@@ -166,6 +204,8 @@
 				align-items: start; /* Căn giữa checkbox và văn bản theo chiều dọc */
 				gap: 5px; /* Khoảng cách giữa checkbox và văn bản */
 				font-size: 1.5rem;
+				color: black;
+				opacity: 0.75;
 			}
 
 		input[type="checkbox"] {
@@ -178,9 +218,9 @@
 			appearance: none; /* Loại bỏ kiểu mặc định của checkbox */
 			width: 20px;
 			height: 20px;
-			border: 2px solid #ccc; /* Viền mặc định */
-			border-radius: 4px; /* Bo góc cho checkbox */
-			background-color: #f8f8f8; /* Màu nền mặc định */
+			border: 2px solid black; /* Viền mặc định */
+			border-radius: 2px; /* Bo góc cho checkbox */
+			background-color: white; /* Màu nền mặc định */
 			cursor: pointer;
 			transition: background-color 0.3s, border-color 0.3s; /* Hiệu ứng mượt mà */
 		}
@@ -188,7 +228,7 @@
 			/* Khi checkbox được chọn */
 			.color-options input[type="checkbox"]:checked {
 				background-color: #f8f8f8; /* Màu nền khi được chọn */
-				border-color: #7a791e; /* Viền khi được chọn */
+				border-color: black; /* Viền khi được chọn */
 			}
 
 				/* Tùy chọn: Thêm dấu check khi chọn */
@@ -202,7 +242,7 @@
 				}
 
 				.color-options input[type="checkbox"]:checked + label {
-					color: #7a791e; /* Màu chữ khi được chọn */
+					color: black; /* Màu chữ khi được chọn */
 				}
 
 
@@ -210,9 +250,9 @@
 			appearance: none; /* Loại bỏ kiểu mặc định của checkbox */
 			width: 20px;
 			height: 20px;
-			border: 2px solid #ccc; /* Viền mặc định */
-			border-radius: 4px; /* Bo góc cho checkbox */
-			background-color: #f8f8f8; /* Màu nền mặc định */
+			border: 2px solid black; /* Viền mặc định */
+			border-radius: 2px; /* Bo góc cho checkbox */
+			background-color: white; /* Màu nền mặc định */
 			cursor: pointer;
 			transition: background-color 0.3s, border-color 0.3s; /* Hiệu ứng mượt mà */
 		}
@@ -220,7 +260,7 @@
 			/* Khi checkbox được chọn */
 			.material-options input[type="checkbox"]:checked {
 				background-color: #f8f8f8; /* Màu nền khi được chọn */
-				border-color: #7a791e; /* Viền khi được chọn */
+				border-color: black; /* Viền khi được chọn */
 			}
 
 				/* Tùy chọn: Thêm dấu check khi chọn */
@@ -234,26 +274,22 @@
 				}
 
 				.material-options input[type="checkbox"]:checked + label {
-					color: #7a791e; /* Màu chữ khi được chọn */
+					color: black; /* Màu chữ khi được chọn */
 				}
 
 
-
-		.divider {
-			border: none;
-			height: 2px;
-			background-color: #7a791e;
-			margin: 15px 0;
-		}
+		
+	
 
 		.dropdown-footer {
 			position: absolute; /* Định vị tuyệt đối */
-			bottom: 5rem; /* Đưa footer xuống dưới cùng (nếu cần) */
+			bottom: -18rem; /* Đưa footer xuống dưới cùng (nếu cần) */
 			left: 50%; /* Đưa vào giữa theo trục ngang */
 			transform: translateX(-50%); /* Căn chỉnh thực tế theo giữa trục ngang */
-			width: fit-content; /* Đảm bảo không vượt chiều ngang nội dung */
+			width: 99vw; /* Đảm bảo không vượt chiều ngang nội dung */
 			padding: 20px; /* Khoảng cách nội dung bên trong */
 			text-align: center; /* Canh giữa nội dung */
+			border-top: 1px solid rgb(0, 0, 0,0.5);
 		}
 
 
@@ -294,15 +330,33 @@
 			}
 
 	</style>
+
+	@{
+		// Lấy giá trị hiện tại của category và brand từ query string
+		var currentCategory = ViewContext.HttpContext.Request.Query["category"].ToString();
+		var currentBrand = ViewContext.HttpContext.Request.Query["brand"].ToString();
+
+		// Thiết lập giá trị mặc định nếu không có category
+		if (string.IsNullOrEmpty(currentCategory))
+		{
+			currentCategory = "All"; // Hoặc giá trị mặc định khác
+		}
+	}
+
 	<div class="filter-slider">
 		<div class="filter-item" id="gender-column">
 			<span class="filter-title">Gender</span>
 			<div class="dropdown-content">
 				<ul>
-					<a asp-action="Search" asp-controller="Product"><li>All</li></a>
-					<a asp-action="Search" asp-controller="Product" asp-route-category="Men's"><li>Men</li></a>
-					<a asp-action="Search" asp-controller="Product" asp-route-category="Women's"><li>Women</li></a>
-
+					<li class="@(string.IsNullOrEmpty(ViewContext.HttpContext.Request.Query["category"]) ? "active" : "")">
+						<a asp-action="Search" asp-controller="Product">All</a>
+					</li>
+					<li class="@(ViewContext.HttpContext.Request.Query["category"] == "Men's" ? "active" : "")">
+						<a asp-action="Search" asp-controller="Product" asp-route-category="Men's">Men</a>
+					</li>
+					<li class="@(ViewContext.HttpContext.Request.Query["category"] == "Women's" ? "active" : "")">
+						<a asp-action="Search" asp-controller="Product" asp-route-category="Women's">Women</a>
+					</li>
 				</ul>
 			</div>
 		</div>
@@ -311,10 +365,29 @@
 			<span class="filter-title">Category</span>
 			<div class="dropdown-content">
 				<ul>
-					<a asp-action="Search" asp-controller="Product"><li>All</li></a>
-					<a asp-action="Search" asp-controller="Product" asp-route-brand="Bags"><li>Bags</li></a>
-					<a asp-action="Search" asp-controller="Product" asp-route-brand="Shoes"><li>Shoes</li></a>
+					<li class="@(string.IsNullOrEmpty(currentBrand) ? "active" : "")">
+						<a asp-action="Search" asp-controller="Product" asp-route-category="@currentCategory">All</a>
+					</li>
+					@if (currentCategory == "Women's" || currentCategory == "All")
+					{
+						<li class="@(currentBrand == "Handbags" ? "active" : "")">
+							<a asp-action="Search" asp-controller="Product" asp-route-category="Women's" asp-route-brand="Handbags">Handbags</a>
+						</li>
+					}
 
+					<!-- Mục "Men's Bags" hiển thị nếu đang chọn Men's hoặc All -->
+					@if (currentCategory == "Men's" || currentCategory == "All")
+					{
+						<li class="@(currentBrand == "Bags" ? "active" : "")">
+							<a asp-action="Search" asp-controller="Product" asp-route-category="Men's" asp-route-brand="Bags">Men's Bags</a>
+						</li>
+					}
+					<li class="@(currentBrand == "Shoes" ? "active" : "")">
+						<a asp-action="Search"
+						   asp-controller="Product"
+						   asp-route-category="@(currentCategory == "All" ? null : currentCategory)"
+						   asp-route-brand="Shoes">Shoes</a>
+					</li>
 				</ul>
 			</div>
 		</div>
@@ -390,9 +463,10 @@
 							<li><input type="checkbox" name="colors" value="White"><label>White</label></li>
 							<li><input type="checkbox" name="colors" value="White&Black"><label>White&Black</label></li>
 							<li><input type="checkbox" name="colors" value="Orange"><label>Orange</label></li>
+
 						</ul>
 					</div>
-
+					
 					<div class="filter-section">
 						<h3 class="filter-heading">MATERIAL</h3>
 						<ul class="filter-options material-options">
@@ -403,7 +477,6 @@
 					</div>
 
 					<div class="dropdown-footer" id="sortby-column">
-						<hr class="divider">
 						<p class="footer-text">
 							You can select several options at once
 						</p>
@@ -413,6 +486,7 @@
 						</div>
 					</div>
 				</form>
+
 			</div>
 		</div>
 
@@ -422,30 +496,31 @@
 			<span class="filter-title">Sort By</span>
 			<div class="dropdown-content">
 				<ul>
-					<a asp-action="Search"
-					   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
-					   asp-route-category="@Context.Request.Query["category"]"
-					   asp-route-brand="@Context.Request.Query["brand"]"
-					   asp-route-sortOrder="best_selling">
-					<li>Best Selling</li>
-					</a>
-					<a asp-action="Search"
-					   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
-					   asp-route-category="@Context.Request.Query["category"]"
-					   asp-route-brand="@Context.Request.Query["brand"]"
-					   asp-route-sortOrder="price_desc">
-					<li>Price: High to Low</li>
-					</a>
-					<a asp-action="Search"
-					   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
-					   asp-route-category="@Context.Request.Query["category"]"
-					   asp-route-brand="@Context.Request.Query["brand"]"
-					   asp-route-sortOrder="price_asc">
-					<li>Price: Low to High</li>
-					</a>
+					<li class="@(ViewContext.HttpContext.Request.Query["sortOrder"] == "best_selling" ? "active" : "")">
+						<a asp-action="Search"
+						   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
+						   asp-route-category="@Context.Request.Query["category"]"
+						   asp-route-brand="@Context.Request.Query["brand"]"
+						   asp-route-sortOrder="best_selling">Best Selling</a>
+					</li>
+					<li class="@(ViewContext.HttpContext.Request.Query["sortOrder"] == "price_desc" ? "active" : "")">
+						<a asp-action="Search"
+						   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
+						   asp-route-category="@Context.Request.Query["category"]"
+						   asp-route-brand="@Context.Request.Query["brand"]"
+						   asp-route-sortOrder="price_desc">Price: High to Low</a>
+					</li>
+					<li class="@(ViewContext.HttpContext.Request.Query["sortOrder"] == "price_asc" ? "active" : "")">
+						<a asp-action="Search"
+						   asp-route-searchTerm="@Context.Request.Query["searchTerm"]"
+						   asp-route-category="@Context.Request.Query["category"]"
+						   asp-route-brand="@Context.Request.Query["brand"]"
+						   asp-route-sortOrder="price_asc">Price: Low to High</a>
+					</li>
 				</ul>
 			</div>
 		</div>
+
 	</div>
 
 
