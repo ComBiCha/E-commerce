@@ -11,19 +11,19 @@
 		padding: 70px 0px 0px 0px;
 	}
 
-	.col-sm-6{
+	.col-sm-6 {
 		padding-right: 0px !important;
 		padding-left: 0px !important;
 	}
 
-	.product-details{
+	.product-details {
 		display: flex; /* Để xếp hai hình ngang nhau */
 		justify-content: space-between; /* Đặt khoảng cách đều giữa hình ảnh */
 		align-items: center; /* Căn giữa theo chiều dọc */
 		margin: 0;
 		padding: 0;
 		background-color: #e7e7e7;
-		min-height:100vh;
+		min-height: 100vh;
 	}
 
 	.view-productPrimary {
@@ -38,16 +38,15 @@
 		margin-right: 10vw;
 		top: 0;
 		width: 40vw;
-}
+	}
 
 		.view-productPrimary img {
-		height: 100%;
-		min-height:77rem;
-		background-color: #dcdcdc;
-		transform: scale(1.5);
-		vertical-align: middle;
-
-	}
+			height: 100%;
+			width: 100%;
+			background-color: #dcdcdc;
+			transform: scale(1.5);
+			vertical-align: middle;
+		}
 
 	.view-productSecondary {
 		position: relative !important;
@@ -76,8 +75,8 @@
 
 	.product-table-wrapper {
 		position: absolute; /* Đặt vị trí tuyệt đối để dễ canh chỉnh */
-		top: 50%; 
-		left: 50%; 
+		top: 50%;
+		left: 50%;
 		transform: translate(-50%, -50%); /* Đảm bảo căn chính giữa */
 		z-index: 3;
 		background-color: rgba(255, 255, 255, 0.8);
@@ -120,12 +119,13 @@
 	.product-variation-section {
 		position: relative;
 	}
-	.product-variations{
+
+	.product-variations {
 		font-size: 1.6rem;
 		color: #443e3e;
 		margin-bottom: 1.8rem;
 		max-width: 100%;
-		cursor:pointer;
+		cursor: pointer;
 		white-space: normal !important;
 	}
 
@@ -192,6 +192,7 @@
 			background-color: gray; /* Màu xám cho trạng thái hết hàng */
 			cursor: not-allowed;
 		}
+
 	.new-section {
 		background-color: black; /* Màu nền tùy chỉnh */
 		padding: 20px; /* Khoảng cách padding cho toàn bộ khung */
@@ -271,22 +272,22 @@
 		line-height: 1.6;
 		margin-top: 10px;
 	}
-	
-	.product-detail-text li{
+
+	.product-detail-text li {
 		color: black;
 		text-align: left;
 		padding-left: 2rem;
 		font-size: 1.3rem;
 	}
-	
-	.product-detail-text li::before {
-		content: "•"; /* Dấu chấm */
-		position: absolute;
-		left: 5rem; /* Đặt dấu chấm ở bên trái */
-		color: #333; /* Màu dấu chấm */
-		font-size: 2rem; /* Kích thước dấu chấm */
-		line-height: 1; /* Đặt chiều cao dòng */
-	}
+
+		.product-detail-text li::before {
+			content: "•"; /* Dấu chấm */
+			position: absolute;
+			left: 5rem; /* Đặt dấu chấm ở bên trái */
+			color: #333; /* Màu dấu chấm */
+			font-size: 2rem; /* Kích thước dấu chấm */
+			line-height: 1; /* Đặt chiều cao dòng */
+		}
 
 	.product-details-list {
 		margin-top: 10px;
@@ -565,7 +566,7 @@
 			border-radius: 2px; /* Thêm bo góc (tùy chọn) */
 		}
 
-	.gift-content{
+	.gift-content {
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -574,8 +575,8 @@
 		padding-top: 3rem;
 	}
 
-
 </style>
+
 
 <div style="font-family: Arial, sans-serif;">
 	<div class="detail-container">
