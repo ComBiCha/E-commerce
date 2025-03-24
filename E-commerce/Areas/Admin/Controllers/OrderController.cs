@@ -9,6 +9,9 @@ using E_commerce.Repository;
 using Stripe.Climate;
 using E_commerce.Areas.Admin.Repository;
 using E_commerce.Models.ViewModel;
+using E_commerce.Services;
+using PayPal.Api;
+using Stripe;
 
 namespace E_commerce.Areas.Admin.Controllers
 {
@@ -128,13 +131,47 @@ namespace E_commerce.Areas.Admin.Controllers
             {
                 return NotFound();
             }
+			var orderDetails = await _dataContext.OrderDetails
+				.Include(od => od.Variation)
+				.ThenInclude(v => v.Product)
+				.Where(od => od.OrderCode == ordercode)
+				.ToListAsync();
 
-            try
+			// Hoàn lại số lượng sản phẩm & giảm số lượng đã bán
+			foreach (var orderDetail in orderDetails)
+			{
+				if (orderDetail.Variation != null)
+				{
+					orderDetail.Variation.Stock += orderDetail.Quantity; // Cộng lại số lượng đã mua
+					if (orderDetail.Variation.Product != null)
+					{
+						orderDetail.Variation.Product.Sold -= orderDetail.Quantity; // Giảm số lượng đã bán
+						orderDetail.Variation.Product.Quantity += orderDetail.Quantity;
+						if (orderDetail.Variation.Product.Sold < 0)
+						{
+							orderDetail.Variation.Product.Sold = 0;
+						}
+						_dataContext.Products.Update(orderDetail.Variation.Product);
+					}
+					_dataContext.Variations.Update(orderDetail.Variation);
+				}
+			}
+
+			// ✅ **Xử lý hoàn tiền theo phương thức thanh toán**
+			if (!string.IsNullOrEmpty(order.PaymentIntentId))
+			{
+				if (order.PaymentIntentId.StartsWith("pi_"))
+				{
+					await ProcessStripeRefund(order.PaymentIntentId);
+				}
+				else if (order.PaymentIntentId.StartsWith("PAYID-"))
+				{
+					await ProcessPayPalRefund(order.PaymentIntentId);
+				}
+			}
+
+			try
             {
-                // Xóa chi tiết đơn hàng trước
-                var orderDetails = await _dataContext.OrderDetails
-                    .Where(od => od.OrderCode == ordercode)
-                    .ToListAsync();
 
                 if (orderDetails.Any())
                 {
@@ -323,6 +360,80 @@ namespace E_commerce.Areas.Admin.Controllers
             return RedirectToAction("Index"); // Chuyển hướng về danh sách đơn hàng
         }
 
+		private async Task ProcessStripeRefund(string paymentIntentId)
+		{
+			try
+			{
+				var refundOptions = new RefundCreateOptions
+				{
+					PaymentIntent = paymentIntentId,
+					Reason = "requested_by_customer"
+				};
+				var refundService = new RefundService();
+				var refund = await refundService.CreateAsync(refundOptions);
 
-    }
+				if (refund.Status == "succeeded")
+				{
+					TempData["success"] = "Stripe refund processed successfully.";
+				}
+				else
+				{
+					TempData["error"] = "Stripe refund processing failed.";
+				}
+			}
+			catch (Exception ex)
+			{
+				TempData["error"] = "Error processing Stripe refund: " + ex.Message;
+			}
+		}
+
+		private async Task ProcessPayPalRefund(string paymentId)
+		{
+			try
+			{
+				var apiContext = new PayPalSdk().GetAPIContext(); // Lấy APIContext từ PayPalSdk
+
+				// Lấy thông tin Payment từ PayPal
+				var payment = Payment.Get(apiContext, paymentId);
+
+				// Kiểm tra nếu không có giao dịch nào
+				if (payment.transactions.Count == 0 || payment.transactions[0].related_resources.Count == 0)
+				{
+					TempData["error"] = "No transactions found for this PayPal payment.";
+					return;
+				}
+
+				// Lấy Sale ID từ giao dịch đầu tiên
+				var saleId = payment.transactions[0].related_resources[0].sale.id;
+
+				// Tạo yêu cầu hoàn tiền
+				var refundRequest = new RefundRequest
+				{
+					amount = new Amount
+					{
+						total = payment.transactions[0].amount.total, // Tổng tiền hoàn
+						currency = payment.transactions[0].amount.currency // Đơn vị tiền tệ
+					}
+				};
+
+				// Gọi Refund API
+				var refund = Sale.Refund(apiContext, saleId, refundRequest); // ✅ Gọi đúng cách
+
+				if (refund.state.ToLower() == "completed")
+				{
+					TempData["success"] = "PayPal refund processed successfully.";
+				}
+				else
+				{
+					TempData["error"] = "PayPal refund processing failed.";
+				}
+			}
+			catch (Exception ex)
+			{
+				TempData["error"] = "Error processing PayPal refund: " + ex.Message;
+			}
+		}
+
+
+	}
 }
