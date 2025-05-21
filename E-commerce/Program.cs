@@ -11,6 +11,12 @@ using Stripe.Climate;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Đăng ký OrderBuilder
+builder.Services.AddTransient<OrderBuilder>();
+
+// Đăng ký OrderRepository
+builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+
 // Thêm UserFacade vào DI container
 builder.Services.AddScoped<UserFacade>();
 

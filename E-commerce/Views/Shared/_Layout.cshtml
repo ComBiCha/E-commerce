@@ -324,51 +324,46 @@
 
 		// -------------- Script của 2 logo MERDI ----------
 
-		document.addEventListener("DOMContentLoaded", () => {
+			document.addEventListener("DOMContentLoaded", () => {
 			const layoutText = document.querySelector(".logo h2");
 			const sliderText = document.querySelector(".slider-text-top h2"); // Slider chỉ có ở trang chủ
+
+			// Kiểm tra nếu các phần tử tồn tại
+			if (!layoutText || !sliderText) return;
 
 			const currentPath = window.location.pathname;
 
 			// Kiểm tra nếu là trang chủ
 			if (currentPath === "/" || currentPath.toLowerCase() === "/home/index") {
-				// Chỉ chạy logic cuộn trên trang chủ
 				window.addEventListener("scroll", () => {
 					const scrollTop = window.scrollY;
 					const viewportHeight = window.innerHeight;
 
 					if (scrollTop < viewportHeight / 3) {
-						// Khi cuộn lên
 						if (sliderText) {
 							sliderText.style.transform = "translateY(0)";
 							sliderText.style.opacity = "1";
 						}
-
 						layoutText.style.transform = "translateY(50%)";
 						layoutText.style.opacity = "0";
 					} else {
-						// Khi cuộn xuống
 						if (sliderText) {
 							sliderText.style.transform = "translateY(-50%)";
 							sliderText.style.opacity = "0";
 						}
-
 						layoutText.style.transform = "translateY(0)";
 						layoutText.style.opacity = "1";
 					}
 				});
 			} else {
-				// Các trang khác, MERDI hiện thẳng ra
+				// Xử lý trên các trang không phải trang chủ
 				if (sliderText) {
-					// Ẩn sliderText nếu không cần hiển thị ngoài trang chủ
 					sliderText.style.transform = "none";
 					sliderText.style.opacity = "0";
 				}
-
 				if (layoutText) {
-					// Bỏ hiệu ứng transition trên các trang khác
-					layoutText.style.transform = "none"; // Không hiệu ứng
-					layoutText.style.opacity = "1"; // Hiển thị MERDI thẳng
+					layoutText.style.transform = "none";
+					layoutText.style.opacity = "1";
 				}
 			}
 		});
