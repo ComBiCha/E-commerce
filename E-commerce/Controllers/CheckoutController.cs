@@ -230,17 +230,24 @@ namespace E_commerce.Controllers
 
                 if (variation.Product.WarrantyPeriod > 0)
                 {
+                    var warrantyPeriod = variation.Product.WarrantyPeriod; // Lấy giá trị thời gian bảo hành
+                    Console.WriteLine($"Warranty Period: {warrantyPeriod} years"); // Kiểm tra log
+
                     var warranty = new WarrantyModel
                     {
                         WarrantyCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper(),
                         ProductId = variation.ProductId,
                         VariationId = variation.Id,
                         OrderCode = ordercode,
-                        ExpirationDate = DateTime.Now.AddMonths(variation.Product.WarrantyPeriod),
+                        ExpirationDate = DateTime.Now.AddYears(warrantyPeriod), // Cộng thêm số năm bảo hành
                         CreatedDate = DateTime.Now
                     };
+
+                    Console.WriteLine($"Created Warranty - Expiration Date: {warranty.ExpirationDate}"); // Kiểm tra log
+
                     _datacontext.Warranties.Add(warranty);
                 }
+
 
                 variation.Stock -= cart.Quantity;
                 variation.Product.Sold += cart.Quantity;
@@ -435,15 +442,21 @@ namespace E_commerce.Controllers
 
                 if (variation.Product.WarrantyPeriod > 0)
                 {
+                    var warrantyPeriod = variation.Product.WarrantyPeriod; // Lấy giá trị thời gian bảo hành
+                    Console.WriteLine($"Warranty Period: {warrantyPeriod} years"); // Kiểm tra log
+
                     var warranty = new WarrantyModel
                     {
                         WarrantyCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper(),
                         ProductId = variation.ProductId,
                         VariationId = variation.Id,
                         OrderCode = ordercode,
-                        ExpirationDate = DateTime.Now.AddMonths(variation.Product.WarrantyPeriod),
+                        ExpirationDate = DateTime.Now.AddYears(warrantyPeriod), // Cộng thêm số năm bảo hành
                         CreatedDate = DateTime.Now
                     };
+
+                    Console.WriteLine($"Created Warranty - Expiration Date: {warranty.ExpirationDate}"); // Kiểm tra log
+
                     _datacontext.Warranties.Add(warranty);
                 }
 
