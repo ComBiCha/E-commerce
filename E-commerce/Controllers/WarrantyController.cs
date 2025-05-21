@@ -33,11 +33,11 @@ public class WarrantyController : Controller
             return View();
         }
 
-        if (warranty.ExpirationDate < DateTime.UtcNow)
+        /*if (warranty.ExpirationDate < DateTime.UtcNow)
         {
             TempData["error"] = "The warranty has expired.";
             return View();
-        }
+        }*/
 
         // Tạo yêu cầu bảo hành
         var request = new WarrantyRequestModel
@@ -54,6 +54,6 @@ public class WarrantyController : Controller
         await _context.SaveChangesAsync();
 
         TempData["success"] = "Warranty request submitted successfully.";
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("RequestWarranty", "Warranty");
     }
 }

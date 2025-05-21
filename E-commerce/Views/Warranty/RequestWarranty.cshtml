@@ -4,7 +4,15 @@
 @{
 }
 @model E_commerce.Models.WarrantyRequestModel
-
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
 <h2>Request Warranty</h2>
 <form asp-action="RequestWarranty" method="post">
     <div class="form-group">
@@ -18,3 +26,38 @@
     </div>
     <button type="submit" class="btn btn-primary">Submit Request</button>
 </form>
+<style>
+    label {
+        color: white;
+        font-size:3rem;
+    }
+    h2 {
+        color: white;
+        font-size: 3rem;
+    }
+    .text-warning {
+        font-size: 2rem;
+    }
+</style>
+@section Scripts {
+    <script>
+        $(function () {
+            var message = '@TempData["success"]';
+            if (message != '')
+                Swal.fire({
+                    icon: "success",
+                    title: "Yayyy",
+                    text: message,
+                });
+        });
+        $(function () {
+            var message = '@TempData["error"]';
+            if (message != '')
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: message,
+                });
+        });
+    </script>
+}

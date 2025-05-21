@@ -230,17 +230,24 @@ namespace E_commerce.Controllers
 
                 if (variation.Product.WarrantyPeriod > 0)
                 {
+                    var warrantyPeriod = variation.Product.WarrantyPeriod; // Lấy giá trị thời gian bảo hành
+                    Console.WriteLine($"Warranty Period: {warrantyPeriod} years"); // Kiểm tra log
+
                     var warranty = new WarrantyModel
                     {
                         WarrantyCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper(),
                         ProductId = variation.ProductId,
                         VariationId = variation.Id,
                         OrderCode = ordercode,
-                        ExpirationDate = DateTime.Now.AddMonths(variation.Product.WarrantyPeriod),
+                        ExpirationDate = DateTime.Now.AddYears(warrantyPeriod), // Cộng thêm số năm bảo hành
                         CreatedDate = DateTime.Now
                     };
+
+                    Console.WriteLine($"Created Warranty - Expiration Date: {warranty.ExpirationDate}"); // Kiểm tra log
+
                     _datacontext.Warranties.Add(warranty);
                 }
+
 
                 variation.Stock -= cart.Quantity;
                 variation.Product.Sold += cart.Quantity;
@@ -272,6 +279,8 @@ namespace E_commerce.Controllers
 			emailBody.AppendLine("We have successfully received your order. Here are the details:");
 			emailBody.AppendLine();
 
+			var baseUrl = "http://sangrk-001-site1.ptempurl.com/";
+
 			emailBody.AppendLine($"**Order Code:** {ordercode}");
 			emailBody.AppendLine($"**Order Date:** {DateTime.Now:yyyy-MM-dd}");
 			emailBody.AppendLine($"**Shipping Cost:** ${shippingPrice:F2}");
@@ -279,9 +288,10 @@ namespace E_commerce.Controllers
 			emailBody.AppendLine($"**Discount Applied (coupon code):** -${discountAmount2:F2}");
 			emailBody.AppendLine($"**Final Total:** ${finalTotal:F2}");
 			emailBody.AppendLine($"**Total Items:** {cartItems.Count}");
+			string orderLink = $"{baseUrl}Account/ViewOrder?orderCode={order.OrderCode}";
+			emailBody.AppendLine($"Bạn có thể xem đơn hàng của mình tại đây: {orderLink}");
 			emailBody.AppendLine();
 
-			var baseUrl = "http://sangrk-001-site1.ptempurl.com/";
 			emailBody.AppendLine("**Products in Your Order:**");
 			foreach (var detail in orderDetails)
 			{
@@ -432,15 +442,21 @@ namespace E_commerce.Controllers
 
                 if (variation.Product.WarrantyPeriod > 0)
                 {
+                    var warrantyPeriod = variation.Product.WarrantyPeriod; // Lấy giá trị thời gian bảo hành
+                    Console.WriteLine($"Warranty Period: {warrantyPeriod} years"); // Kiểm tra log
+
                     var warranty = new WarrantyModel
                     {
                         WarrantyCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper(),
                         ProductId = variation.ProductId,
                         VariationId = variation.Id,
                         OrderCode = ordercode,
-                        ExpirationDate = DateTime.Now.AddMonths(variation.Product.WarrantyPeriod),
+                        ExpirationDate = DateTime.Now.AddYears(warrantyPeriod), // Cộng thêm số năm bảo hành
                         CreatedDate = DateTime.Now
                     };
+
+                    Console.WriteLine($"Created Warranty - Expiration Date: {warranty.ExpirationDate}"); // Kiểm tra log
+
                     _datacontext.Warranties.Add(warranty);
                 }
 
