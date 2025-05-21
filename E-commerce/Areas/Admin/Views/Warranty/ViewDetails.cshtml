@@ -68,7 +68,7 @@
         <dd class="col-sm-10">@Html.Raw(@Model.Warranty.Product.Description)</dd>
 
         <dt class="col-sm-2">Product Price:</dt>
-        <dd class="col-sm-10">@((ViewBag.ProductTotal - ViewBag.DiscountAmount + ViewBag.Order.ShippingCost).ToString("C"))</dd>
+        <dd class="col-sm-10">@((ViewBag.ProductTotal).ToString("C"))</dd>
 
         <dt class="col-sm-2">Product Image:</dt>
         <dd class="col-sm-10">

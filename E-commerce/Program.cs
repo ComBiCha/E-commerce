@@ -1,4 +1,5 @@
-﻿using E_commerce.Areas.Admin.Repository;
+﻿using E_commerce.Areas.Admin.Controllers.RepositoryPattern;
+using E_commerce.Areas.Admin.Repository;
 using E_commerce.Controllers;
 using E_commerce.Models;
 using E_commerce.Repository;
@@ -63,6 +64,9 @@ builder.Services.AddScoped<RoleManagerDecorator>();
 
 builder.Services.AddSingleton<CouponFactory>();
 builder.Services.AddScoped<CouponManager>();
+
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddLogging(logging =>

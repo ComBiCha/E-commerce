@@ -37,18 +37,29 @@ namespace E_commerce.Areas.Admin.Controllers
                 .Include(r => r.Warranty.Variation.Color)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
-            var order = await _context.Orders
-                .FirstOrDefaultAsync(o => o.OrderCode == request.Warranty.OrderCode);
-            var userEmail = order.UserName;
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
-            decimal discountRate = user?.GetDiscountRate() ?? 0m; // Lấy mức giảm giá từ UserModel
+
+
+            //var orderCode = request?.Warranty?.OrderCode;
+            //if (string.IsNullOrEmpty(orderCode))
+            //{
+            //    TempData["error"] = "Order Code is missing.";
+            //    Console.WriteLine("❌ OrderCode is NULL or EMPTY!");
+            //    return RedirectToAction(nameof(Index));
+            //}
+
+            //Console.WriteLine($"✅ OrderCode: {orderCode}");
+            //var order = await _context.Orders
+            // .FirstOrDefaultAsync(o => o.OrderCode == request.Warranty.OrderCode);
+            //var userEmail = order.UserName;
+            //var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
+            //decimal discountRate = user?.GetDiscountRate() ?? 0m; // Lấy mức giảm giá từ UserModel
             decimal productTotal = request.Warranty.Product.Price;
 
-            decimal discountAmount = productTotal * discountRate; // Số tiền giảm giá
+            //decimal discountAmount = productTotal * discountRate; // Số tiền giảm giá
 
-            ViewBag.Order = order;
-            ViewBag.DiscountRate = discountRate; // Gửi Discount Rate sang View
-            ViewBag.DiscountAmount = discountAmount; // Số tiền giảm giá
+            //ViewBag.Order = order;
+            //ViewBag.DiscountRate = discountRate; // Gửi Discount Rate sang View
+            //ViewBag.DiscountAmount = discountAmount; // Số tiền giảm giá
             ViewBag.ProductTotal = productTotal;
 
             if (request == null)
