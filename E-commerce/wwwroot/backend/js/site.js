@@ -14,14 +14,12 @@
 
 });
 
-function readURL(input) {
+/*function readURL(input, imgPreviewId) {
     if (input.files && input.files[0]) {
         let reader = new FileReader();
-
         reader.onload = function (e) {
-            $("img#imgpreview").attr("src", e.target.result).width(200).height(200);
+            $("#" + imgPreviewId).attr("src", e.target.result).width(200).height(200).show();
         };
-
         reader.readAsDataURL(input.files[0]);
     }
-}
+}*/

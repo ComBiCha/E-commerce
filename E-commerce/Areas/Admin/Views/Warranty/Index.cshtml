@@ -1,0 +1,133 @@
+﻿@model IEnumerable<E_commerce.Models.WarrantyRequestModel>
+
+@{
+    ViewData["Title"] = "Warranty Requests";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div>
+    <label for="statusFilter">Filter by Status:</label>
+    <select id="statusFilter" class="form-select" style="width: 200px;">
+        <option value="">All</option>
+        <option value="Đợi duyệt">Đợi duyệt</option>
+        <option value="Đã duyệt">Đã duyệt</option>
+        <option value="Đã tiếp nhận sản phẩm lỗi">Đã tiếp nhận sản phẩm lỗi</option>
+        <option value="Đã khắc phục">Đã khắc phục</option>
+        <option value="Đã hoàn thành">Đã hoàn thành</option>
+        <option value="Bị từ chối">Bị từ chối</option>
+        <option value="Đã bị huỷ">Đã bị huỷ</option>
+    </select>
+</div>
+<div class="row mb-3">
+    <div class="col-md-3">
+        <label for="startDate">Start Date:</label>
+        <input type="date" id="startDate" class="form-control">
+    </div>
+    <div class="col-md-3">
+        <label for="endDate">End Date:</label>
+        <input type="date" id="endDate" class="form-control">
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-bordered" id="WarrantyTable">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Warranty Code</th>
+                <th>User</th>
+                <th>Status</th>
+                <th>Created Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var request in Model)
+            {
+                <tr>
+                    <td>@request.Id</td>
+                    <td>@request.WarrantyCode</td>
+                    <td>@request.User.UserName</td>
+                    <td>
+                        @if (request.Status == 0)
+                        {
+                            <span class="badge bg-warning">Đợi duyệt</span>
+                        }
+                        else if (request.Status == 1)
+                        {
+                            <span class="badge bg-success">Đã duyệt</span>
+                        }
+                        else if (request.Status == 2)
+                        {
+                            <span class="badge bg-info">Đã tiếp nhận sản phẩm lỗi</span>
+                        }
+                        else if (request.Status == 3)
+                        {
+                            <span class="badge bg-primary">Đã khắc phục</span>
+                        }
+                        else if (request.Status == 4)
+                        {
+                            <span class="badge bg-dark">Đã hoàn thành</span>
+                        }
+                        else if (request.Status == 5)
+                        {
+                            <span class="badge bg-danger">Bị từ chối</span>
+                        }
+                        else if (request.Status == 6)
+                        {
+                            <span class="badge bg-danger">Đã bị huỷ</span>
+                        }
+                    </td>
+                    <td>@request.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                    <td>
+                        <a href="@Url.Action("ViewDetails", "Warranty", new { id = request.Id })" class="btn btn-info btn-sm">View Details</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Initialize DataTable
+            var table = $('#WarrantyTable').DataTable();
+
+            // Add event listener to the dropdown
+            $('#statusFilter').on('change', function () {
+                var selectedStatus = $(this).val();
+                table.column(3).search(selectedStatus, true, false).draw(); // Column 4 is the "Order Status"
+            });
+
+            // Add custom filter for date range
+            $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
+                var startDate = $('#startDate').val();
+                var endDate = $('#endDate').val();
+                var createdDate = data[4]; // Column index of CreatedDate
+
+                if (startDate) {
+                    startDate = new Date(startDate);
+                }
+                if (endDate) {
+                    endDate = new Date(endDate);
+                }
+
+                // Parse the createdDate from the table
+                var tableDate = new Date(createdDate.split(" ")[0].split('/').reverse().join('-'));
+
+                // Apply the filter
+                if ((!startDate || tableDate >= startDate) &&
+                    (!endDate || tableDate <= endDate)) {
+                    return true;
+                }
+                return false;
+            });
+
+            // Add event listeners to the date inputs
+            $('#startDate, #endDate').on('change', function () {
+                table.draw(); // Trigger a redraw with the date filter
+            });
+        });
+    </script>
+}

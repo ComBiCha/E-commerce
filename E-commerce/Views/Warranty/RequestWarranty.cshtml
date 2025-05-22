@@ -1,0 +1,63 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+@model E_commerce.Models.WarrantyRequestModel
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<h2>Request Warranty</h2>
+<form asp-action="RequestWarranty" method="post">
+    <div class="form-group">
+        <label for="WarrantyCode">Warranty Code</label>
+        <input type="text" class="form-control" name="warrantyCode" required />
+    </div>
+    <span class="text-warning">*You can find WarrantyCode in Your OrderDetails after it finished*</span>
+    <div class="form-group">
+        <label for="Reason">Reason</label>
+        <textarea class="form-control" name="reason" rows="4" required></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit Request</button>
+</form>
+<style>
+    label {
+        color: white;
+        font-size:3rem;
+    }
+    h2 {
+        color: white;
+        font-size: 3rem;
+    }
+    .text-warning {
+        font-size: 2rem;
+    }
+</style>
+@section Scripts {
+    <script>
+        $(function () {
+            var message = '@TempData["success"]';
+            if (message != '')
+                Swal.fire({
+                    icon: "success",
+                    title: "Yayyy",
+                    text: message,
+                });
+        });
+        $(function () {
+            var message = '@TempData["error"]';
+            if (message != '')
+                Swal.fire({
+                    icon: "error",
+                    title: "Oops...",
+                    text: message,
+                });
+        });
+    </script>
+}

@@ -1,0 +1,140 @@
+﻿@{
+    ViewData["Title"] = "Báo Cáo Doanh Thu";
+}
+<h2 class="mb-4">Báo Cáo Doanh Thu</h2>
+
+<div class="row mb-3">
+    <div class="col-md-3">
+        <label for="yearFilter">Chọn Năm:</label>
+        <select id="yearFilter" class="form-control">
+            <option value="">Tất cả</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="monthFilter">Chọn Tháng:</label>
+        <select id="monthFilter" class="form-control">
+            <option value="">Tất cả</option>
+        </select>
+    </div>
+    <div class="col-md-3">
+        <label for="dateFilter">Chọn Ngày:</label>
+        <input type="date" id="dateFilter" class="form-control">
+    </div>
+    <div class="col-md-3 align-self-end">
+        <button class="btn btn-primary" id="filterBtn">Lọc</button>
+    </div>
+</div>
+
+<!-- Hiển thị doanh thu -->
+<h3 class="mt-4">Tổng Doanh Thu: <span id="totalRevenue">0</span></h3>
+
+<!-- Bảng hiển thị đơn hàng -->
+<h4 class="mt-4">Danh Sách Đơn Hàng</h4>
+<table id="ordersTable" class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Order Code</th>
+            <th>Ngày Tạo</th>
+            <th>Tổng Tiền</th>
+            <th>Trạng Thái</th>
+            <th>View</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+
+
+        function loadMonthOptions() {
+            for (let i = 1; i <= 12; i++) {
+                $("#monthFilter").append(`<option value="${i}">Tháng ${i}</option>`);
+            }
+        }
+
+        $(document).ready(function () {
+            loadYearOptions();
+            loadMonthOptions();
+
+            $("#filterBtn").click(function () {
+                loadRevenue();
+                loadOrdersTable();
+            });
+
+            function loadYearOptions() {
+                let currentYear = new Date().getFullYear();
+                for (let i = currentYear; i >= currentYear - 5; i--) {
+                    $("#yearFilter").append(`<option value="${i}">${i}</option>`);
+                }
+            }
+
+            function loadMonthOptions() {
+                for (let i = 1; i <= 12; i++) {
+                    $("#monthFilter").append(`<option value="${i}">Tháng ${i}</option>`);
+                }
+            }
+
+            function loadRevenue() {
+                let year = $("#yearFilter").val();
+                let month = $("#monthFilter").val();
+                let day = $("#dateFilter").val();
+
+                if (day) {
+                    day = new Date(day).getDate();
+                }
+
+                $.get('@Url.Action("GetRevenue2", "Statistic")', { year: year, month: month, day: day }, function (data) {
+                    console.log("Doanh thu nhận được:", data.totalRevenue);  // Kiểm tra trong Console
+                    if (isNaN(data.totalRevenue) || data.totalRevenue === null) {
+                        $("#totalRevenue").text("0 $"); // Tránh lỗi hiển thị
+                    } else {
+                        $("#totalRevenue").text(new Intl.NumberFormat().format(data.totalRevenue) + " $");
+                    }
+                }).fail(function (xhr) {
+                    console.error("Lỗi API:", xhr.responseText);
+                    $("#totalRevenue").text("Lỗi tải dữ liệu");
+                });
+            }
+
+
+            function loadOrdersTable() {
+                let year = $("#yearFilter").val();
+                let month = $("#monthFilter").val();
+                let day = $("#dateFilter").val();
+
+                if (day) {
+                    day = new Date(day).getDate();
+                }
+
+                $("#ordersTable").DataTable().destroy();
+                $("#ordersTable").DataTable({
+                    ajax: {
+                        url: '@Url.Action("GetRevenue", "Statistic")',
+                        data: { year: year, month: month, day: day },
+                        dataSrc: ""
+                    },
+                    columns: [
+                        { data: "orderCode" },
+                        { data: "createdDate", render: function (data) { return new Date(data).toLocaleDateString(); } },
+                        { data: "revenue", render: function (data) { return new Intl.NumberFormat().format(data) + " $"; } },
+                        { data: "status" },
+                        {
+                            data: "orderCode",
+                            render: function (data) {
+                                return `<a href="/Admin/Order/ViewOrder?ordercode=${data}" class="btn btn-sm btn-primary">Xem</a>`;
+                            }
+                        }
+                    ],
+                    order: [[1, "desc"]]
+                });
+            }
+        });
+
+
+
+    </script>
+}
+

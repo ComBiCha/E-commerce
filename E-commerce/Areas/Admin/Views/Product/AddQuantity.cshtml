@@ -6,19 +6,15 @@
 }
 <h4>Add Quantity</h4>
 <div class="col-md-9">
-    <form asp-action="StoreProductQuantity" asp-controller="Product" enctype="multipart/form-data">
-        <input type="hidden" name="ProductId" value="@ViewBag.Id"/>
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <form asp-action="StoreProductQuantity" method="post">
+        <input type="hidden" asp-for="VariationId" />
+
         <div class="form-group">
             <label>Quantity</label>
-            <input min="1" value="1" max="500" asp-for="Quantity" class="form-control" />
-            <span asp-validation-for="Quantity" class="text-danger" />
+            <input type="number" asp-for="Quantity" class="form-control" required />
         </div>
 
-        <div class="form-group">
-            <button class="btn btn-primary">Create</button>
-        </div>
-
+        <button type="submit" class="btn btn-primary">Add</button>
     </form>
     <h3>Existing Product Quantities:</h3>
     <table class="table table-striped">
@@ -30,7 +26,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach(var productQuantity in ViewBag.ProductByQuantity)
+            @foreach (var productQuantity in ViewBag.ProductByQuantity)
             {
                 total_quantities += productQuantity.Quantity;
                 <tr>
@@ -41,11 +37,15 @@
                 key++;
             }
             <tr>
-                <td>Total Quantities : @total_quantities</td>
+                <td colspan="2"><strong>Total Quantities:</strong></td>
+                <td><strong>@total_quantities</strong></td>
             </tr>
         </tbody>
     </table>
-    <a asp-asp-controller="Product" asp-action="Index">Back to List Products</a>
+
+    <a asp-controller="Product" asp-action="Details" asp-route-id="@Model.Variation.ProductId" class="btn btn-secondary">
+        Back to Product Details
+    </a>
 </div>
 @section Scripts {
     @{

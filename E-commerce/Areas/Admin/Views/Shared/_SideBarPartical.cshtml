@@ -1,9 +1,423 @@
-﻿<div class="left-sidebar">
-	<h2>Category</h2>
-	<div class="panel-group category-products" id="accordian">
-		<!--category-productsr-->
-		<vc:categories></vc:categories>
-			@* <div id="sportswear" class="panel-collapse collapse">
+﻿<div>
+	<style>
+		.filter-slider {
+			display: flex;
+			justify-content: flex-end;
+			gap: 30px;
+			padding: 15px 20px;
+			background-color: black;
+			border-top: 1px solid #ddd;
+			border-bottom: 1px solid #ddd;
+			position: relative;
+		}
+
+		.filter-item {
+			position: relative;
+			cursor: pointer;
+		}
+
+		.filter-title {
+			font-size: 1.5rem;
+			color: white;
+			text-transform: uppercase;
+			transition: color 0.3s ease;
+		}
+
+		.dropdown-content {
+			display: none;
+			position: absolute;
+			top: 165%;
+			right: 0;
+			background-color: white;
+			border: 1px solid #ddd;
+			box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+			z-index: 100;
+			width: 200px;
+			text-align: left;
+		}
+
+		.dropdown-filter {
+			display: none;
+			position: absolute;
+			top: 165%;
+			left: -90vw;
+			padding: 40px 0px 40px 200px;
+			background-color: white;
+			border: 1px solid #ddd;
+			box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+			z-index: 1000000000;
+			height: 70vh;
+			width: 100vw;
+			box-sizing: border-box;
+			overflow-y: auto;
+		}
+
+		.filter-item::after {
+			content: '';
+			position: absolute;
+			top: 100%; /* Ngay dưới filter-item */
+			left: 0;
+			width: 100%;
+			height: 65%; /* Tạo vùng hover ảo kết nối filter-item với dropdown */
+			background: transparent;
+			z-index: 99;
+		}
+
+
+		.dropdown-content ul {
+			list-style: none; /* Loại bỏ bullet points */
+			padding: 0; /* Xóa khoảng cách mặc định */
+			margin: 0; /* Xóa khoảng cách mặc định */
+		}
+
+		.dropdown-content li {
+			font-size: 1.4rem;
+			font-weight: 600;
+			padding: 10px 1rem;
+			border-bottom: 1px solid #ddd; /* Đường gạch dưới */
+			transition: background-color 0.3s ease, color 0.3s ease; /* Hiệu ứng mượt khi hover */
+			cursor: pointer;
+			position: relative;
+		}
+
+			.dropdown-content li:last-child {
+				border-bottom: none; /* Ẩn đường gạch dưới ở mục cuối */
+			}
+
+			.dropdown-content li:hover,
+			.dropdown-content li.active {
+				background-color: black; /* Màu nền khi hover hoặc active */
+				color: white; /* Màu chữ khi hover hoặc active */
+			}
+
+				.dropdown-content li.active::after {
+					content: "\2713"; /* Biểu tượng checkmark */
+					position: absolute;
+					right: 1rem; /* Căn sang bên phải */
+					color: white; /* Màu dấu checkmark */
+					font-size: 1.5rem; /* Kích thước dấu checkmark */
+				}
+
+		.dropdown-content label {
+			font-size: 1.4rem;
+			color: black;
+		}
+
+
+		.filter-item:hover .dropdown-content {
+			display: block;
+		}
+
+		.filter-item:hover .dropdown-filter {
+			display: flex;
+			gap: 20px;
+			flex-wrap: wrap; /* Cho phép các mục bên trong dropdown nằm ngang hoặc xuống dòng nếu cần */
+			align-items: flex-start;
+		}
+
+		.filter-section {
+			flex: 1; /* Các phần COLOR và MATERIAL sẽ có cùng chiều rộng */
+			display: flex;
+			flex-direction: column; /* Duy trì bố cục theo chiều dọc */
+			gap: 40px; /* Khoảng cách giữa các phần */
+		}
+
+		.filter-heading {
+			font-size: 3rem;
+			font-weight: bold;
+			color: #7a791e;
+		}
+
+		.color-options,
+		.material-options {
+			list-style: none;
+			padding: 0;
+			margin: 0; /* Căn giữa toàn bộ grid */
+			display: grid;
+			gap: 10px;
+			overflow-y: auto;
+		}
+
+		.color-options {
+			grid-template-columns: repeat(4, 1fr); /* COLOR: 4 cột */
+		}
+
+		.material-options {
+			grid-template-columns: repeat(2, 1fr); /* MATERIAL: 2 cột */
+			justify-content: start; /* Center toàn bộ grid trong container */
+		}
+
+			.color-options li,
+			.material-options li {
+				display: flex;
+				align-items: center; /* Căn giữa checkbox và label theo chiều dọc */
+				gap: 8px; /* Khoảng cách giữa checkbox và label */
+				justify-content: start; /* Đảm bảo checkbox và label luôn căn trái trong mỗi cột */
+			}
+
+			.color-options input[type="checkbox"],
+			.material-options input[type="checkbox"] {
+				margin: 0; /* Loại bỏ margin mặc định của checkbox */
+			}
+
+			.color-options label,
+			.material-options label {
+				display: flex;
+				align-items: start; /* Căn giữa checkbox và văn bản theo chiều dọc */
+				gap: 5px; /* Khoảng cách giữa checkbox và văn bản */
+				font-size: 1.5rem;
+			}
+
+		input[type="checkbox"] {
+			margin: 0;
+			cursor: pointer;
+		}
+
+		/* Checkbox mặc định */
+		.color-options input[type="checkbox"] {
+			appearance: none; /* Loại bỏ kiểu mặc định của checkbox */
+			width: 20px;
+			height: 20px;
+			border: 2px solid #ccc; /* Viền mặc định */
+			border-radius: 4px; /* Bo góc cho checkbox */
+			background-color: #f8f8f8; /* Màu nền mặc định */
+			cursor: pointer;
+			transition: background-color 0.3s, border-color 0.3s; /* Hiệu ứng mượt mà */
+		}
+
+			/* Khi checkbox được chọn */
+			.color-options input[type="checkbox"]:checked {
+				background-color: #f8f8f8; /* Màu nền khi được chọn */
+				border-color: #7a791e; /* Viền khi được chọn */
+			}
+
+				/* Tùy chọn: Thêm dấu check khi chọn */
+				.color-options input[type="checkbox"]:checked::after {
+					content: "\2713"; /* Dấu check */
+					color: black;
+					font-size: 14px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+
+				.color-options input[type="checkbox"]:checked + label {
+					color: #7a791e; /* Màu chữ khi được chọn */
+				}
+
+
+		.material-options input[type="checkbox"] {
+			appearance: none; /* Loại bỏ kiểu mặc định của checkbox */
+			width: 20px;
+			height: 20px;
+			border: 2px solid #ccc; /* Viền mặc định */
+			border-radius: 4px; /* Bo góc cho checkbox */
+			background-color: #f8f8f8; /* Màu nền mặc định */
+			cursor: pointer;
+			transition: background-color 0.3s, border-color 0.3s; /* Hiệu ứng mượt mà */
+		}
+
+			/* Khi checkbox được chọn */
+			.material-options input[type="checkbox"]:checked {
+				background-color: #f8f8f8; /* Màu nền khi được chọn */
+				border-color: #7a791e; /* Viền khi được chọn */
+			}
+
+				/* Tùy chọn: Thêm dấu check khi chọn */
+				.material-options input[type="checkbox"]:checked::after {
+					content: "\2713"; /* Dấu check */
+					color: black;
+					font-size: 14px;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+				}
+
+				.material-options input[type="checkbox"]:checked + label {
+					color: #7a791e; /* Màu chữ khi được chọn */
+				}
+
+
+
+		.divider {
+			border: none;
+			height: 2px;
+			background-color: #7a791e;
+			margin: 15px 0;
+		}
+
+		.dropdown-footer {
+			position: absolute; /* Định vị tuyệt đối */
+			bottom: 5rem; /* Đưa footer xuống dưới cùng (nếu cần) */
+			left: 50%; /* Đưa vào giữa theo trục ngang */
+			transform: translateX(-50%); /* Căn chỉnh thực tế theo giữa trục ngang */
+			width: fit-content; /* Đảm bảo không vượt chiều ngang nội dung */
+			padding: 20px; /* Khoảng cách nội dung bên trong */
+			text-align: center; /* Canh giữa nội dung */
+		}
+
+
+			.dropdown-footer .footer-text {
+				font-size: 1.5rem; /* Kích thước chữ */
+				margin-bottom: 10px; /* Khoảng cách giữa text và các nút */
+				color: black; /* Màu chữ */
+			}
+
+			.dropdown-footer .footer-buttons {
+				display: flex;
+				justify-content: center; /* Canh giữa các nút */
+				gap: 10px; /* Khoảng cách giữa 2 nút */
+			}
+
+			.dropdown-footer .btn {
+				padding: 10px 20px;
+				font-size: 1.6rem;
+				font-weight: 600;
+				border: 1px solid black;
+				cursor: pointer;
+				border-radius: 3px;
+				transition: all 0.3s ease;
+			}
+
+				.dropdown-footer .btn:hover {
+					transform: scale(0.95);
+				}
+
+			.dropdown-footer .btn-apply {
+				background-color: black;
+				color: white;
+			}
+
+			.dropdown-footer .btn-reset {
+				background-color: white;
+				color: black;
+			}
+
+	</style>
+	<div class="filter-slider">
+		<div class="filter-item" id="gender-column">
+			<span class="filter-title">Gender</span>
+			<div class="dropdown-content">
+				<ul>
+					<li>All</li>
+					<li>Men</li>
+					<li>Women</li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="filter-item" id="category-column">
+			<span class="filter-title">Category</span>
+			<div class="dropdown-content">
+				<ul>
+					<li>All</li>
+					<li>Bags</li>
+					<li>Shoes</li>
+				</ul>
+			</div>
+		</div>
+
+		<div class="filter-item">
+			<span class="filter-title">Filter</span>
+			<div class="dropdown-filter">
+				<div class="filter-section">
+					<h3 class="filter-heading">COLOR</h3>
+					<ul class="filter-options color-options">
+						<li><input type="checkbox" id="color-all"><label for="color-all">All</label></li>
+						<li><input type="checkbox" id="color-beige"><label for="color-beige">Beige</label></li>
+						<li><input type="checkbox" id="color-black"><label for="color-black">Black</label></li>
+						<li><input type="checkbox" id="color-blue"><label for="color-blue">Blue</label></li>
+						<li><input type="checkbox" id="color-bordeaux"><label for="color-bordeaux">Bordeaux</label></li>
+						<li><input type="checkbox" id="color-brown"><label for="color-brown">Brown</label></li>
+						<li><input type="checkbox" id="color-gold"><label for="color-gold">Gold</label></li>
+						<li><input type="checkbox" id="color-green"><label for="color-green">Green</label></li>
+						<li><input type="checkbox" id="color-grey"><label for="color-grey">Grey</label></li>
+						<li><input type="checkbox" id="color-multicolor"><label for="color-multicolor">Multicolor</label></li>
+						<li><input type="checkbox" id="color-neutral"><label for="color-neutral">Neutral</label></li>
+						<li><input type="checkbox" id="color-orange"><label for="color-orange">Orange</label></li>
+						<li><input type="checkbox" id="color-pink"><label for="color-pink">Pink</label></li>
+						<li><input type="checkbox" id="color-red"><label for="color-red">Red</label></li>
+						<li><input type="checkbox" id="color-silver"><label for="color-silver">Silver</label></li>
+						<li><input type="checkbox" id="color-white"><label for="color-white">White</label></li>
+						<li><input type="checkbox" id="color-yellow"><label for="color-yellow">Yellow</label></li>
+					</ul>
+				</div>
+				<div class="filter-section">
+					<h3 class="filter-heading">MATERIAL</h3>
+					<ul class="filter-options material-options">
+						<li><input type="checkbox" id="material-all"><label for="material-all">All</label></li>
+						<li><input type="checkbox" id="material-fabric"><label for="material-fabric">Fabric</label></li>
+						<li><input type="checkbox" id="material-ggcanvas"><label for="material-ggcanvas">GG Canvas</label></li>
+						<li><input type="checkbox" id="material-leather"><label for="material-leather">Leather</label></li>
+						<li><input type="checkbox" id="material-nylon"><label for="material-nylon">Nylon</label></li>
+						<li><input type="checkbox" id="material-originalgg"><label for="material-originalgg">Original GG Fabric</label></li>
+						<li><input type="checkbox" id="material-precious"><label for="material-precious">Precious</label></li>
+						<li><input type="checkbox" id="material-suede"><label for="material-suede">Suede</label></li>
+					</ul>
+				</div>
+
+				<div class="dropdown-footer" id="sortby-column">
+					<hr class="divider">
+					<p class="footer-text">
+						You can select several options at onc
+					</p>
+					<div class="footer-buttons">
+						<button class="btn btn-apply">Apply</button>
+						<button class="btn btn-reset">Reset</button>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+
+		<div class="filter-item">
+			<span class="filter-title">Sort By</span>
+			<div class="dropdown-content">
+				<ul>
+					<li>Newest</li>
+					<li>Price: High to Low</li>
+					<li>Price: Low to High</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+
+</div>
+
+<script>
+			document.querySelectorAll('.filter-item').forEach(filterItem => {
+	  const listItems = filterItem.querySelectorAll('.dropdown-content li'); // Chọn tất cả <li> trong filter-item hiện tại
+	  listItems.forEach(item => {
+		item.addEventListener('click', function () {
+		  // Xóa lớp 'active' khỏi tất cả các mục <li> trong filter-item hiện tại
+		  listItems.forEach(li => li.classList.remove('active'));
+		  // Thêm lớp 'active' cho mục được click
+		  this.classList.add('active');
+		});
+	  });
+	});
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+@* <div class="sidebar_container"> *@
+@* <h2>Category</h2> *@
+@* <div class="panel-group category-products" id="accordian"> *@
+<!--category-productsr-->
+@* <vc:categories></vc:categories> *@
+@* <div id="sportswear" class="panel-collapse collapse">
 				<div class="panel-body">
 					<ul>
 						<li><a href="#">Nike </a></li>
@@ -13,11 +427,11 @@
 						<li><a href="#">ASICS </a></li>
 					</ul>
 				</div>
-			</div> *@
-		</div>
+			</div>x
+		</div> *@
 
-	</div><!--/category-products-->
-
+@* </div> *@<!--/category-products-->
+@* 
 	<div class="brands_products">
 		<!--brands_products-->
 		<h2>Brands</h2>
@@ -26,8 +440,8 @@
 			<vc:brands></vc:brands>
 			</ul>
 		</div>
-		
-	</div><!--/brands_products-->
+
+	</div> *@<!--/brands_products-->
 
 @* 	<div class="price-range">
 		<!--price-range-->
@@ -43,4 +457,4 @@
 		<img src="images/home/shipping.jpg" alt="" />
 	</div><!--/shipping--> *@
 
-</div>
+@* </div>  *@

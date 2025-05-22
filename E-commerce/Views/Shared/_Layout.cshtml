@@ -1,5 +1,5 @@
-
-﻿<!DOCTYPE html>
+﻿
+<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="utf-8">
@@ -10,101 +10,134 @@
 	<link href="~/css/bootstrap.min.css" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
 	<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.min.css" rel="stylesheet">
+	<link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.dataTables.css" rel="stylesheet">
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+
+	<link href="//cdn.datatables.net/2.1.7/css/dataTables.dataTables.min.css" rel="stylesheet">
 	<link href="~/css/prettyPhoto.css" rel="stylesheet">
 	<link href="~/css/price-range.css" rel="stylesheet">
 	<link href="~/css/animate.css" rel="stylesheet">
 	<link href="~/css/main.css" rel="stylesheet">
 	<link href="~/css/responsive.css" rel="stylesheet">
-	<!--[if lt IE 9]>
-	<script src="js/html5shiv.js"></script>
-	<script src="js/respond.min.js"></script>
-	<![endif]-->
 	<link rel="shortcut icon" href="images/ico/favicon.ico">
 	<link rel="apple-touch-icon-precomposed" sizes="144x144" href="images/ico/apple-touch-icon-144-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+
+	<style>
+		.custom-icon {
+			color: black; /* Màu đen cho icon */
+			text-shadow: 1px 1px 0 white, /* Trắng phía dưới bên phải */
+			-1px 1px 0 white, /* Trắng phía dưới bên trái */
+			1px -1px 0 white, /* Trắng phía trên bên phải */
+			-1px -1px 0 white; /* Trắng phía trên bên trái */
+		}
+
+		a#scrollUp {
+			bottom: 0px;
+			right: 10px;
+			padding: 5px 10px;
+			background: #373733 !important;
+			color: #FFF;
+			-webkit-animation: bounce 2s ease infinite;
+			animation: bounce 2s ease infinite;
+		}
+
+
+			a#scrollUp i {
+				font-size: 50px;
+			}
+
+		.btnCancel{
+			background-color: black !important;
+			color: white !important;
+		}
+
+	</style>
 </head><!--/head-->
 
 <body>
 	<header id="header">
-		<!--header-->
-		<div class="header_top">
-			<!--header_top-->
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-6">
-						<div class="contactinfo">
-							<ul class="nav nav-pills">
-								@* <li><a href="#"><i class="fa fa-phone"></i> @ViewBag.Contact.Phone</a></li>
-								<li><a href="#"><i class="fa fa-envelope"></i> @ViewBag.Contact.Email</a></li> *@
-							</ul>
-						</div>
-					</div>
-					<div class="col-sm-6">
-						<div class="social-icons pull-right">
-							<ul class="nav navbar-nav">
-								<li><a href="#"><i class="fa fa-facebook"></i></a></li>
-								<li><a href="#"><i class="fa fa-twitter"></i></a></li>
-								<li><a href="#"><i class="fa fa-linkedin"></i></a></li>
-								<li><a href="#"><i class="fa fa-dribbble"></i></a></li>
-								<li><a href="#"><i class="fa fa-google-plus"></i></a></li>
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div><!--/header_top-->
-
 		<div class="header-middle">
 			<!--header-middle-->
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-4">
-						<div class="logo pull-left">
-							<a href="index.html"><img src="images/home/logo.png" alt="" /></a>
-						</div>
-						@* <div class="btn-group pull-right">
-							<div class="btn-group">
-								<button type="button" class="btn btn-default dropdown-toggle usa" data-toggle="dropdown">
-									USA
-									<span class="caret"></span>
-								</button>
-								<ul class="dropdown-menu">
-									<li><a href="#">Canada</a></li>
-									<li><a href="#">UK</a></li>
-								</ul>
-							</div>
-
-							<div class="btn-group">
-								<button type="button" class="btn btn-default dropdown-toggle usa" data-toggle="dropdown">
-									DOLLAR
-									<span class="caret"></span>
-								</button>
-								<ul class="dropdown-menu">
-									<li><a href="#">Canadian Dollar</a></li>
-									<li><a href="#">Pound</a></li>
-								</ul>
-							</div>
-						</div> *@
+			<div class="container-fluid">
+				<div class="row align-items-center">
+					<!-- Phần bên trái -->
+					<div class="contactUs col-sm-4 d-flex align-items-center justify-content-center">
+						<a asp-action="Contact" asp-controller="Home" class="contact-info d-flex align-items-center justify-content-center">
+							<p>
+								<i class="fa fa-plus" aria-hidden="true"></i>
+								Contact Us
+							</p>
+						</a>
 					</div>
-					<div class="col-sm-8">
+
+
+
+					<!-- Phần ở giữa -->
+					<div class="col-sm-4 d-flex align-items-center justify-content-center">
+						<div id="layout-merdi" class="logo">
+							<a href="index.html">
+								<h2>MERDI</h2>
+							</a>
+						</div>
+
+					</div>
+
+
+					<!-- Phần bên phải -->
+					<div class="col-sm-4 d-flex align-items-center justify-content-center">
 						<div class="shop-menu pull-right">
-							<ul class="nav navbar-nav">
-								
-								<li><a asp-action="Index" asp-controller="Cart"><i class="fa fa-shopping-cart"></i>Cart</a></li>
-								@if(User.Identity?.IsAuthenticated ?? false)
+							<ul class="nav">
+								<li><a asp-action="Index" asp-controller="Cart"><i class="fa fa-shopping-bag custom-icon" aria-hidden="true"></i></a></li>
+								@if (User.Identity?.IsAuthenticated ?? false)
 								{
-									<li><a asp-controller="Home" asp-action="Account"><i class="fa fa-user"></i> Account</a></li>
-									<li><a asp-controller="Home" asp-action="Wishlist"><i class="fa fa-star"></i> Wishlist</a></li>
-									<li><a asp-controller="Home" asp-action="Compare"><i class="fa fa-star"></i> Compare</a></li>
+									<li class="nav-item dropdown">
+										<a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+											<i class="fa fa-user custom-icon"></i>
+										</a>
+										<ul class="dropdown-menu" aria-labelledby="userDropdown">
+											<li>
+												<a class="dropdown-item" asp-controller="Account" asp-action="Portal">
+													Portal
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item" asp-controller="Home" asp-action="Wishlist">
+													Wishlist
+												</a>
+											</li>
+											<li>
+												<a class="dropdown-item" asp-controller="Warranty" asp-action="RequestWarranty">
+													Request Warranty
+												</a>
+											</li>
+										</ul>
+									</li>
+									<li class="nav-item" id="searchContainer">
+										<a class="nav-link" href="#" id="searchIcon" role="button">
+											<i class="fa fa-search custom-icon" aria-hidden="true"></i>
+										</a>
+										<form asp-controller="Product" asp-action="Search" method="post" class="search-form d-none">
+											<div class="input-group">
+												<input type="text" class="form-control" placeholder="Search" name="searchTerm" />
+												<button class="btn btnCancel" type="button" id="cancelSearch">Cancel</button>
+											</div>
+										</form>
+									</li>
+
 									@* <li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li> *@
 									@if (User.IsInRole("Admin"))
 									{
-										<li><a asp-controller="Admin" asp-action="Index"><i class="fa fa-lock"></i>Admin Panel</a></li>
+										<li><a asp-controller="Admin" asp-action="Index"><i class="fa fa-lock custom-icon"></i>Admin</a></li>
 									}
 
-									<li><a asp-controller="Account" asp-action="Logout"><i class="fa fa-sign-out"></i>Hi, @User.Identity.Name, Logout</a></li>
+									<li><a asp-controller="Account" asp-action="Logout"><i class="fa fa-sign-out custom-icon"></i>@User.Identity.Name, Logout</a></li>
 
 								}
 								else
@@ -118,66 +151,13 @@
 			</div>
 		</div><!--/header-middle-->
 
-		<div class="header-bottom">
-			<!--header-bottom-->
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-9">
-						<div class="navbar-header">
-							<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-								<span class="sr-only">Toggle navigation</span>
-								<span class="icon-bar"></span>
-								<span class="icon-bar"></span>
-								<span class="icon-bar"></span>
-							</button>
-						</div>
-						<div class="mainmenu pull-left">
-							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a asp-action="Index" asp-controller="Home" class="active">Home</a></li>
-								<li class="dropdown">
-									<a asp-action="Index" asp-controller="Product">Shop<i class="fa fa-angle-down"></i></a>
-									<ul role="menu" class="sub-menu">
-										<li><a asp-action="Index" asp-controller="Cart">Cart</a></li>
-										@if(User.Identity?.IsAuthenticated ?? false)
-										{
-										<li><a asp-controller="Home" asp-action="Account">Account</a></li>
-										<li><a asp-controller="Home" asp-action="Wishlist">Wishlist</a></li>
-										<li><a asp-controller="Home" asp-action="Compare">Compare</a></li>
-										} else
-										{
-											<li><a asp-controller="Account" asp-action="Login">Login</a></li>
-										}
-									</ul>
-								</li>
-								@* <li class="dropdown">
-									<a href="#">Blog<i class="fa fa-angle-down"></i></a>
-									<ul role="menu" class="sub-menu">
-										<li><a href="blog.html">Blog List</a></li>
-										<li><a href="blog-single.html">Blog Single</a></li>
-									</ul>
-								</li> *@
-								<li><a asp-action="Contact" asp-controller="Home">Contact</a></li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<form asp-controller="Product" asp-action="Search" method="post">
-							<div class="search_box pull-right">
-								<input type="text" placeholder="Search" name="searchTerm" />
-								<button class="btn btn-warning" type="submit">Search</button>
-							</div>
-						</form>
-						
-					</div>
-				</div>
-			</div>
-		</div><!--/header-bottom-->
+
 	</header><!--/header-->
 
 
 
-	<section>
-		<div class="container">
+	<section style="background-color:black">
+		<div class="container-fluid p-0 m-0">
 			<div class="row">
 				@Html.Partial("_NotificationPartical")
 				@RenderBody()
@@ -191,79 +171,78 @@
 		{
 			<partial name="_FooterPartial" />
 		}
-		
+
 
 		@* <div class="footer-widget">
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-2">
-						<div class="single-widget">
-							<h2>Service</h2>
-							<ul class="nav nav-pills nav-stacked">
-								<li><a href="#">Online Help</a></li>
-								<li><a href="#">Contact Us</a></li>
-								<li><a href="#">Order Status</a></li>
-								<li><a href="#">Change Location</a></li>
-								<li><a href="#">FAQ’s</a></li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-sm-2">
-						<div class="single-widget">
-							<h2>Quock Shop</h2>
-							<ul class="nav nav-pills nav-stacked">
-								<li><a href="#">T-Shirt</a></li>
-								<li><a href="#">Mens</a></li>
-								<li><a href="#">Womens</a></li>
-								<li><a href="#">Gift Cards</a></li>
-								<li><a href="#">Shoes</a></li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-sm-2">
-						<div class="single-widget">
-							<h2>Policies</h2>
-							<ul class="nav nav-pills nav-stacked">
-								<li><a href="#">Terms of Use</a></li>
-								<li><a href="#">Privecy Policy</a></li>
-								<li><a href="#">Refund Policy</a></li>
-								<li><a href="#">Billing System</a></li>
-								<li><a href="#">Ticket System</a></li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-sm-2">
-						<div class="single-widget">
-							<h2>About Shopper</h2>
-							<ul class="nav nav-pills nav-stacked">
-								<li><a href="#">Company Information</a></li>
-								<li><a href="#">Careers</a></li>
-								<li><a href="#">Store Location</a></li>
-								<li><a href="#">Affillate Program</a></li>
-								<li><a href="#">Copyright</a></li>
-							</ul>
-						</div>
-					</div>
-					<div class="col-sm-3 col-sm-offset-1">
-						<div class="single-widget">
-							<h2>About Shopper</h2>
-							<form action="#" class="searchform">
-								<input type="text" placeholder="Your email address" />
-								<button type="submit" class="btn btn-default"><i class="fa fa-arrow-circle-o-right"></i></button>
-								<p>Get the most recent updates from <br />our site and be updated your self...</p>
-							</form>
-						</div>
-					</div>
+		<div class="container">
+		<div class="row">
+		<div class="col-sm-2">
+		<div class="single-widget">
+		<h2>Service</h2>
+		<ul class="nav nav-pills nav-stacked">
+		<li><a href="#">Online Help</a></li>
+		<li><a href="#">Contact Us</a></li>
+		<li><a href="#">Order Status</a></li>
+		<li><a href="#">Change Location</a></li>
+		<li><a href="#">FAQ’s</a></li>
+		</ul>
+		</div>
+		</div>
+		<div class="col-sm-2">
+		<div class="single-widget">
+		<h2>Quock Shop</h2>
+		<ul class="nav nav-pills nav-stacked">
+		<li><a href="#">T-Shirt</a></li>
+		<li><a href="#">Mens</a></li>
+		<li><a href="#">Womens</a></li>
+		<li><a href="#">Gift Cards</a></li>
+		<li><a href="#">Shoes</a></li>
+		</ul>
+		</div>
+		</div>
+		<div class="col-sm-2">
+		<div class="single-widget">
+		<h2>Policies</h2>
+		<ul class="nav nav-pills nav-stacked">
+		<li><a href="#">Terms of Use</a></li>
+		<li><a href="#">Privecy Policy</a></li>
+		<li><a href="#">Refund Policy</a></li>
+		<li><a href="#">Billing System</a></li>
+		<li><a href="#">Ticket System</a></li>
+		</ul>
+		</div>
+		</div>
+		<div class="col-sm-2">
+		<div class="single-widget">
+		<h2>About Shopper</h2>
+		<ul class="nav nav-pills nav-stacked">
+		<li><a href="#">Company Information</a></li>
+		<li><a href="#">Careers</a></li>
+		<li><a href="#">Store Location</a></li>
+		<li><a href="#">Affillate Program</a></li>
+		<li><a href="#">Copyright</a></li>
+		</ul>
+		</div>
+		</div>
+		<div class="col-sm-3 col-sm-offset-1">
+		<div class="single-widget">
+		<h2>About Shopper</h2>
+		<form action="#" class="searchform">
+		<input type="text" placeholder="Your email address" />
+		<button type="submit" class="btn btn-default"><i class="fa fa-arrow-circle-o-right"></i></button>
+		<p>Get the most recent updates from <br />our site and be updated your self...</p>
+		</form>
+		</div>
+		</div>
 
-				</div>
-			</div>
+		</div>
+		</div>
 		</div> *@
 
 		<div class="footer-bottom">
 			<div class="container">
 				<div class="row">
 					<p class="pull-left">Copyright © 2024 E-SHOPPER Inc. All rights reserved.</p>
-					<p class="pull-right">Designed by <span><a target="_blank" href="http://www.themeum.com">Themeum</a></span></p>
 				</div>
 			</div>
 		</div>
@@ -279,8 +258,127 @@
 	<script src="~/js/jquery.prettyPhoto.js"></script>
 	<script src="~/js/main.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.all.min.js"></script>
+	<script src="//cdn.datatables.net/2.1.7/js/dataTables.min.js"></script>
+	<script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js"></script>
+
+
+
+
+@* <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-app.js";
+  import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/11.3.1/firebase-auth.js";
+  
+  const firebaseConfig = {
+    apiKey: "AIzaSyDrGTcPGZT3XhPNDOcxC5J5J3ztDh8EcLk",
+    authDomain: "ecommerce-fa6f0.firebaseapp.com",
+    projectId: "ecommerce-fa6f0",
+    storageBucket: "ecommerce-fa6f0.firebasestorage.app",
+    messagingSenderId: "980699721921",
+    appId: "1:980699721921:web:f84678c6c5d24797c86440",
+    measurementId: "G-TWXZ166DYE"
+  };
+
+  // Khởi tạo Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+	window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+		'size': 'invisible',
+		'callback': (response) => {
+			console.log("reCAPTCHA verified!");
+		}
+	});
+
+  // Gán Firebase vào window để dùng trong các script khác
+  window.firebaseApp = app;
+  window.firebaseAuth = auth;
+  window.signInWithPhoneNumber = signInWithPhoneNumber;
+
+  console.log("Firebase đã khởi tạo!", window.firebaseApp);
+</script> *@
+
+
+
+
+
+
+
+
+	<script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
+	<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.dataTables.js"></script>
+	<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.html5.min.js"></script>
+	<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.print.min.js"></script>
+
 	<div id="fb-root"></div>
-	<script async defer crossorigin="anonymous" src="https://connect.facebook.net/vi_VN/sdk.js#xfbml=1&version=v21.0"></script>
+	<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v21.0"></script>
 	@await RenderSectionAsync("Scripts", required: false)
+	@await RenderSectionAsync("Styles", required: false)
+
+	<script>
+		document.getElementById('searchIcon').addEventListener('click', function (event) {
+			event.preventDefault(); // Ngăn chặn hành động mặc định
+			const form = document.querySelector('.search-form');
+			form.classList.toggle('d-none'); // Hiện/ẩn form
+		});
+
+		document.getElementById('cancelSearch').addEventListener('click', function () {
+			const form = document.querySelector('.search-form');
+			form.classList.add('d-none'); // Ẩn form
+		});
+
+		// -------------- Script của 2 logo MERDI ----------
+
+		document.addEventListener("DOMContentLoaded", () => {
+			const layoutText = document.querySelector(".logo h2");
+			const sliderText = document.querySelector(".slider-text-top h2"); // Slider chỉ có ở trang chủ
+
+			const currentPath = window.location.pathname;
+
+			// Kiểm tra nếu là trang chủ
+			if (currentPath === "/" || currentPath.toLowerCase() === "/home/index") {
+				// Chỉ chạy logic cuộn trên trang chủ
+				window.addEventListener("scroll", () => {
+					const scrollTop = window.scrollY;
+					const viewportHeight = window.innerHeight;
+
+					if (scrollTop < viewportHeight / 3) {
+						// Khi cuộn lên
+						if (sliderText) {
+							sliderText.style.transform = "translateY(0)";
+							sliderText.style.opacity = "1";
+						}
+
+						layoutText.style.transform = "translateY(50%)";
+						layoutText.style.opacity = "0";
+					} else {
+						// Khi cuộn xuống
+						if (sliderText) {
+							sliderText.style.transform = "translateY(-50%)";
+							sliderText.style.opacity = "0";
+						}
+
+						layoutText.style.transform = "translateY(0)";
+						layoutText.style.opacity = "1";
+					}
+				});
+			} else {
+				// Các trang khác, MERDI hiện thẳng ra
+				if (sliderText) {
+					// Ẩn sliderText nếu không cần hiển thị ngoài trang chủ
+					sliderText.style.transform = "none";
+					sliderText.style.opacity = "0";
+				}
+
+				if (layoutText) {
+					// Bỏ hiệu ứng transition trên các trang khác
+					layoutText.style.transform = "none"; // Không hiệu ứng
+					layoutText.style.opacity = "1"; // Hiển thị MERDI thẳng
+				}
+			}
+		});
+
+
+	</script>
 </body>
 </html>

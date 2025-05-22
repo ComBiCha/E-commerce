@@ -2,25 +2,73 @@
 using E_commerce.Models;
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace E_commerce.Controllers
 {
 	public class ProductController : Controller
 	{
 		private readonly DataContext _dataContext;
-		public ProductController(DataContext context)
+        private readonly UserManager<AppUserModel> _userManager;
+        public ProductController(DataContext context, UserManager<AppUserModel> userManager)
 		{
 			_dataContext = context;
-		}
-		public IActionResult Index()
-		{
-			return View();
-		}
-		public async Task<IActionResult> Search(string searchTerm)
-		{
-            ViewBag.Keyword = searchTerm;
+            _userManager = userManager;
+        }
+        public async Task<IActionResult> Index(int page = 1)
+        {
+            int pageSize = 9;  // S? l??ng s?n ph?m trên m?i trang
+            int totalProducts = await _dataContext.Products.CountAsync();  // T?ng s? s?n ph?m
+            var products = await _dataContext.Products
+                .Include("Category")
+                .Include("Brand")
+                .Skip((page - 1) * pageSize)  // B? qua các s?n ph?m c?a các trang tr??c
+                .Take(pageSize)  // L?y s? l??ng s?n ph?m c?a trang hi?n t?i
+                .ToListAsync();
+
+            var sliders = _dataContext.Sliders.Where(s => s.Status == 1).ToList();
+
+            // L?y danh sách các brand cùng v?i s? l??ng s?n ph?m t??ng ?ng
+            var brandCounts = _dataContext.Brands
+                .Select(b => new
+                {
+                    b.Name,
+                    b.Slug,
+                    ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
+                })
+                .ToList();
+
+            var contact = _dataContext.Contacts.FirstOrDefault();
+
+            // Thêm thông tin phân trang vào ViewBag
+            ViewBag.Page = page;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)totalProducts / pageSize);
+            ViewBag.BrandCounts = brandCounts;
+            ViewBag.Sliders = sliders;
+            ViewBag.Contact = contact;
+
+            return View(products);
+        }
+        public async Task<IActionResult> Search(string searchTerm, string category, string brand, string sortOrder, List<string> colors, List<string> materials)
+        {
+            ViewBag.Keyword = searchTerm ?? $"{category} {brand}";
+
+            // Lấy thông tin user (nếu có)
+            var user = await _userManager.GetUserAsync(User);
+            var wishlist = new List<long>(); // Khởi tạo danh sách trống
+
+            if (user != null)
+            {
+                wishlist = _dataContext.Wishlists
+                    .Where(w => w.UserId == user.Id)
+                    .Select(w => w.ProductId)
+                    .ToList();
+            }
+            ViewBag.Wishlist = wishlist;
 
             var brandCounts = _dataContext.Brands
                 .Select(b => new
@@ -33,49 +81,117 @@ namespace E_commerce.Controllers
             var contact = _dataContext.Contacts.FirstOrDefault();
             ViewBag.BrandCounts = brandCounts;
             ViewBag.Contact = contact;
-            if (searchTerm == null)
-			{
-                var products = await _dataContext.Products.Include("Category").Include("Brand").ToListAsync();
-                return View(products);
-            }
-            else
+
+            IQueryable<ProductModel> products = _dataContext.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.Variations);
+
+            // Lọc theo từ khóa, danh mục, thương hiệu
+            if (!string.IsNullOrEmpty(searchTerm))
             {
-                var products = await _dataContext.Products.Where(p => p.Name.Contains(searchTerm) || p.Category.Name.Contains(searchTerm)).ToListAsync();
-                return View(products);
+                products = products.Where(p => p.Name.Contains(searchTerm) || p.Category.Name.Contains(searchTerm));
+            }
+            if (!string.IsNullOrEmpty(category))
+            {
+                products = products.Where(p => p.Category.Slug == category);
+            }
+            if (!string.IsNullOrEmpty(brand))
+            {
+                products = products.Where(p => p.Brand.Name == brand);
             }
 
-		}
-		public async Task<IActionResult> Details(long Id)
-		{
-			if (Id == null) return RedirectToAction("Index");
+            // **Lọc theo màu sắc**
+            if (colors != null && colors.Count > 0)
+            {
+                products = products.Where(p => p.Variations.Any(v => colors.Contains(v.Color.Name)));
+            }
 
-			var productsById = _dataContext.Products.Include(p => p.Ratings).Where(p => p.Id == Id).FirstOrDefault();
-			//related
-			var relatedProducts = await _dataContext.Products.Where(p => p.CategoryId == productsById.CategoryId && p.Id != productsById.Id)
-				.Take(4)
-				.ToListAsync();
-			ViewBag.RelatedProducts = relatedProducts;
+            // **Lọc theo chất liệu**
+            if (materials != null && materials.Count > 0)
+            {
+                products = products.Where(p => p.Variations.Any(v => materials.Contains(v.Material.Name)));
+            }
 
-			var brandCounts = _dataContext.Brands
-				.Select(b => new
-				{
-					b.Name,
-					b.Slug,
-					ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
-				})
-				.ToList();
-			var contact = _dataContext.Contacts.FirstOrDefault();
-			ViewBag.BrandCounts = brandCounts;
-			ViewBag.Contact = contact;
+            // **Thêm chức năng sắp xếp**
+            switch (sortOrder)
+            {
+                case "best_selling":
+                    products = products.OrderByDescending(p => p.Sold);
+                    break;
+                case "price_desc":
+                    products = products.OrderByDescending(p => p.Price);
+                    break;
+                case "price_asc":
+                    products = products.OrderBy(p => p.Price);
+                    break;
+                default:
+                    products = products.OrderBy(p => p.Name);
+                    break;
+            }
 
-			var viewModel = new ProductDetailsViewModel
-			{
-				ProductDetails = productsById,
-			};
+            return View(await products.ToListAsync());
+        }
 
-			return View(viewModel);
-		}
-		[HttpPost]
+
+
+        public async Task<IActionResult> Details(long Id)
+        {
+            if (Id == null) return RedirectToAction("Index");
+
+            // Load product with Brand, Category, and other related data
+            var productsById = _dataContext.Products
+                .Include(p => p.Brand) // Include Brand navigation property
+                .Include(p => p.Category) // Include Category navigation property
+                .Include(p => p.Ratings)
+                .Include(p => p.Variations)
+                    .ThenInclude(v => v.Material) // Load Material of Variations
+                .Include(p => p.Variations)
+                    .ThenInclude(v => v.Color) // Load Color of Variations
+                .FirstOrDefault(p => p.Id == Id);
+
+            if (productsById == null) return NotFound();
+
+            // Get related products
+            var relatedProducts = await _dataContext.Products
+                .Where(p => p.CategoryId == productsById.CategoryId && p.Id != productsById.Id)
+                .Take(4)
+                .ToListAsync();
+            ViewBag.RelatedProducts = relatedProducts;
+
+            var groupedRelatedProducts = relatedProducts
+                .Select((value, index) => new GroupedProduct { Index = index, Product = value })
+                .GroupBy(x => x.Index / 3)
+                .ToList();
+
+            // Load brand counts
+            var brandCounts = _dataContext.Brands
+                .Select(b => new
+                {
+                    b.Name,
+                    b.Slug,
+                    ProductCount = _dataContext.Products.Count(p => p.BrandId == b.Id)
+                })
+                .ToList();
+
+            // Load contact information
+            var contact = _dataContext.Contacts.FirstOrDefault();
+            ViewBag.BrandCounts = brandCounts;
+            ViewBag.Contact = contact;
+
+            // Create the view model
+            var viewModel = new ProductDetailsViewModel
+            {
+                ProductDetails = productsById,
+                RelatedProductsGrouped = groupedRelatedProducts,
+                Variations = productsById.Variations.ToList()
+            };
+
+            return View(viewModel);
+        }
+
+
+        [HttpPost]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> CommentProduct(RatingModel rating)
 		{
@@ -113,5 +229,6 @@ namespace E_commerce.Controllers
 			}
 			
 		}
+
 	}
 }

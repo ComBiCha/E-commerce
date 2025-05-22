@@ -28,6 +28,7 @@
 	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
 
+
 </head><!--/head-->
 
 <body>
@@ -74,22 +75,22 @@
 						<div class="mainmenu pull-left">
 							<ul class="nav navbar-nav collapse navbar-collapse">
 								<li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
+								<li><a asp-controller="Statistic" asp-action="Index">Dashboard</a></li>
 								<li><a asp-controller="Product" asp-action="Index">Products</a></li>
 								<li><a asp-controller="Shipping" asp-action="Index">Shippings</a></li>
 								<li><a asp-controller="Category" asp-action="Index">Categories</a></li>
 								<li><a asp-controller="Brand" asp-action="Index">Brands</a></li>
+								<li><a asp-controller="Material" asp-action="Index">Materials</a></li>
+								<li><a asp-controller="Color" asp-action="Index">Colors</a></li>
 								<li><a asp-controller="Order" asp-action="Index">Orders</a></li>
+								<li><a asp-controller="Coupon" asp-action="Index">Coupons</a></li>
 								<li><a asp-controller="User" asp-action="Index">Users</a></li>
 								<li><a asp-controller="Role" asp-action="Index">Roles</a></li>
 								<li><a asp-controller="Slider" asp-action="Index">Sliders</a></li>
 								<li><a asp-controller="Contact" asp-action="Index">Contact</a></li>
-								<li><a asp-controller="Statistic" asp-action="Index">Statistic</a></li>
+								<li><a asp-controller="Warranty" asp-action="Index">Warranties</a></li>
+								
 							</ul>
-						</div>
-					</div>
-					<div class="col-sm-3">
-						<div class="search_box pull-right">
-							<input type="text" placeholder="Search" />
 						</div>
 					</div>
 				</div>
@@ -100,6 +101,13 @@
 	
 
 	<section>
+		<br />
+		<br />
+		<br />
+		<br />
+		<br />
+		<br />
+		<br />
 		<div class="container">
 			<div class="row">
 				@Html.Partial("_NotificationPartical")
@@ -128,6 +136,7 @@
 	<script src="~/js/main.js"></script>
 	<script src="~/backend/js/site.js"></script>
 	<script src="//cdn.datatables.net/2.1.7/js/dataTables.min.js"></script>
+
 
 	<script src="https://cdn.datatables.net/buttons/3.1.2/js/dataTables.buttons.js"></script>
 	<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.dataTables.js"></script>

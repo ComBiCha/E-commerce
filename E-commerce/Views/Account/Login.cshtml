@@ -2,39 +2,290 @@
 @{
     ViewData["Title"] = "Login User";
 }
-	<section id=""><!--form-->
-		<div class="container">
-			<div class="row">
-				<div class="col-sm-8 col-sm-offset-1">
-					<div class="login-form"><!--login form-->
-						<h2>Login to your account</h2>
-					<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-						<form asp-action="Login" asp-controller="Account">
-						<div class="form-group">
-							<label>Username</label>
-							<input asp-for="UserName" class="form-control" />
-							<span asp-validation-for="UserName" class="text-danger" />
-						</div>
-						<div class="form-group">
-							<label>Password</label>
-							<input asp-for="Password" class="form-control" />
-							<span asp-validation-for="Password" class="text-danger" />
-						</div>
-							<span>
-								<input type="checkbox" class="checkbox"> 
-								Keep me signed in
-							</span>
-							<button type="submit" class="btn btn-default">Login</button>
-							<a asp-action="ForgotPassword" asp-controller="Account">Forgot password?</a><br/>
-							<a asp-action="Create" asp-controller="Account">Create new account</a>
-						</form>
-					</div><!--/login form-->
-				</div>				
-			</div>
-		</div>
-	</section><!--/form-->
+<section style="background-color:white; padding: 50px 0;">
+    <div style="padding:8rem 0.7rem 15rem 0.7rem ">
+        <div class="row">
+            <div class="login-container">
+                <div class="login-form">
+                    <h2>MY MERDI ACCOUNT</h2>
+                    <div class="social-login">
+                        <button class="google-login">
+                            <svg class="social-icon-google" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g opacity="1"><path fill-rule="evenodd" clip-rule="evenodd" d="M24.0003 12.2724C24.0003 11.4215 23.9223 10.6033 23.7776 9.81787H12.2451V14.4596H18.8351C18.5513 15.9596 17.6886 17.2305 16.3917 18.0814V21.0923H20.349C22.6644 19.0032 24.0003 15.9269 24.0003 12.2724Z" fill="#4285F4"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M12.2445 23.9999C15.5507 23.9999 18.3225 22.9254 20.3484 21.0927L16.3911 18.0818C15.2946 18.8018 13.892 19.2272 12.2445 19.2272C9.05527 19.2272 6.35582 17.1164 5.39292 14.28H1.302V17.3891C3.31685 21.3108 7.45787 23.9999 12.2445 23.9999Z" fill="#34A853"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M5.39334 14.2796C5.14844 13.5596 5.00929 12.7905 5.00929 11.9996C5.00929 11.2087 5.14844 10.4396 5.39334 9.71965V6.6106H1.30242C0.4731 8.23057 0 10.0633 0 11.9996C0 13.936 0.4731 15.7687 1.30242 17.3886L5.39334 14.2796Z" fill="#FBBC05"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M12.2445 4.77267C14.0423 4.77267 15.6564 5.37811 16.9254 6.56719L20.4375 3.12541C18.3169 1.18908 15.5451 0 12.2445 0C7.45787 0 3.31685 2.68906 1.302 6.61082L5.39292 9.71987C6.35582 6.88355 9.05527 4.77267 12.2445 4.77267Z" fill="#EA4335"></path></g></svg>
+                            <span style="font-size: 1.5rem;font-family: 'Roboto';line-height:normal; letter-spacing:1.5px">CONTINUE WITH GOOGLE</span>
+                        </button>
+                        <button class="apple-login">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/Apple_logo_black.svg" alt="Apple" class="social-icon-apple">
+                            <span style="font-size: 1.5rem;font-family: 'Roboto';line-height:normal;letter-spacing:1.5px">CONTINUE WITH APPLE</span>
+                        </button>
+                    </div>
+                    <div class="divider">OR</div>
+                    <h2 style="font-size:3.5rem; margin-bottom:1rem">CONTINUE WITH YOUR EMAIL ADDRESS</h2>
+                    <h2 style="font-size:1.5rem; margin-bottom:0rem; font-weight:500">Sign in with your email and password or create a profile if you are new.</h2>
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <form asp-action="Login" asp-controller="Account" class="login-form-signin">
+                        <div class="form-group m-0">
+                            <label style="padding-left:1rem; font-size:1.3rem">UserName</label>
+                            <input asp-for="UserName" class="input-field" placeholder="Username" />
+                            <span asp-validation-for="UserName" style="padding-left:1rem; font-size:1.1rem" class="text-danger" />
+                        </div>
+                        <div class="form-group m-0" style="display: flex; flex-direction: row ;justify-content: space-between; align-items: center;">
+                            <label style="padding-left:1rem; font-size:1.3rem">Password</label>
+                            <a asp-action="ForgotPassword" asp-controller="Account" class="forgot-link" >Forgot?</a>
+                        </div>
+                        <div class="form-group" style="margin-bottom:1rem">
+                            <input asp-for="Password" class="input-field" placeholder="Password" type="password" />
+                            <span asp-validation-for="Password" class="text-danger" style="padding-left:1rem; font-size:1.1rem"></span>
+                        </div>
+                        
+
+                        <div class="form-check">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="remember-me" class="checkbox" />
+                                <span class="custom-checkbox"></span>
+                                Keep me signed in
+                            </label>
+                        </div>
+
+                        <button type="submit" class="login-btn">Login</button>
+                        <div class="links">
+                            <p class="no-account-text">Don't have an account?</p>
+                            <a asp-action="Create" asp-controller="Account" class="create-account-link">Sign Up</a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .login-container {
+        text-align: center;
+        font-family: GucciSans, Helvetica, Arial, sans-serif;
+    }
+
+    .login-form h2 {
+        color: #000000;
+        font-size: 4.8rem;
+        line-height: 4.8rem;
+        font-weight: 400;
+        margin-bottom: 4.5rem;
+        text-align: center;
+        font-family: system-ui;
+    }
+
+    .social-login {
+        margin-bottom: 20px;
+    }
+
+    .google-login, .apple-login {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        max-width: 35rem;
+        margin: 15px auto;
+        padding: 10px;
+        border: 2px solid #000000;
+        border-radius: 2px;
+        background-color: #ffffff;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: bold;
+        height: 5rem;
+    }
+
+    .social-icon-google {
+        width: 24px;
+        height: 24px;
+        margin-right: 10px;
+    }
+
+    .social-icon-apple {
+        width: 23px;
+        height: 24px;
+        margin-right: 10px;
+    }
+
+    .divider {
+        font-size: 1.7rem;
+        color: #000000;
+        margin: 3rem 0;
+        font-weight: bold;
+    }
+
+    .login-form p {
+        font-size: 1.2rem;
+        color: #555;
+        margin: 0;
+    }
+
+    .login-form-signin {
+        max-width: 35rem;
+        margin: 0 auto;
+        padding: 15px;
+        border-radius: 2px;
+        font-family: Arial, sans-serif;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column; /* Đảm bảo label nằm trên input */
+        align-items: flex-start; /* Căn label sang trái */
+        margin-bottom: 10px;
+    }
+
+    .form-label {
+        font-size: 1rem; /* Kích thước font của label */
+        color: #000000; /* Màu chữ của label */
+    }
+
+    .input-field {
+        width: 100%;
+        height: 5rem;
+        max-width: 300px;
+        margin: 10px auto;
+        padding: 10px;
+        border: 2px solid #000000;
+        border-radius: 2px;
+        font-size: 1.3rem;
+        background-color: #ffffff; /* Màu nền */
+        color: #000000; /* Màu chữ */
+        outline: none; /* Loại bỏ viền màu xanh */
+    }
+
+        .input-field:focus {
+            background-color: #f9f9f9; /* Màu nền khi nhấp vào */
+            border-color: #000000; /* Màu viền khi nhấp vào */
+            outline: none; /* Loại bỏ viền mặc định */
+            box-shadow: none; /* Loại bỏ bóng */
+        }
+
+    .form-check {
+        display: flex; /* Sử dụng flexbox để canh chỉnh ngang */
+        align-items: center; /* Căn chỉnh dọc theo trục giữa */
+        gap: 10px; /* Khoảng cách giữa checkbox và nhãn */
+        margin-bottom: 0.125rem; /* Khoảng cách phía dưới */
+    }
+
+    /* Ẩn checkbox mặc định */
+    .checkbox {
+        display: none !important;
+    }
+
+    /* Tùy chỉnh giao diện checkbox */
+    .custom-checkbox {
+        width: 16px;
+        height: 16px;
+        border: 2px solid #000;
+        border-radius: 3px;
+        background-color: #fff;
+        display: inline-block;
+        position: relative;
+        cursor: pointer;
+        vertical-align: middle; /* Căn giữa theo chiều dọc */
+    }
+
+    /* Thay đổi khi checkbox được chọn */
+    .checkbox:checked + .custom-checkbox {
+        background-color: #000;
+    }
+
+        /* Dấu tích hiển thị khi checkbox được chọn */
+        .checkbox:checked + .custom-checkbox::after {
+            content: "";
+            position: absolute;
+            top: 3px;
+            left: 5px;
+            width: 3px;
+            height: 6px;
+            border: solid #fff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+    /* Căn chỉnh chữ với checkbox */
+    .checkbox-label {
+        display: inline-flex;
+        align-items: center; /* Căn giữa theo chiều dọc */
+        gap: 8px; /* Khoảng cách giữa checkbox và chữ */
+        font-size: 1rem; /* Kích thước chữ */
+        cursor: pointer; /* Thêm hiệu ứng con trỏ */
+    }
+
+
+
+    .login-btn {
+        display: block;
+        width: 100%;
+        margin: 15px 0;
+        padding: 10px;
+        border: 2px solid #000000;
+        border-radius: 2px;
+        background-color: #000000;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: bold;
+        cursor: pointer;
+        text-align: center;
+        transition: transform 0.3s ease-in-out;
+    }
+
+        .login-btn:hover {
+            transform: scale(0.95);
+        }
+
+    .forgot-link {
+        font-size: 1.2rem;
+        text-decoration: none;
+        color: #007bff;
+        margin-right: 1rem;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+        .forgot-link:hover {
+            text-decoration: underline;
+        }
+
+    .links {
+        text-align: center;
+        margin-top: 3rem;
+    }
+
+    .no-account-text,
+    .create-account-link {
+        display: inline-block; /* Đặt cả hai trên cùng một dòng */
+        margin: 0 5px; /* Khoảng cách giữa chúng */
+        font-size: 1rem;
+        font-family: Arial, sans-serif;
+    }
+
+    .no-account-text {
+        color: #555; /* Màu xám nhẹ */
+    }
+
+    .create-account-link {
+        font-weight: bold;
+        color: black;
+        text-decoration: none;
+        transition: color 0.3s ease, transform 0.2s ease;
+        font-size: 1.3rem;
+        margin: 0;
+    }
+
+        .create-account-link:hover {
+            color: black; /* Màu xanh đậm khi hover */
+            text-decoration: underline;
+            transform: scale(1.05); /* Phóng to nhẹ khi hover */
+        }
+
+
+</style>
+
 @section Scripts {
-	@{
-		await Html.RenderPartialAsync("_ValidationScriptsPartial");
-	}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }
