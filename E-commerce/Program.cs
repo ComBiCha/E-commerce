@@ -12,6 +12,17 @@ using Stripe.Climate;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFlutter", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
+
 // Thêm UserFacade vào DI container
 builder.Services.AddScoped<UserFacade>();
 
@@ -106,6 +117,8 @@ builder.Services.Configure<IdentityOptions>(options =>
 });
 
 var app = builder.Build();
+
+app.UseCors("AllowFlutter");
 
 app.UseStatusCodePagesWithRedirects("/Home/Error?statuscode={0}");
 app.UseSession();
