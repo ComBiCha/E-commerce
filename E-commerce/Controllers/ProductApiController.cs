@@ -1,4 +1,5 @@
 ﻿using E_commerce.Models;
+using E_commerce.Models.DTOs;
 using E_commerce.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -26,9 +27,35 @@ namespace E_commerce.Controllers
 
         // 1. Lấy danh sách tất cả sản phẩm
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductModel>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<ProductWithVariationsDto>>> GetProducts()
         {
-            return await _context.Products.ToListAsync();
+            var products = await _context.Products
+                .Include(p => p.Variations)
+                    .ThenInclude(v => v.Color)
+                .Select(p => new ProductWithVariationsDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    Image = p.Image,
+                    Variations = p.Variations.Select(v => new VariationDto
+                    {
+                        Id = v.Id,
+                        Size = v.Size,
+                        Price = v.Price,
+                        Stock = v.Stock,
+                        Color = v.Color == null ? null : new ColorDto
+                        {
+                            Id = v.Color.Id,
+                            Name = v.Color.Name,
+                            HexCode = v.Color.HexCode
+                        }
+                    }).ToList()
+                })
+                .ToListAsync();
+
+            return products;
         }
 
         // 2. Lấy thông tin chi tiết sản phẩm theo Id

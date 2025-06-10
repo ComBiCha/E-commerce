@@ -279,7 +279,7 @@ namespace E_commerce.Controllers
 			emailBody.AppendLine("We have successfully received your order. Here are the details:");
 			emailBody.AppendLine();
 
-			var baseUrl = "http://sangrk-001-site1.ptempurl.com/";
+			var baseUrl = "http://localhost:5139/";
 
 			emailBody.AppendLine($"**Order Code:** {ordercode}");
 			emailBody.AppendLine($"**Order Date:** {DateTime.Now:yyyy-MM-dd}");
@@ -485,7 +485,7 @@ namespace E_commerce.Controllers
                 .Include(od => od.Variation)
                 .ToListAsync();
 
-            var baseUrl = "http://sangrk-001-site1.ptempurl.com/";
+            var baseUrl = "http://localhost:5139/";
             var emailBody = new StringBuilder();
             emailBody.AppendLine("Dear Customer,");
             emailBody.AppendLine("We have successfully received your order. Here are the details:");
