@@ -22,7 +22,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-
 // Thêm UserFacade vào DI container
 builder.Services.AddScoped<UserFacade>();
 
