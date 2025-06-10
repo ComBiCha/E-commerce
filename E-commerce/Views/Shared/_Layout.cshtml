@@ -58,6 +58,12 @@
 			color: white !important;
 		}
 
+		.logo-static h2 {
+			transform: none !important;
+			opacity: 1 !important;
+			transition: none !important;
+		}
+
 	</style>
 </head><!--/head-->
 
@@ -81,7 +87,7 @@
 
 					<!-- Phần ở giữa -->
 					<div class="col-sm-4 d-flex align-items-center justify-content-center">
-						<div id="layout-merdi" class="logo">
+						<div id="layout-merdi" class="logo @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "logo-home" : "logo-static")">
 							<a href="index.html">
 								<h2>MERDI</h2>
 							</a>
@@ -95,6 +101,17 @@
 						<div class="shop-menu pull-right">
 							<ul class="nav">
 								<li><a asp-action="Index" asp-controller="Cart"><i class="fa fa-shopping-bag custom-icon" aria-hidden="true"></i></a></li>
+								<li class="nav-item" id="searchContainer">
+									<a class="nav-link" href="#" id="searchIcon" role="button">
+										<i class="fa fa-search custom-icon" aria-hidden="true"></i>
+									</a>
+									<form asp-controller="Product" asp-action="Search" method="post" class="search-form d-none">
+										<div class="input-group">
+											<input type="text" class="form-control" placeholder="Search" name="searchTerm" />
+											<button class="btn btnCancel" type="button" id="cancelSearch">Cancel</button>
+										</div>
+									</form>
+								</li>
 								@if (User.Identity?.IsAuthenticated ?? false)
 								{
 									<li class="nav-item dropdown">
@@ -119,17 +136,7 @@
 											</li>
 										</ul>
 									</li>
-									<li class="nav-item" id="searchContainer">
-										<a class="nav-link" href="#" id="searchIcon" role="button">
-											<i class="fa fa-search custom-icon" aria-hidden="true"></i>
-										</a>
-										<form asp-controller="Product" asp-action="Search" method="post" class="search-form d-none">
-											<div class="input-group">
-												<input type="text" class="form-control" placeholder="Search" name="searchTerm" />
-												<button class="btn btnCancel" type="button" id="cancelSearch">Cancel</button>
-											</div>
-										</form>
-									</li>
+								
 
 									@* <li><a href="checkout.html"><i class="fa fa-crosshairs"></i> Checkout</a></li> *@
 									@if (User.IsInRole("Admin"))
@@ -138,12 +145,13 @@
 									}
 
 									<li><a asp-controller="Account" asp-action="Logout"><i class="fa fa-sign-out custom-icon"></i>@User.Identity.Name, Logout</a></li>
-
 								}
+								
 								else
 								{
 									<li><a asp-controller="Account" asp-action="Login"><i class="fa fa-sign-in"></i>Login</a></li>
 								}
+
 							</ul>
 						</div>
 					</div>
@@ -329,49 +337,40 @@
 
 		// -------------- Script của 2 logo MERDI ----------
 
-			document.addEventListener("DOMContentLoaded", () => {
+					document.addEventListener("DOMContentLoaded", () => {
 			const layoutText = document.querySelector(".logo h2");
-			const sliderText = document.querySelector(".slider-text-top h2"); // Slider chỉ có ở trang chủ
+			const sliderText = document.querySelector(".slider-text-top h2");
+			const logoContainer = document.querySelector(".logo");
 
-			// Kiểm tra nếu các phần tử tồn tại
-			if (!layoutText || !sliderText) return;
+			if (!layoutText || !logoContainer) return;
 
-			const currentPath = window.location.pathname;
+			const isHome = logoContainer.classList.contains("logo-home");
 
-			// Kiểm tra nếu là trang chủ
-			if (currentPath === "/" || currentPath.toLowerCase() === "/home/index") {
+			if (isHome && sliderText) {
 				window.addEventListener("scroll", () => {
 					const scrollTop = window.scrollY;
 					const viewportHeight = window.innerHeight;
 
 					if (scrollTop < viewportHeight / 3) {
-						if (sliderText) {
-							sliderText.style.transform = "translateY(0)";
-							sliderText.style.opacity = "1";
-						}
+						sliderText.style.transform = "translateY(0)";
+						sliderText.style.opacity = "1";
+
 						layoutText.style.transform = "translateY(50%)";
 						layoutText.style.opacity = "0";
 					} else {
-						if (sliderText) {
-							sliderText.style.transform = "translateY(-50%)";
-							sliderText.style.opacity = "0";
-						}
+						sliderText.style.transform = "translateY(-50%)";
+						sliderText.style.opacity = "0";
+
 						layoutText.style.transform = "translateY(0)";
 						layoutText.style.opacity = "1";
 					}
 				});
-			} else {
-				// Xử lý trên các trang không phải trang chủ
-				if (sliderText) {
-					sliderText.style.transform = "none";
-					sliderText.style.opacity = "0";
-				}
-				if (layoutText) {
-					layoutText.style.transform = "none";
-					layoutText.style.opacity = "1";
-				}
 			}
+			// Nếu không phải trang chủ, KHÔNG cần làm gì thêm, vì CSS đã lo rồi
 		});
+
+
+
 
 
 	</script>
