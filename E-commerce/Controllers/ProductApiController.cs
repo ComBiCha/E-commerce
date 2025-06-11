@@ -58,6 +58,88 @@ namespace E_commerce.Controllers
             return products;
         }
 
+
+    [HttpGet("Search")]
+    public async Task<IActionResult> Search(
+        string? searchTerm,
+        string? category,
+        string? brand,
+        string? sortOrder,
+        [FromQuery] List<string>? colors,
+        [FromQuery] List<string>? materials)
+    {
+        IQueryable<ProductModel> products = _context.Products
+            .Include(p => p.Category)
+            .Include(p => p.Brand)
+            .Include(p => p.Variations)
+                .ThenInclude(v => v.Color)
+            .Include(p => p.Variations)
+                .ThenInclude(v => v.Material);
+
+        // Lọc theo từ khóa, danh mục, thương hiệu
+        if (!string.IsNullOrEmpty(searchTerm))
+        {
+            products = products.Where(p => p.Name.Contains(searchTerm) || p.Category.Name.Contains(searchTerm));
+        }
+        if (!string.IsNullOrEmpty(category))
+        {
+            products = products.Where(p => p.Category.Name == category);
+        }
+        if (!string.IsNullOrEmpty(brand))
+        {
+            products = products.Where(p => p.Brand.Name == brand);
+        }
+
+        // Lọc theo màu sắc
+        if (colors != null && colors.Count > 0)
+        {
+            products = products.Where(p => p.Variations.Any(v => colors.Contains(v.Color.Name)));
+        }
+
+        // Lọc theo chất liệu
+        if (materials != null && materials.Count > 0)
+        {
+            products = products.Where(p => p.Variations.Any(v => materials.Contains(v.Material.Name)));
+        }
+
+        // Sắp xếp
+        switch (sortOrder)
+        {
+            case "best_selling":
+                products = products.OrderByDescending(p => p.Sold);
+                break;
+            case "price_desc":
+                products = products.OrderByDescending(p => p.Price);
+                break;
+            case "price_asc":
+                products = products.OrderBy(p => p.Price);
+                break;
+            default:
+                products = products.OrderBy(p => p.Name);
+                break;
+        }
+
+        var result = await products.Select(p => new {
+            p.Id,
+            p.Name,
+            p.Description,
+            p.Price,
+            p.Image,
+            Category = p.Category.Name,
+            Brand = p.Brand.Name,
+            Variations = p.Variations.Select(v => new {
+                v.Id,
+                v.Size,
+                v.Price,
+                v.Stock,
+                Color = v.Color != null ? new { v.Color.Id, v.Color.Name, v.Color.HexCode } : null,
+                Material = v.Material != null ? new { v.Material.Id, v.Material.Name } : null
+            })
+        }).ToListAsync();
+
+        return Ok(result);
+    }
+
         // 2. Lấy thông tin chi tiết sản phẩm theo Id
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductModel>> GetProduct(int id)
