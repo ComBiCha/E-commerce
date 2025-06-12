@@ -39,12 +39,14 @@ namespace E_commerce.Controllers
                     Description = p.Description,
                     Price = p.Price,
                     Image = p.Image,
+                    Image2 = p.Image2,
                     Variations = p.Variations.Select(v => new VariationDto
                     {
                         Id = v.Id,
                         Size = v.Size,
                         Price = v.Price,
                         Stock = v.Stock,
+                        Image = v.ImageUrl,
                         Color = v.Color == null ? null : new ColorDto
                         {
                             Id = v.Color.Id,
@@ -125,6 +127,7 @@ namespace E_commerce.Controllers
             p.Description,
             p.Price,
             p.Image,
+            p.Image2,
             Category = p.Category.Name,
             Brand = p.Brand.Name,
             Variations = p.Variations.Select(v => new {
@@ -132,6 +135,7 @@ namespace E_commerce.Controllers
                 v.Size,
                 v.Price,
                 v.Stock,
+                v.ImageUrl,
                 Color = v.Color != null ? new { v.Color.Id, v.Color.Name, v.Color.HexCode } : null,
                 Material = v.Material != null ? new { v.Material.Id, v.Material.Name } : null
             })
