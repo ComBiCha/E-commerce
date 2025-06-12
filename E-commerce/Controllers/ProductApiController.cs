@@ -39,6 +39,7 @@ namespace E_commerce.Controllers
                     Description = p.Description,
                     Price = p.Price,
                     Image = p.Image,
+                    Image2 = p.Image2,
                     Variations = p.Variations.Select(v => new VariationDto
                     {
                         Id = v.Id,
@@ -125,6 +126,7 @@ namespace E_commerce.Controllers
             p.Description,
             p.Price,
             p.Image,
+            p.Image2,
             Category = p.Category.Name,
             Brand = p.Brand.Name,
             Variations = p.Variations.Select(v => new {

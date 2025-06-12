@@ -7,6 +7,7 @@
         public string? Description { get; set; }
         public decimal Price { get; set; }
         public string? Image { get; set; }
+        public string? Image2 { get; set; }
         public List<VariationDto> Variations { get; set; } = new();
     }
 
