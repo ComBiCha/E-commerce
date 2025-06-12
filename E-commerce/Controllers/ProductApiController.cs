@@ -46,6 +46,7 @@ namespace E_commerce.Controllers
                         Size = v.Size,
                         Price = v.Price,
                         Stock = v.Stock,
+                        Image = v.ImageUrl,
                         Color = v.Color == null ? null : new ColorDto
                         {
                             Id = v.Color.Id,
@@ -134,6 +135,7 @@ namespace E_commerce.Controllers
                 v.Size,
                 v.Price,
                 v.Stock,
+                v.ImageUrl,
                 Color = v.Color != null ? new { v.Color.Id, v.Color.Name, v.Color.HexCode } : null,
                 Material = v.Material != null ? new { v.Material.Id, v.Material.Name } : null
             })
