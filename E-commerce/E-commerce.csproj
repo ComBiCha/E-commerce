@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.10">
       <PrivateAssets>all</PrivateAssets>
@@ -38,6 +39,7 @@
     <Folder Include="wwwroot\backend\css\" />
     <Folder Include="wwwroot\backend\images\" />
     <Folder Include="wwwroot\media\contact\" />
+    <Folder Include="wwwroot\media\chat\" />
     <Folder Include="wwwroot\media\variations\" />
     <Folder Include="wwwroot\media\sliders\" />
     <Folder Include="wwwroot\media\products\" />

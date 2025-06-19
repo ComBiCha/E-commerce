@@ -1,6 +1,7 @@
 ﻿using E_commerce.Models;
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -380,8 +381,34 @@ namespace E_commerce.Controllers
                 newPrice = newPrice
 			});
         }
+        //==================================================================================================
+        //============================================API SESSION===========================================
+        //==================================================================================================
+        [HttpGet("api/Cart/GetCart")]
+        public async Task<IActionResult> GetCart()
+        {
+            // Lấy cart từ session
+            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
 
+            // Lấy danh sách Variation từ database dựa trên VariationId
+            var variationIds = cartItems.Select(x => x.VariationId).Distinct().ToList();
+            var variations = await _dataContext.Variations
+                .Include(v => v.Material)
+                .Include(v => v.Color)
+                .Where(v => variationIds.Contains(v.Id))
+                .ToDictionaryAsync(v => v.Id);
 
+            // Gán thông tin Variation vào từng CartItemModel
+            foreach (var item in cartItems)
+            {
+                if (variations.ContainsKey(item.VariationId))
+                {
+                    item.Variation = variations[item.VariationId];
+                }
+            }
+
+            return Json(cartItems);
+        }
 
 
 

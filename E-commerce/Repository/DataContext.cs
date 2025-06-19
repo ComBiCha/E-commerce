@@ -32,5 +32,25 @@ namespace E_commerce.Repository
         public DbSet<CouponUsageModel> CouponUsages { get; set; }
 
         public DbSet<E_commerce.Models.UserModel> UserModel { get; set; }
+
+        public DbSet<Messages> Messages { get; set; }
+    
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+        
+            // Cấu hình relationship cho Messages
+            modelBuilder.Entity<Messages>()
+                .HasOne(m => m.Sender)
+                .WithMany(u => u.SentMessages)
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            modelBuilder.Entity<Messages>()
+                .HasOne(m => m.Receiver)
+                .WithMany(u => u.ReceivedMessages)
+                .HasForeignKey(m => m.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }

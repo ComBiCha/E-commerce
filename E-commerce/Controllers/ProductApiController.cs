@@ -32,6 +32,8 @@ namespace E_commerce.Controllers
             var products = await _context.Products
                 .Include(p => p.Variations)
                     .ThenInclude(v => v.Color)
+                .Include(p => p.Variations)
+                    .ThenInclude(v => v.ProductQuantities)
                 .Select(p => new ProductWithVariationsDto
                 {
                     Id = p.Id,
@@ -45,7 +47,7 @@ namespace E_commerce.Controllers
                         Id = v.Id,
                         Size = v.Size,
                         Price = v.Price,
-                        Stock = v.Stock,
+                        Stock = v.ProductQuantities.Sum(q => q.Quantity), // Lấy tổng tồn kho
                         Image = v.ImageUrl,
                         Color = v.Color == null ? null : new ColorDto
                         {
@@ -61,7 +63,7 @@ namespace E_commerce.Controllers
         }
 
 
-    [HttpGet("Search")]
+        [HttpGet("Search")]
     public async Task<IActionResult> Search(
         string? searchTerm,
         string? category,

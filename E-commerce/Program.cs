@@ -5,6 +5,7 @@ using E_commerce.Models;
 using E_commerce.Repository;
 using E_commerce.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Stripe;
@@ -17,8 +18,8 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFlutter", policy =>
     {
         policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
@@ -30,6 +31,9 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration["ConnectionStrings:ConnectedDb"]);
 });
+
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 /*// Đọc cấu hình Firebase từ appsettings.json
 var firebaseConfig = builder.Configuration.GetSection("Firebase").Get<Dictionary<string, string>>();
@@ -141,7 +145,7 @@ else
 }
 
 app.UseStaticFiles();
-
+app.MapHub<ChatHub>("/chatHub");
 app.UseRouting();
 
 
@@ -151,6 +155,8 @@ StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey"
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+
 
 app.MapControllerRoute(
     name: "Areas",
