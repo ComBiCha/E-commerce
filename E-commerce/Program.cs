@@ -5,12 +5,23 @@ using E_commerce.Models;
 using E_commerce.Repository;
 using E_commerce.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Stripe;
 using Stripe.Climate;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFlutter", policy =>
+    {
+        policy.AllowAnyOrigin()
+        .AllowAnyHeader()
+        .AllowAnyMethod();
+    });
+});
 
 // Thêm UserFacade vào DI container
 builder.Services.AddScoped<UserFacade>();
@@ -20,6 +31,9 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration["ConnectionStrings:ConnectedDb"]);
 });
+
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 /*// Đọc cấu hình Firebase từ appsettings.json
 var firebaseConfig = builder.Configuration.GetSection("Firebase").Get<Dictionary<string, string>>();
@@ -107,6 +121,8 @@ builder.Services.Configure<IdentityOptions>(options =>
 
 var app = builder.Build();
 
+app.UseCors("AllowFlutter");
+
 app.UseStatusCodePagesWithRedirects("/Home/Error?statuscode={0}");
 app.UseSession();
 
@@ -129,7 +145,7 @@ else
 }
 
 app.UseStaticFiles();
-
+app.MapHub<ChatHub>("/chatHub");
 app.UseRouting();
 
 
@@ -139,6 +155,8 @@ StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey"
 app.UseAuthentication();
 
 app.UseAuthorization();
+
+
 
 app.MapControllerRoute(
     name: "Areas",

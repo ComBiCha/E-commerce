@@ -16,5 +16,8 @@ namespace E_commerce.Models
             if (Points >= 10000) return 0.02m; // 2%
             return 0m; // Không giảm giá
         }
+
+        public ICollection<Messages> SentMessages { get; set; }
+        public ICollection<Messages> ReceivedMessages { get; set; }
     }
 }

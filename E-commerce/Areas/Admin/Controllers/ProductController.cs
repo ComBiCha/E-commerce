@@ -87,90 +87,94 @@ namespace E_commerce.Areas.Admin.Controllers
 			ViewBag.Colors = new SelectList(_dataContext.Colors, "Id", "Name");
 			return View();
 		}
-		[HttpPost]
-		[ValidateAntiForgeryToken]
-		public async Task<IActionResult> Create(ProductModel model, List<IFormFile> VariationImages)
-		{
-			ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name");
-			ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name");
-			ViewBag.Materials = new SelectList(_dataContext.Materials, "Id", "Name");
-			ViewBag.Colors = new SelectList(_dataContext.Colors, "Id", "Name");
-			if (!ModelState.IsValid)
-			{
-				model.Slug = model.Name.Replace(" ", "-");
-				var existingProduct = await _productRepository.GetProductBySlugAsync(model.Slug);
-				if (existingProduct != null)
-				{
-					ModelState.AddModelError("", "Product already exist");
-					return View(model);
-				}
-				// Upload ảnh chính cho sản phẩm
-				if (model.ImageUpload != null)
-				{
-					string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
-					string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ImageUpload.FileName;
-					string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-					using (var fileStream = new FileStream(filePath, FileMode.Create))
-					{
-						await model.ImageUpload.CopyToAsync(fileStream);
-					}
-					model.Image = uniqueFileName;
-				}
-			}
-			//Upload ảnh phụ cho sản phẩm
-			if (model.ImageUpload2 != null)
-			{
-				string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
-				string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ImageUpload2.FileName;
-				string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(ProductModel model, List<IFormFile> VariationImages)
+        {
+            ViewBag.Categories = new SelectList(_dataContext.Categories, "Id", "Name");
+            ViewBag.Brands = new SelectList(_dataContext.Brands, "Id", "Name");
+            ViewBag.Materials = new SelectList(_dataContext.Materials, "Id", "Name");
+            ViewBag.Colors = new SelectList(_dataContext.Colors, "Id", "Name");
 
-				using (var fileStream = new FileStream(filePath, FileMode.Create))
-				{
-					await model.ImageUpload2.CopyToAsync(fileStream);
-				}
-				model.Image2 = uniqueFileName;
-			}
-			await _productRepository.CreateProductAsync(model);
+            // Xử lý upload ảnh chính cho sản phẩm (luôn thực hiện)
+            if (model.ImageUpload != null)
+            {
+                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ImageUpload.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ImageUpload.CopyToAsync(fileStream);
+                }
+                model.Image = uniqueFileName;
+            }
+
+            // Upload ảnh phụ cho sản phẩm
+            if (model.ImageUpload2 != null)
+            {
+                string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "media/products");
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + model.ImageUpload2.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await model.ImageUpload2.CopyToAsync(fileStream);
+                }
+                model.Image2 = uniqueFileName;
+            }
+
+            if (!ModelState.IsValid)
+            {
+                model.Slug = model.Name.Replace(" ", "-");
+                var existingProduct = await _productRepository.GetProductBySlugAsync(model.Slug);
+                if (existingProduct != null)
+                {
+                    ModelState.AddModelError("", "Product already exist");
+                    return View(model);
+                }
+            }
+            await _productRepository.CreateProductAsync(model);
 			// lưu sản phẩm trước để có id
 			await _dataContext.SaveChangesAsync();
 
-			// Xử lý biến thể nếu có
-			if (model.Variations != null && model.Variations.Count > 0)
-			{
-				for (int i = 0; i < model.Variations.Count; i++)
-				{
-					var variationData = model.Variations[i];
-					string uniqueFileName = null;
-					// Kiểm tra nếu có ảnh thì mới xử lý
-					if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
-					{
-						string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "media/variations");
-						uniqueFileName = Guid.NewGuid().ToString() + "_" + VariationImages[i].FileName;
-						string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+            // Xử lý biến thể nếu có
+            if (model.Variations != null && model.Variations.Count > 0)
+            {
+                for (int i = 0; i < model.Variations.Count; i++)
+                {
+                    var variationData = model.Variations[i];
+                    string uniqueFileName = null;
+                    // Kiểm tra nếu có ảnh thì mới xử lý
+                    if (VariationImages != null && i < VariationImages.Count && VariationImages[i] != null)
+                    {
+                        string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "media/variations");
+                        uniqueFileName = Guid.NewGuid().ToString() + "_" + VariationImages[i].FileName;
+                        string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-						using (var fileStream = new FileStream(filePath, FileMode.Create))
-						{
-							await VariationImages[i].CopyToAsync(fileStream);
-						}
-						_dataContext.Variations.Add(new ProductVariationModel
-						{
-							MaterialId = variationData.MaterialId,
-							ColorId = variationData.ColorId,
-							Price = variationData.Price,
-							Stock = variationData.Stock,
-							Size = variationData.Size,
-							ProductId = model.Id,
-							ImageUrl = uniqueFileName
-						});
-					}
-					await _dataContext.SaveChangesAsync();
-					model.Quantity = _dataContext.Variations.Where(v => v.ProductId == model.Id).Sum(v => v.Stock);
-					await _productRepository.UpdateProductAsync(model);
-				}
-				TempData["success"] = "Product added successfully";
-				return RedirectToAction("Index");
-			}
-			return View(model);
+                        using (var fileStream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await VariationImages[i].CopyToAsync(fileStream);
+                        }
+                        _dataContext.Variations.Add(new ProductVariationModel
+                        {
+                            MaterialId = variationData.MaterialId,
+                            ColorId = variationData.ColorId,
+                            Price = variationData.Price,
+                            Stock = variationData.Stock,
+                            Size = variationData.Size,
+                            ProductId = model.Id,
+                            ImageUrl = uniqueFileName
+                        });
+                    }
+                }
+                await _dataContext.SaveChangesAsync();
+                model.Quantity = _dataContext.Variations.Where(v => v.ProductId == model.Id).Sum(v => v.Stock);
+                await _productRepository.UpdateProductAsync(model);
+
+                TempData["success"] = "Product added successfully";
+                return RedirectToAction("Index");
+            }
+            return View(model);
 		}
 		public async Task<IActionResult> Edit(long Id)
 		{
