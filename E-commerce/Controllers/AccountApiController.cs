@@ -12,6 +12,7 @@ namespace E_commerce.Controllers
     {
         private readonly SignInManager<AppUserModel> _signInManager;
         private UserManager<AppUserModel> _userManager;
+
         public AccountApiController(SignInManager<AppUserModel> signInManager, UserManager<AppUserModel> userManager)
         {
             _signInManager = signInManager;
@@ -27,8 +28,22 @@ namespace E_commerce.Controllers
             var result = await _signInManager.PasswordSignInAsync(loginVM.UserName, loginVM.Password, false, false);
             if (result.Succeeded)
             {
-                // Có thể trả về token hoặc thông tin user nếu cần
-                return Ok(new { success = true, message = "Login successful" });
+                var user = await _userManager.FindByNameAsync(loginVM.UserName);
+                return Ok(new
+                {
+                    success = true,
+                    message = "Login successful",
+                    user = new
+                    {
+                        id = user.Id,
+                        userName = user.UserName,
+                        email = user.Email,
+                        phoneNumber = user.PhoneNumber,
+                        points = user.Points,
+                        membershipTier = GetMembershipTier(user.Points),
+                        discountRate = user.GetDiscountRate()
+                    }
+                });
             }
             return Unauthorized(new { success = false, message = "Invalid Username or Password" });
         }
@@ -55,7 +70,7 @@ namespace E_commerce.Controllers
                 UserName = user.UserName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
-                // Address = user.Address
+                Points = 0 // Khởi tạo với 0 điểm
             };
 
             var result = await _userManager.CreateAsync(newUser, user.Password);
@@ -72,6 +87,83 @@ namespace E_commerce.Controllers
             {
                 return BadRequest(new { success = false, message = string.Join(", ", result.Errors.Select(e => e.Description)) });
             }
+        }
+
+        // 🔹 CẬP NHẬT API GETUSERINFO ĐỂ BAO GỒM POINTS VÀ DISCOUNT RATE
+        [HttpGet("GetUserInfo")]
+        public async Task<IActionResult> GetUserInfo(string username)
+        {
+            try
+            {
+                var user = await _userManager.FindByNameAsync(username);
+                if (user != null)
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        user = new
+                        {
+                            id = user.Id,
+                            userName = user.UserName,
+                            email = user.Email,
+                            phoneNumber = user.PhoneNumber,
+                            emailConfirmed = user.EmailConfirmed,
+                            points = user.Points,
+                            membershipTier = GetMembershipTier(user.Points),
+                            discountRate = user.GetDiscountRate() // Trả về tỷ lệ giảm giá membership
+                        }
+                    });
+                }
+
+                return NotFound(new { success = false, message = "User not found" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        // 🔹 API LẤY THÔNG TIN USER THEO EMAIL
+        [HttpGet("GetUserByEmail")]
+        public async Task<IActionResult> GetUserByEmail(string email)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user != null)
+                {
+                    return Ok(new
+                    {
+                        success = true,
+                        user = new
+                        {
+                            id = user.Id,
+                            userName = user.UserName,
+                            email = user.Email,
+                            phoneNumber = user.PhoneNumber,
+                            emailConfirmed = user.EmailConfirmed,
+                            points = user.Points,
+                            membershipTier = GetMembershipTier(user.Points),
+                            discountRate = user.GetDiscountRate()
+                        }
+                    });
+                }
+
+                return NotFound(new { success = false, message = "User not found" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        // 🔹 HELPER METHOD ĐỂ TÍNH MEMBERSHIP TIER
+        private string GetMembershipTier(int points)
+        {
+            if (points >= 1000) return "Gold";
+            if (points >= 500) return "Silver";
+            if (points >= 100) return "Bronze";
+            return "Basic";
         }
     }
 }

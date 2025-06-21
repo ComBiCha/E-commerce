@@ -542,6 +542,82 @@ namespace E_commerce.Controllers
             return View(order);
         }
 
+        //========
+        //API
+        //========
+        [HttpPost]
+        [Route("api/Checkout/Checkout")]
+        public async Task<IActionResult> CheckoutApi([FromBody] CheckoutApiRequest request)
+        {
+            try
+            {
+                // Validate request
+                if (request == null || !request.CartItems.Any())
+                {
+                    return BadRequest(new { error = "Invalid request or empty cart" });
+                }
+
+                // Tạo đơn hàng
+                var order = new OrderModel
+                {
+                    OrderCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper(),
+                    CreatedDate = DateTime.Now,
+                    UserName = request.UserEmail ?? "guest@example.com"
+                };
+
+                // Convert CartItems từ API request
+                var cartItems = request.CartItems.Select(item => new CartItemModel
+                {
+                    ProductId = item.ProductId,
+                    VariationId = item.VariationId,
+                    ProductName = item.ProductName,
+                    Price = (decimal)item.Price, // Ép kiểu double sang decimal
+                    Quantity = item.Quantity,
+                    Image = item.ImageUrl
+                }).ToList();
+
+                // Xử lý thanh toán - Ép kiểu double sang decimal
+                var paymentService = PaymentServiceFactory.GetPaymentService(request.PaymentMethod, _datacontext);
+                var redirectUrl = await paymentService.ProcessPayment(
+                    order,
+                    cartItems,
+                    (decimal)request.ShippingPrice,    // Ép kiểu double sang decimal
+                    (decimal)request.DiscountAmount    // Ép kiểu double sang decimal
+                );
+
+                return Ok(new
+                {
+                    success = true,
+                    redirectUrl = redirectUrl,
+                    orderCode = order.OrderCode,
+                    paymentMethod = request.PaymentMethod
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { error = ex.Message });
+            }
+        }
+
+        public class CheckoutApiRequest
+        {
+            public string PaymentMethod { get; set; }
+            public string UserEmail { get; set; }
+            public List<CartItemApiModel> CartItems { get; set; }
+            public double ShippingPrice { get; set; }
+            public double DiscountAmount { get; set; }
+        }
+
+        public class CartItemApiModel
+        {
+            public int ProductId { get; set; }
+            public int VariationId { get; set; }
+            public string ProductName { get; set; }
+            public double Price { get; set; }
+            public int Quantity { get; set; }
+            public string ImageUrl { get; set; }
+        }
+
     }
 }
 
