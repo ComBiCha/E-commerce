@@ -121,6 +121,16 @@ namespace E_commerce.Areas.Admin.Repository
         {
             return await _roleManager.Roles.ToListAsync();
         }
+
+        public async Task<string> GetCustomerSupportUserNameAsync()
+        {
+            return await (from u in _dataContext.Users
+                          join ur in _dataContext.UserRoles on u.Id equals ur.UserId
+                          join r in _dataContext.Roles on ur.RoleId equals r.Id
+                          where r.Name == "CustomerSupport"
+                          select u.UserName).FirstOrDefaultAsync(); // chỉ lấy 1 người
+        }
+
     }
 
 }

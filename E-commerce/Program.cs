@@ -32,7 +32,12 @@ builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration["ConnectionStrings:ConnectedDb"]);
 });
 
-builder.Services.AddSignalR();
+builder.Services.AddSignalR()
+    .AddHubOptions<ChatHub>(options =>
+    {
+        options.ClientTimeoutInterval = TimeSpan.FromMinutes(5);
+        options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    });
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 /*// Đọc cấu hình Firebase từ appsettings.json
