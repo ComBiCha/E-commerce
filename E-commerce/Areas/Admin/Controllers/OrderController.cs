@@ -126,66 +126,111 @@ namespace E_commerce.Areas.Admin.Controllers
         [HttpGet]
         public async Task<IActionResult> Delete(string ordercode)
         {
+            // Find the order
             var order = await _dataContext.Orders.FirstOrDefaultAsync(o => o.OrderCode == ordercode);
             if (order == null)
             {
                 return NotFound();
             }
-			var orderDetails = await _dataContext.OrderDetails
-				.Include(od => od.Variation)
-				.ThenInclude(v => v.Product)
-				.Where(od => od.OrderCode == ordercode)
-				.ToListAsync();
 
-			// Hoàn lại số lượng sản phẩm & giảm số lượng đã bán
-			foreach (var orderDetail in orderDetails)
-			{
-				if (orderDetail.Variation != null)
-				{
-					orderDetail.Variation.Stock += orderDetail.Quantity; // Cộng lại số lượng đã mua
-					if (orderDetail.Variation.Product != null)
-					{
-						orderDetail.Variation.Product.Sold -= orderDetail.Quantity; // Giảm số lượng đã bán
-						orderDetail.Variation.Product.Quantity += orderDetail.Quantity;
-						if (orderDetail.Variation.Product.Sold < 0)
-						{
-							orderDetail.Variation.Product.Sold = 0;
-						}
-						_dataContext.Products.Update(orderDetail.Variation.Product);
-					}
-					_dataContext.Variations.Update(orderDetail.Variation);
-				}
-			}
+            // Get order details with variations and products
+            var orderDetails = await _dataContext.OrderDetails
+                .Include(od => od.Variation)
+                .ThenInclude(v => v.Product)
+                .Where(od => od.OrderCode == ordercode)
+                .ToListAsync();
 
-			// ✅ **Xử lý hoàn tiền theo phương thức thanh toán**
-			if (!string.IsNullOrEmpty(order.PaymentIntentId))
-			{
-				if (order.PaymentIntentId.StartsWith("pi_"))
-				{
-					await ProcessStripeRefund(order.PaymentIntentId);
-				}
-				else if (order.PaymentIntentId.StartsWith("PAYID-"))
-				{
-					await ProcessPayPalRefund(order.PaymentIntentId);
-				}
-			}
+            // Begin transaction to ensure data consistency
+            await using var transaction = await _dataContext.Database.BeginTransactionAsync();
 
-			try
+            try
             {
+                // Restock products and update sold quantities
+                foreach (var orderDetail in orderDetails)
+                {
+                    if (orderDetail.Variation != null)
+                    {
+                        // Restock by adding quantity back to ProductQuantityModel (preferably to the latest batch)
+                        var productQuantities = await _dataContext.ProductQuantities
+                            .Where(pq => pq.VariationId == orderDetail.Variation.Id)
+                            .OrderByDescending(pq => pq.DateCreated) // Prefer latest batch for restocking
+                            .ToListAsync();
 
+                        int quantityToRestock = orderDetail.Quantity;
+
+                        if (productQuantities.Any())
+                        {
+                            // Add quantity to the latest batch
+                            var latestBatch = productQuantities.First();
+                            latestBatch.CurrentQuantityInBatch += quantityToRestock;
+                            latestBatch.LastUpdated = DateTime.Now;
+                            _dataContext.ProductQuantities.Update(latestBatch);
+                        }
+                        else
+                        {
+                            // If no batch exists, create a new one (optional, depending on business rules)
+                            var newBatch = new BatchModel
+                            {
+                                BatchCode = $"RESTOCK-{ordercode}-{DateTime.Now.Ticks}",
+                                ImportDate = DateTime.Now,
+                            };
+                            _dataContext.Batches.Add(newBatch);
+                            await _dataContext.SaveChangesAsync(); // Save to generate BatchId
+
+                            var newProductQuantity = new ProductQuantityModel
+                            {
+                                VariationId = orderDetail.Variation.Id,
+                                BatchId = newBatch.Id,
+                                InitialQuantity = quantityToRestock,
+                                CurrentQuantityInBatch = quantityToRestock,
+                                DateCreated = DateTime.Now,
+                                LastUpdated = DateTime.Now
+                            };
+                            _dataContext.ProductQuantities.Add(newProductQuantity);
+                        }
+
+                        // Update product sold quantity
+                        if (orderDetail.Variation.Product != null)
+                        {
+                            orderDetail.Variation.Product.Sold -= orderDetail.Quantity;
+                            if (orderDetail.Variation.Product.Sold < 0)
+                            {
+                                orderDetail.Variation.Product.Sold = 0;
+                            }
+                            _dataContext.Products.Update(orderDetail.Variation.Product);
+                        }
+                    }
+                }
+
+                // Process refund if applicable
+                if (!string.IsNullOrEmpty(order.PaymentIntentId))
+                {
+                    if (order.PaymentIntentId.StartsWith("pi_"))
+                    {
+                        await ProcessStripeRefund(order.PaymentIntentId);
+                    }
+                    else if (order.PaymentIntentId.StartsWith("PAYID-"))
+                    {
+                        await ProcessPayPalRefund(order.PaymentIntentId);
+                    }
+                }
+
+                // Remove order details and order
                 if (orderDetails.Any())
                 {
                     _dataContext.OrderDetails.RemoveRange(orderDetails);
                 }
-
-                // Xóa đơn hàng
                 _dataContext.Orders.Remove(order);
+
+                // Save changes and commit transaction
                 await _dataContext.SaveChangesAsync();
+                await transaction.CommitAsync();
 
                 TempData["success"] = "Order deleted successfully!";
             }
             catch (Exception ex)
             {
+                await transaction.RollbackAsync();
                 ModelState.AddModelError("", "An error occurred while deleting the order: " + ex.Message);
                 return RedirectToAction("Index");
             }
@@ -287,80 +332,159 @@ namespace E_commerce.Areas.Admin.Controllers
                 return View(model); // Trả về View với model để hiển thị lỗi
             }
 
-
             var order = await _dataContext.Orders.FirstOrDefaultAsync(o => o.Id == model.Order.Id);
             if (order == null)
             {
                 return NotFound(new { success = false, message = "Order not found" });
             }
 
-            // Cập nhật thông tin đơn hàng
-            order.ShippingCost = model.Order.ShippingCost;
-            order.Address = model.Order.Address;
-            order.UserName = model.Order.UserName;
-            order.Status = 1;
+            // Bắt đầu giao dịch để đảm bảo tính toàn vẹn dữ liệu
+            await using var transaction = await _dataContext.Database.BeginTransactionAsync();
 
-            _dataContext.Orders.Update(order);
-
-            foreach (var detail in model.OrderDetails)
+            try
             {
-                var existingDetail = _dataContext.OrderDetails
-                    .Include(x => x.Product)
-                    .Include(x => x.Variation)
-                    .FirstOrDefault(x => x.Id == detail.Id);
+                // Cập nhật thông tin đơn hàng
+                order.ShippingCost = model.Order.ShippingCost;
+                order.Address = model.Order.Address;
+                order.UserName = model.Order.UserName;
+                order.Status = 1;
+                _dataContext.Orders.Update(order);
 
-                if (existingDetail != null)
+                foreach (var detail in model.OrderDetails)
                 {
-                    // Tính sự chênh lệch
+                    var existingDetail = await _dataContext.OrderDetails
+                        .Include(x => x.Product)
+                        .Include(x => x.Variation)
+                        .FirstOrDefaultAsync(x => x.Id == detail.Id);
+
+                    if (existingDetail == null)
+                    {
+                        ModelState.AddModelError(string.Empty, "Chi tiết đơn hàng không tồn tại.");
+                        await transaction.RollbackAsync();
+                        return View(model);
+                    }
+
+                    // Tính sự chênh lệch số lượng
                     var quantityDifference = detail.Quantity - existingDetail.Quantity;
 
                     // Kiểm tra nếu Quantity lớn hơn Stock
                     if (existingDetail.Variation == null)
                     {
                         ModelState.AddModelError(string.Empty, "Không tìm thấy thông tin biến thể sản phẩm.");
+                        await transaction.RollbackAsync();
                         return View(model);
                     }
 
                     if (detail.Quantity <= 0)
                     {
                         ModelState.AddModelError(string.Empty, $"Số lượng không hợp lệ cho sản phẩm {existingDetail.Product.Name}");
+                        await transaction.RollbackAsync();
                         return View(model);
                     }
 
-                    if (existingDetail.Variation != null && detail.Quantity > existingDetail.Variation.Stock)
+                    if (quantityDifference > 0 && quantityDifference > existingDetail.Variation.Stock)
                     {
                         ModelState.AddModelError(string.Empty, $"Số lượng của sản phẩm '{existingDetail.Product.Name}' vượt quá tồn kho. Hiện tại chỉ còn {existingDetail.Variation.Stock}.");
+                        await transaction.RollbackAsync();
                         return View(model);
                     }
 
                     // Cập nhật Quantity trong OrderDetails
                     existingDetail.Quantity = detail.Quantity;
 
-                    // Trừ Stock và cộng Sold nếu có Product
+                    // Cập nhật tồn kho trong ProductQuantityModel
+                    if (quantityDifference != 0)
+                    {
+                        var productQuantities = await _dataContext.ProductQuantities
+                            .Where(pq => pq.VariationId == existingDetail.Variation.Id && pq.CurrentQuantityInBatch > 0)
+                            .OrderBy(pq => pq.DateCreated) // FIFO
+                            .ToListAsync();
+
+                        if (quantityDifference > 0)
+                        {
+                            // Trừ số lượng từ các lô (FIFO)
+                            int quantityToDeduct = quantityDifference;
+                            foreach (var pq in productQuantities)
+                            {
+                                if (quantityToDeduct <= 0) break;
+
+                                int deduct = Math.Min(pq.CurrentQuantityInBatch, quantityToDeduct);
+                                pq.CurrentQuantityInBatch -= deduct;
+                                pq.LastUpdated = DateTime.Now;
+                                quantityToDeduct -= deduct;
+                                _dataContext.ProductQuantities.Update(pq);
+                            }
+                        }
+                        else if (quantityDifference < 0)
+                        {
+                            // Hoàn lại số lượng vào lô mới nhất
+                            int quantityToRestock = -quantityDifference;
+                            var latestBatch = await _dataContext.ProductQuantities
+                                .Where(pq => pq.VariationId == existingDetail.Variation.Id)
+                                .OrderByDescending(pq => pq.DateCreated)
+                                .FirstOrDefaultAsync();
+
+                            if (latestBatch != null)
+                            {
+                                latestBatch.CurrentQuantityInBatch += quantityToRestock;
+                                latestBatch.LastUpdated = DateTime.Now;
+                                _dataContext.ProductQuantities.Update(latestBatch);
+                            }
+                            else
+                            {
+                                // Tạo lô mới nếu không có lô nào
+                                var newBatch = new BatchModel
+                                {
+                                    BatchCode = $"RESTOCK-EDIT-{order.OrderCode}-{DateTime.Now.Ticks}",
+                                    ImportDate = DateTime.Now,
+                                };
+                                _dataContext.Batches.Add(newBatch);
+                                await _dataContext.SaveChangesAsync(); // Lưu để lấy BatchId
+
+                                var newProductQuantity = new ProductQuantityModel
+                                {
+                                    VariationId = existingDetail.Variation.Id,
+                                    BatchId = newBatch.Id,
+                                    InitialQuantity = quantityToRestock,
+                                    CurrentQuantityInBatch = quantityToRestock,
+                                    DateCreated = DateTime.Now,
+                                    LastUpdated = DateTime.Now
+                                };
+                                _dataContext.ProductQuantities.Add(newProductQuantity);
+                            }
+                        }
+                    }
+
+                    // Cập nhật số lượng đã bán trong Product
                     if (existingDetail.Product != null)
                     {
-                        existingDetail.Product.Quantity -= quantityDifference;
                         existingDetail.Product.Sold += quantityDifference;
+                        if (existingDetail.Product.Sold < 0)
+                        {
+                            existingDetail.Product.Sold = 0;
+                        }
                         _dataContext.Products.Update(existingDetail.Product);
                     }
 
-                    // Trừ Stock nếu có Variation
-                    if (existingDetail.Variation != null)
-                    {
-                        existingDetail.Variation.Stock -= quantityDifference;
-                        _dataContext.Variations.Update(existingDetail.Variation);
-                    }
-
-                    // Cập nhật lại OrderDetails
+                    // Cập nhật chi tiết đơn hàng
                     _dataContext.OrderDetails.Update(existingDetail);
                 }
 
+                // Lưu tất cả thay đổi và commit giao dịch
                 await _dataContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return RedirectToAction("Index"); // Chuyển hướng về danh sách đơn hàng
             }
-            return RedirectToAction("Index"); // Chuyển hướng về danh sách đơn hàng
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                ModelState.AddModelError(string.Empty, "Đã xảy ra lỗi khi cập nhật đơn hàng: " + ex.Message);
+                return View(model);
+            }
         }
 
-		private async Task ProcessStripeRefund(string paymentIntentId)
+        private async Task ProcessStripeRefund(string paymentIntentId)
 		{
 			try
 			{

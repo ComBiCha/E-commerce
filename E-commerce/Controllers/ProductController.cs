@@ -148,7 +148,9 @@ namespace E_commerce.Controllers
                     .ThenInclude(v => v.Material) // Load Material of Variations
                 .Include(p => p.Variations)
                     .ThenInclude(v => v.Color) // Load Color of Variations
-                .FirstOrDefault(p => p.Id == Id);
+				.Include(p => p.Variations)
+	                .ThenInclude(v => v.ProductQuantities)
+				.FirstOrDefault(p => p.Id == Id);
 
             if (productsById == null) return NotFound();
 

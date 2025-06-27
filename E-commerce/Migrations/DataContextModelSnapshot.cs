@@ -67,6 +67,9 @@ namespace E_commerce.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
                     b.Property<string>("RoleId")
                         .HasColumnType("nvarchar(max)");
 
@@ -94,6 +97,27 @@ namespace E_commerce.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
+                });
+
+            modelBuilder.Entity("E_commerce.Models.BatchModel", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("BatchCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("ImportDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Batches");
                 });
 
             modelBuilder.Entity("E_commerce.Models.BrandModel", b =>
@@ -150,6 +174,25 @@ namespace E_commerce.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("E_commerce.Models.ColorModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("HexCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Colors");
+                });
+
             modelBuilder.Entity("E_commerce.Models.CompareModel", b =>
                 {
                     b.Property<int>("Id")
@@ -200,6 +243,107 @@ namespace E_commerce.Migrations
                     b.ToTable("Contacts");
                 });
 
+            modelBuilder.Entity("E_commerce.Models.CouponModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsPercentage")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("MaxUsage")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("MinOrderValue")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsedCount")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Coupons");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.CouponUsageModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CouponId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UsedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CouponUsages");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.MaterialModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Materials");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.Messages", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ReceiverId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("SenderId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiverId");
+
+                    b.HasIndex("SenderId");
+
+                    b.ToTable("Messages");
+                });
+
             modelBuilder.Entity("E_commerce.Models.OrderDetails", b =>
                 {
                     b.Property<int>("Id")
@@ -207,6 +351,9 @@ namespace E_commerce.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("OrderCode")
                         .HasColumnType("nvarchar(max)");
@@ -223,9 +370,14 @@ namespace E_commerce.Migrations
                     b.Property<string>("UserName")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("VariationId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("VariationId");
 
                     b.ToTable("OrderDetails");
                 });
@@ -238,10 +390,16 @@ namespace E_commerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("OrderCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PaymentIntentId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("ShippingCost")
@@ -279,6 +437,9 @@ namespace E_commerce.Migrations
                     b.Property<string>("Image")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Image2")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -286,13 +447,13 @@ namespace E_commerce.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(8, 2)");
 
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
                     b.Property<string>("Slug")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Sold")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WarrantyPeriod")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -312,20 +473,68 @@ namespace E_commerce.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<long>("BatchId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("CurrentQuantityInBatch")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("DateCreated")
                         .HasColumnType("datetime2");
 
-                    b.Property<long>("ProductId")
-                        .HasColumnType("bigint");
+                    b.Property<int>("InitialQuantity")
+                        .HasColumnType("int");
 
-                    b.Property<int>("Quantity")
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("VariationId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("BatchId");
+
+                    b.HasIndex("VariationId");
 
                     b.ToTable("ProductQuantities");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.ProductVariationModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ColorId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MaterialId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("Size")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ColorId");
+
+                    b.HasIndex("MaterialId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Variations");
                 });
 
             modelBuilder.Entity("E_commerce.Models.RatingModel", b =>
@@ -430,6 +639,10 @@ namespace E_commerce.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -437,6 +650,79 @@ namespace E_commerce.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UserModel");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.WarrantyModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long>("ProductId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("VariationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("WarrantyCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("VariationId");
+
+                    b.ToTable("Warranties");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.WarrantyRequestModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Reason")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("WarrantyCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("WarrantyID")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("WarrantyID");
+
+                    b.ToTable("WarrantyRequests");
                 });
 
             modelBuilder.Entity("E_commerce.Models.WishlistModel", b =>
@@ -604,6 +890,23 @@ namespace E_commerce.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("E_commerce.Models.Messages", b =>
+                {
+                    b.HasOne("E_commerce.Models.AppUserModel", "Receiver")
+                        .WithMany("ReceivedMessages")
+                        .HasForeignKey("ReceiverId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("E_commerce.Models.AppUserModel", "Sender")
+                        .WithMany("SentMessages")
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Receiver");
+
+                    b.Navigation("Sender");
+                });
+
             modelBuilder.Entity("E_commerce.Models.OrderDetails", b =>
                 {
                     b.HasOne("E_commerce.Models.ProductModel", "Product")
@@ -612,7 +915,15 @@ namespace E_commerce.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("E_commerce.Models.ProductVariationModel", "Variation")
+                        .WithMany()
+                        .HasForeignKey("VariationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Product");
+
+                    b.Navigation("Variation");
                 });
 
             modelBuilder.Entity("E_commerce.Models.ProductModel", b =>
@@ -636,11 +947,46 @@ namespace E_commerce.Migrations
 
             modelBuilder.Entity("E_commerce.Models.ProductQuantityModel", b =>
                 {
+                    b.HasOne("E_commerce.Models.BatchModel", "Batch")
+                        .WithMany("ProductQuantities")
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("E_commerce.Models.ProductVariationModel", "Variation")
+                        .WithMany("ProductQuantities")
+                        .HasForeignKey("VariationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Batch");
+
+                    b.Navigation("Variation");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.ProductVariationModel", b =>
+                {
+                    b.HasOne("E_commerce.Models.ColorModel", "Color")
+                        .WithMany("Variations")
+                        .HasForeignKey("ColorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("E_commerce.Models.MaterialModel", "Material")
+                        .WithMany("Variations")
+                        .HasForeignKey("MaterialId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("E_commerce.Models.ProductModel", "Product")
-                        .WithMany()
+                        .WithMany("Variations")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Color");
+
+                    b.Navigation("Material");
 
                     b.Navigation("Product");
                 });
@@ -654,6 +1000,42 @@ namespace E_commerce.Migrations
                         .IsRequired();
 
                     b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.WarrantyModel", b =>
+                {
+                    b.HasOne("E_commerce.Models.ProductModel", "Product")
+                        .WithMany("Warranty")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("E_commerce.Models.ProductVariationModel", "Variation")
+                        .WithMany()
+                        .HasForeignKey("VariationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Variation");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.WarrantyRequestModel", b =>
+                {
+                    b.HasOne("E_commerce.Models.AppUserModel", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
+
+                    b.HasOne("E_commerce.Models.WarrantyModel", "Warranty")
+                        .WithMany()
+                        .HasForeignKey("WarrantyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+
+                    b.Navigation("Warranty");
                 });
 
             modelBuilder.Entity("E_commerce.Models.WishlistModel", b =>
@@ -718,9 +1100,40 @@ namespace E_commerce.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("E_commerce.Models.AppUserModel", b =>
+                {
+                    b.Navigation("ReceivedMessages");
+
+                    b.Navigation("SentMessages");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.BatchModel", b =>
+                {
+                    b.Navigation("ProductQuantities");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.ColorModel", b =>
+                {
+                    b.Navigation("Variations");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.MaterialModel", b =>
+                {
+                    b.Navigation("Variations");
+                });
+
             modelBuilder.Entity("E_commerce.Models.ProductModel", b =>
                 {
                     b.Navigation("Ratings");
+
+                    b.Navigation("Variations");
+
+                    b.Navigation("Warranty");
+                });
+
+            modelBuilder.Entity("E_commerce.Models.ProductVariationModel", b =>
+                {
+                    b.Navigation("ProductQuantities");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,17 +1,21 @@
 ﻿@model IEnumerable<ProductModel>
+
 <div>
 	<div class="col-sm-3">
 		@Html.Partial("_SideBarPartical")
 	</div>
+
 	<style>
 		.product-image-wrapper {
-			height:450px;
+			height: 450px;
 		}
 	</style>
+
 	<div class="col-sm-9 padding-right">
 		<div class="features_items">
 			<!--features_items-->
 			<h2 class="title text-center">Features Items</h2>
+
 			@foreach (var item in Model)
 			{
 				<div class="col-sm-4">
@@ -21,21 +25,36 @@
 								<img src="~/media/products/@item.Image" alt="@item.Name" width="100%" />
 								<h2>$@item.Price</h2>
 								<p>@item.Name</p>
-								@* 							<p>Category: @item.Category.Name</p> *@
+								@* <p>Category: @item.Category.Name</p> *@
 								<p>Brand: @item.Brand.Name</p>
-								@if (item.Quantity > 0)
+
+								@if (item.TotalStock > 0)
 								{
-									<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>View Details</a>
+									<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="btn btn-default add-to-cart">
+										<i class="fa fa-shopping-cart"></i>View Details
+									</a>
 								}
 								else
 								{
-									<a class="btn btn-default add-to-cart"><i class="fa fa-minus-square"></i>Sold Out</a>
+									<a class="btn btn-default add-to-cart disabled" style="pointer-events: none; opacity: 0.6;">
+										<i class="fa fa-minus-square"></i>Sold Out
+									</a>
 								}
+
 								@if (User.Identity?.IsAuthenticated ?? false)
 								{
 									<ul class="nav nav-pills nav-justified">
-										<li><button class="btn btn-default add-btn-wishlist"><i class="fa fa-plus-square"></i><a asp-action="AddWishList" asp-controller="Home" asp-route-Id="@item.Id"> Add Wishlist</a></button></li>
-										<li><button class="btn btn-default add-btn-compare" data-product_id="@item.Id"><i class="fa fa-plus-square"></i> to compare</button></li>
+										<li>
+											<button class="btn btn-default add-btn-wishlist">
+												<i class="fa fa-plus-square"></i>
+												<a asp-action="AddWishList" asp-controller="Home" asp-route-Id="@item.Id"> Add Wishlist</a>
+											</button>
+										</li>
+										<li>
+											<button class="btn btn-default add-btn-compare" data-product_id="@item.Id">
+												<i class="fa fa-plus-square"></i> to compare
+											</button>
+										</li>
 									</ul>
 								}
 							</div>

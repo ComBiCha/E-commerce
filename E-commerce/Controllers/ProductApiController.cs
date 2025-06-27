@@ -25,7 +25,6 @@ namespace E_commerce.Controllers
             _categoryApiController = categoryApiController;
         }
 
-        // 1. Lấy danh sách tất cả sản phẩm
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProductWithVariationsDto>>> GetProducts()
         {
@@ -47,7 +46,7 @@ namespace E_commerce.Controllers
                         Id = v.Id,
                         Size = v.Size,
                         Price = v.Price,
-                        Stock = v.ProductQuantities.Sum(q => q.Quantity), // Lấy tổng tồn kho
+                        Stock = v.ProductQuantities.Sum(q => q.CurrentQuantityInBatch),
                         Image = v.ImageUrl,
                         Color = v.Color == null ? null : new ColorDto
                         {
@@ -61,6 +60,7 @@ namespace E_commerce.Controllers
 
             return products;
         }
+
 
 
         [HttpGet("Search")]
@@ -196,12 +196,11 @@ namespace E_commerce.Controllers
                 return NotFound();
             }
 
-            // Cập nhật thông tin sản phẩm
+            // Cập nhật thông tin sản phẩm (không cập nhật Quantity)
             existingProduct.Name = product.Name;
             existingProduct.Price = product.Price;
             existingProduct.Description = product.Description;
             existingProduct.Image = product.Image;
-            existingProduct.Quantity = product.Quantity;
             existingProduct.CategoryId = product.CategoryId;
             existingProduct.BrandId = product.BrandId;
 
@@ -223,6 +222,7 @@ namespace E_commerce.Controllers
 
             return NoContent();
         }
+
 
         // 5. Xóa sản phẩm
         [HttpDelete("{id}")]

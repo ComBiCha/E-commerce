@@ -1,179 +1,169 @@
 ﻿@model ProductModel
 @{
-    ViewData["title"] = "Create Product";
+    ViewData["Title"] = "Create Product";
 }
+
 <h4>Create Product</h4>
 <div class="col-md-9">
-    <form asp-action="Create" enctype="multipart/form-data"> 
+    <form asp-action="Create" enctype="multipart/form-data">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
         <div class="form-group">
             <label>Name</label>
             <input asp-for="Name" class="form-control" />
             <span asp-validation-for="Name" class="text-danger" />
         </div>
+
         <div class="form-group">
             <label>Description</label>
             <textarea asp-for="Description" class="form-control"></textarea>
             <span asp-validation-for="Description" class="text-danger" />
         </div>
+
         <div class="form-group">
             <label>Price</label>
             <input asp-for="Price" pattern="[0-9.,]+" class="form-control typing-price" />
             <span style="color:orange;" id="price-convert"></span>
             <span asp-validation-for="Price" class="text-danger" />
         </div>
+
         <div class="form-group">
             <label>WarrantyPeriod</label>
             <input asp-for="WarrantyPeriod" class="form-control" />
             <span asp-validation-for="WarrantyPeriod" class="text-danger" />
         </div>
+
         <div class="form-group">
             <label>Category</label>
             <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
-                <option>--Choose a Category</option>
+                <option>--Choose a Category--</option>
             </select>
             <span asp-validation-for="CategoryId" class="text-danger" />
         </div>
+
         <div class="form-group">
             <label>Brand</label>
             <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands">
-                <option>--Choose a Brand</option>
+                <option>--Choose a Brand--</option>
             </select>
             <span asp-validation-for="BrandId" class="text-danger" />
         </div>
+
         <div class="form-group">
             <label>Image</label>
             <input asp-for="ImageUpload" class="form-control-file" />
             <span asp-validation-for="ImageUpload" class="text-danger" />
-            <img id="imgpreview" class="pt-2"/>
+            <img id="imgpreview" class="pt-2" style="max-width: 200px; display:none;" />
         </div>
+
         <div class="form-group">
             <label>Image 2</label>
             <input asp-for="ImageUpload2" class="form-control-file" />
             <span asp-validation-for="ImageUpload2" class="text-danger" />
-            <img id="imgpreview2" class="pt-2" />
+            <img id="imgpreview2" class="pt-2" style="max-width: 200px; display:none;" />
         </div>
+
         <h4>Add Variations (Optional)</h4>
-        <button type="button" id="add-variation" class="btn btn-success">+ Add Variation</button>
+        <button type="button" id="add-variation" class="btn btn-success mb-2">+ Add Variation</button>
         <div id="variations-container"></div>
+
         <div class="form-group">
             <button class="btn btn-primary">Create</button>
         </div>
-
     </form>
+
     <a asp-action="Index">Back to List Product</a>
 </div>
+
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+
     <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
-    <script>
-        $(document).ready(function () {
-            function readURL(input, previewId) {
-                if (input.files && input.files[0]) {
-                    let reader = new FileReader();
-                    reader.onload = function (e) {
-                        $("#" + previewId).attr("src", e.target.result).width(200).height(200).show();
-                    };
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
 
-            $("#ImageUpload").change(function () {
-                readURL(this, "imgpreview");
-            });
-
-            $("#ImageUpload2").change(function () {
-                readURL(this, "imgpreview2");
-            });
-        });
-
-    </script>
     <script>
         CKEDITOR.replace('Description');
-    </script>
-    <script>
+
         $(".typing-price").on("keyup", function () {
             var currency_input = $(this).val();
-
-            $("#price-convert").html(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-                currency_input)
-            );
+            $("#price-convert").html(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(currency_input));
         });
-    </script>
-    <script>
+
+        function readURL(input, previewId) {
+            if (input.files && input.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    $("#" + previewId).attr("src", e.target.result).show();
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        $("#ImageUpload").change(function () {
+            readURL(this, "imgpreview");
+        });
+
+        $("#ImageUpload2").change(function () {
+            readURL(this, "imgpreview2");
+        });
+
         var materials = @Html.Raw(Json.Serialize(ViewBag.Materials));
         var colors = @Html.Raw(Json.Serialize(ViewBag.Colors));
-    </script>
 
-    <script>
         $(document).ready(function () {
             $("#add-variation").click(function () {
                 var index = $(".variation").length;
 
-                // Tạo danh sách Material options từ mảng materials
-                var materialOptions = '<option value="">--Choose a Material--</option>';
+                var materialOptions = `<option value="">--Choose a Material--</option>`;
                 materials.forEach(function (mat) {
                     materialOptions += `<option value="${mat.value}">${mat.text}</option>`;
                 });
 
-                // Tạo danh sách Color options từ mảng colors
-                var colorOptions = '<option value="">--Choose a Color--</option>';
+                var colorOptions = `<option value="">--Choose a Color--</option>`;
                 colors.forEach(function (col) {
                     colorOptions += `<option value="${col.value}">${col.text}</option>`;
                 });
 
                 var variationHtml = `
-                        <div class="variation border p-3 my-2">
-                            <h5>Variation ${index + 1}</h5>
-                            <div class="form-group">
-                                <label>Material</label>
-                                <select name="Variations[${index}].MaterialId" class="form-control">
-                                    ${materialOptions}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Color</label>
-                                <select name="Variations[${index}].ColorId" class="form-control">
-                                    ${colorOptions}
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>Price</label>
-                                <input name="Variations[${index}].Price" class="form-control" />
-                            </div>
-                            <div class="form-group">
-                                <input type="hidden" name="Variations[${index}].Stock" value="0" />
-                            </div>
-                            <div class="form-group">
-                                <label>Size</label>
-                                <input name="Variations[${index}].Size" class="form-control" />
-                            </div>
-                            <div class="form-group">
-                                <label>Variation Image</label>
-                                <input type="file" name="VariationImages" class="form-control-file variation-image" accept="image/*" data-preview="variation-preview-${index}" />
-                                <img id="variation-preview-${index}" class="pt-2" style="max-width: 100px; display: none;"/>
-                            </div>
-                        </div>
-                    `;
+                            <div class="variation border p-3 my-2">
+                                <h5>Variation ${index + 1}</h5>
+                                <div class="form-group">
+                                    <label>Material</label>
+                                    <select name="Variations[${index}].MaterialId" class="form-control">
+                                        ${materialOptions}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Color</label>
+                                    <select name="Variations[${index}].ColorId" class="form-control">
+                                        ${colorOptions}
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Price</label>
+                                    <input name="Variations[${index}].Price" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <input type="hidden" name="Variations[${index}].Stock" value="0" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Size</label>
+                                    <input name="Variations[${index}].Size" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Variation Image</label>
+                                    <input type="file" name="VariationImages" class="form-control-file variation-image" accept="image/*" data-preview="variation-preview-${index}" />
+                                    <img id="variation-preview-${index}" class="pt-2" style="max-width: 100px; display: none;" />
+                                </div>
+                            </div>`;
 
                 $("#variations-container").append(variationHtml);
             });
 
-            // Xử lý preview ảnh
             $("#variations-container").on("change", ".variation-image", function () {
                 var input = this;
                 var previewId = $(this).data("preview");
-                if (input.files && input.files[0]) {
-                    var reader = new FileReader();
-                    reader.onload = function (e) {
-                        $("#" + previewId).attr("src", e.target.result).show();
-                    };
-                    reader.readAsDataURL(input.files[0]);
-                }
+                readURL(input, previewId);
             });
         });
     </script>
-
 }

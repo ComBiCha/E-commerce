@@ -42,7 +42,7 @@
 									data-product-id="@item.ProductId"
 									data-variation-id="@item.VariationId"
 							@(string.IsNullOrEmpty(Model.CouponCode) ? "" : "disabled")>
-								@for (int qty = 1; qty <= Math.Min(20, item.Variation.Stock); qty++)
+								@for (int qty = 1; qty <= Math.Min(20, item.Variation?.Stock ?? 0); qty++)
 								{
 									if (qty == item.Quantity)
 									{

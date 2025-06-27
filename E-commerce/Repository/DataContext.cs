@@ -30,6 +30,7 @@ namespace E_commerce.Repository
         public DbSet<ColorModel> Colors { get; set; }
 		public DbSet<CouponModel> Coupons { get; set; }
         public DbSet<CouponUsageModel> CouponUsages { get; set; }
+        public DbSet<BatchModel> Batches { get; set; }
 
         public DbSet<E_commerce.Models.UserModel> UserModel { get; set; }
 

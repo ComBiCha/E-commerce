@@ -52,38 +52,51 @@ namespace E_commerce.Areas.Admin.Controllers
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ColorModel color)
-        {
+		public async Task<IActionResult> Create(ColorModel color)
+		{
+			if (ModelState.IsValid)
+			{
+				// Check if a color with the same name or hexcode already exists
+				var existingColor = await _dataContext.Colors
+					.FirstOrDefaultAsync(p => p.Name == color.Name || p.HexCode == color.HexCode);
 
-            if (ModelState.IsValid)
-            {
-                var name = await _dataContext.Colors.FirstOrDefaultAsync(p => p.Name == color.Name);
-                if (name != null)
-                {
-                    ModelState.AddModelError("", "Category already exist");
-                    return View(color);
-                }
-                _dataContext.Add(color);
-                await _dataContext.SaveChangesAsync();
-                TempData["success"] = "Category added successfully";
-                return RedirectToAction("Index");
-            }
-            else
-            {
-                TempData["error"] = "Model error";
-                List<string> errors = new List<string>();
-                foreach (var value in ModelState.Values)
-                {
-                    foreach (var error in value.Errors)
-                    {
-                        errors.Add(error.ErrorMessage);
-                    }
-                }
-                string errorMessage = string.Join("\n", errors);
-                return BadRequest(errorMessage);
-            }
-        }
-        public async Task<IActionResult> Delete(int Id)
+				if (existingColor != null)
+				{
+					if (existingColor.Name == color.Name)
+					{
+						ModelState.AddModelError("Name", "Color name already exists.");
+					}
+					if (existingColor.HexCode == color.HexCode)
+					{
+						ModelState.AddModelError("Hexcode", "Hexcode already exists.");
+					}
+					return View(color);
+				}
+
+				_dataContext.Add(color);
+				await _dataContext.SaveChangesAsync();
+				TempData["success"] = "Color added successfully"; // Changed message to be more specific
+				return RedirectToAction("Index");
+			}
+			else
+			{
+				// Your existing error handling
+				TempData["error"] = "Model error";
+				List<string> errors = new List<string>();
+				foreach (var value in ModelState.Values)
+				{
+					foreach (var error in value.Errors)
+					{
+						errors.Add(error.ErrorMessage);
+					}
+				}
+				string errorMessage = string.Join("\n", errors);
+				// If you're returning a View on error, consider passing the model back
+				// return View(color); // This is often more user-friendly for form validation
+				return BadRequest(errorMessage); // Or keep BadRequest for API-like behavior
+			}
+		}
+		public async Task<IActionResult> Delete(int Id)
         {
             ColorModel color = await _dataContext.Colors.FindAsync(Id);
             _dataContext.Colors.Remove(color);
