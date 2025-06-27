@@ -8,6 +8,8 @@ namespace E_commerce.Models
         public int Points { get; set; }
         public string RoleId { get; set; }
         public string Token { get; set; }
+        public string Avatar { get; set; } // 🔹 THÊM AVATAR
+
         public decimal GetDiscountRate()
         {
             if (Points >= 50000) return 0.08m; // 8%
@@ -19,5 +21,6 @@ namespace E_commerce.Models
 
         public ICollection<Messages> SentMessages { get; set; }
         public ICollection<Messages> ReceivedMessages { get; set; }
+        public ICollection<UserAddressModel> Addresses { get; set; } // 🔹 THÊM ADDRESSES
     }
 }

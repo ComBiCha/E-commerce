@@ -40,6 +40,7 @@
     <Folder Include="wwwroot\backend\images\" />
     <Folder Include="wwwroot\media\contact\" />
     <Folder Include="wwwroot\media\chat\" />
+    <Folder Include="wwwroot\media\avatars\" />
     <Folder Include="wwwroot\media\variations\" />
     <Folder Include="wwwroot\media\sliders\" />
     <Folder Include="wwwroot\media\products\" />
