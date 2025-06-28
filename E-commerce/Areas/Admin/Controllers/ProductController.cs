@@ -44,10 +44,24 @@ namespace E_commerce.Areas.Admin.Controllers
                     .ThenInclude(v => v.ProductQuantities)
                 .ToListAsync();
 
-            // KHÔNG cần gán Quantity thủ công nữa vì đã có TotalStock tính động
+			// Lấy tổng số sản phẩm đã bán từ bảng OrderDetails
+			var soldMap = await _dataContext.OrderDetails
+	            .Where(od => _dataContext.Orders
+		            .Where(o => o.Status != 6)
+		            .Select(o => o.OrderCode)
+		            .Contains(od.OrderCode))
+	            .GroupBy(od => od.ProductId)
+	            .Select(g => new { ProductId = g.Key, SoldQty = g.Sum(od => od.Quantity) })
+	            .ToDictionaryAsync(x => x.ProductId, x => x.SoldQty);
 
-            // Phân trang
-            int recsCount = products.Count();
+			// Gán số lượng đã bán vào từng sản phẩm
+			foreach (var product in products)
+			{
+				product.Sold = soldMap.ContainsKey(product.Id) ? soldMap[product.Id] : 0;
+			}
+
+			// Phân trang
+			int recsCount = products.Count();
             var pager = new Paginate(recsCount, pg, pageSize);
             int recSkip = (pg - 1) * pageSize;
 

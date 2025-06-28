@@ -464,18 +464,6 @@ namespace E_commerce.Controllers
                             };
                             _dataContext.ProductQuantities.Add(newProductQuantity);
                         }
-
-                        // Cập nhật Sold
-                        if (orderDetail.Variation.Product != null)
-                        {
-                            orderDetail.Variation.Product.Sold -= quantityToRestock;
-                            if (orderDetail.Variation.Product.Sold < 0)
-                            {
-                                orderDetail.Variation.Product.Sold = 0;
-                            }
-
-                            _dataContext.Products.Update(orderDetail.Variation.Product);
-                        }
                     }
                 }
 
