@@ -482,7 +482,15 @@ namespace E_commerce.Controllers
 
                 order.Status = 6; // Đã hủy
                 _dataContext.Orders.Update(order);
-
+                foreach (var orderDetail in orderDetails)
+                {
+                    var product = orderDetail.Variation?.Product;
+                    if (product != null)
+                    {
+                        product.Sold = Math.Max(0, product.Sold - orderDetail.Quantity);
+                        _dataContext.Products.Update(product);
+                    }
+                }
                 await _dataContext.SaveChangesAsync();
                 await transaction.CommitAsync();
 
