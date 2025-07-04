@@ -35,7 +35,8 @@ namespace E_commerce.Repository
         public DbSet<E_commerce.Models.UserModel> UserModel { get; set; }
 
         public DbSet<Messages> Messages { get; set; }
-    
+        public DbSet<UserAddressModel> UserAddresses { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
