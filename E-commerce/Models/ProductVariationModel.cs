@@ -16,12 +16,15 @@ namespace E_commerce.Models
 
         public decimal Price { get; set; }  // Giá riêng cho biến thể (nếu có)
         public int Size { get; set; }
-        public int Stock { get; set; }  // Số lượng tồn kho
 
 
         public string ImageUrl { get; set; } // Ảnh biến thể
         [NotMapped]
         public IFormFile ImageUpload { get; set; } // Hỗ trợ upload file
         public ICollection<ProductQuantityModel> ProductQuantities { get; set; } = new List<ProductQuantityModel>();
+
+        // Tính toán số lượng tồn kho dựa trên ProductQuantities
+        [NotMapped]
+        public int Stock => ProductQuantities?.Sum(q => q.CurrentQuantityInBatch) ?? 0;
     }
 }

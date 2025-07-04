@@ -2,16 +2,14 @@
 @{
     ViewData["title"] = "Product Listed";
     // Paginate pager = new Paginate();
-
     // int pageNo = 0;
-
     // if (ViewBag.Pager != null)
     // {
     //     pager = ViewBag.Pager;
-
     //     pageNo = pager.CurrentPage;
     // }
 }
+
 <h3>List Products</h3>
 <a asp-action="Create" asp-controller="Product">Add Product</a>
 
@@ -21,8 +19,7 @@
             <th scope="col">#</th>
             <th scope="col">Product Name</th>
             <th scope="col">Product Description</th>
-            
-            <th scope="col">Product Quantity</th>
+            <th scope="col">Total In Stock</th> <!-- Đổi tên cho rõ -->
             <th scope="col">Product Sold</th>
             <th scope="col">Product Price</th>
             <th scope="col">Product Image</th>
@@ -33,18 +30,16 @@
         </tr>
     </thead>
     <tbody>
-        @foreach(var item in Model)
+        @foreach (var item in Model)
         {
             <tr>
                 <th scope="row">@item.Id</th>
                 <td>@item.Name</td>
-                <td>@Html.Raw(@item.Description)</td>
-                <td><b>@item.Quantity</b>
-                </td>
+                <td>@Html.Raw(item.Description)</td>
+                <td><b>@item.TotalStock</b></td> <!-- Dùng thuộc tính tổng tồn kho mới từ controller -->
                 <td style="text-align:center; color:coral"><b>@item.Sold</b></td>
-                
                 <td>@item.Price</td>
-                <td><img src="~/media/products/@item.Image" width="120"/></td>
+                <td><img src="~/media/products/@item.Image" width="120" /></td>
                 <td>@item.Slug</td>
                 <td>@item.Category.Name</td>
                 <td>@item.Brand.Name</td>
@@ -54,10 +49,10 @@
                 </td>
             </tr>
         }
-        
-
     </tbody>
 </table>
+
+
 @* <partial name="_paging" model="@pager" /> *@
 @* @section Scripts{
     <script>

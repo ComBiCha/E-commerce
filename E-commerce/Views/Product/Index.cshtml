@@ -1,57 +1,74 @@
 ﻿@model IEnumerable<ProductModel>
-  @foreach (var item in Model)  
-  {  
-  	<div class="col-sm-3">  
-  		<div class="product-image-wrapper">  
-  			<div class="single-products">  
-  				<div class="productinfo text-center">  
-  <a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" ><img src="~/media/products/@item.Image" alt="@item.Name" width="100%" /></a>  
-  <h2>$@item.Price</h2>  
-  <p>@item.Name</p>  
-  							<p>Category: @item.Category.Name</p>  
-  <p>Brand: @item.Brand.Name</p>  
-  @if (item.Quantity > 0)
-									{
-										<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>View Details</a>
-									}
-									else
-									{
-										<a class="btn btn-default add-to-cart"><i class="fa fa-minus-square"></i>Sold Out</a>
-									}  
-  @if (User.Identity?.IsAuthenticated ?? false)
-									{
-										<ul class="nav nav-pills nav-justified">
-											<li><button class="btn btn-default add-btn-wishlist"><i class="fa fa-plus-square"></i><a asp-action="AddWishList" asp-controller="Home" asp-route-Id="@item.Id"> Add Wishlist</a></button></li>
-											<li><button class="btn btn-default add-btn-compare" data-product_id="@item.Id"><i class="fa fa-plus-square"></i> Add compare</button></li>
-										</ul>
-									}  
-  				</div>  
-  			</div>  
-  		</div>  
-  	</div>  
-  }  
 
-  	</div><!--features_items-->  
-  		<div class="pagination">  
-  			@if (ViewBag.Page > 1)  
-  			{  
-  				<a asp-action="Index" asp-route-page="1" class="first">First</a> <!-- Nút "First" -->  
-  				<a asp-action="Index" asp-route-page="@(ViewBag.Page - 1)" class="prev">Previous</a>  
-  			}  
+@foreach (var item in Model)
+{
+	<div class="col-sm-3">
+		<div class="product-image-wrapper">
+			<div class="single-products">
+				<div class="productinfo text-center">
+					<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id">
+						<img src="~/media/products/@item.Image" alt="@item.Name" width="100%" />
+					</a>
+					<h2>$@item.Price</h2>
+					<p>@item.Name</p>
+					<p>Category: @item.Category.Name</p>
+					<p>Brand: @item.Brand.Name</p>
 
-  			@for (var i = 1; i <= ViewBag.TotalPages; i++)  
-  			{  
-  				<a asp-action="Index" asp-route-page="@i" class="@(i == ViewBag.Page ? "active" : "")">@i</a>  
-  			}  
+					@if (item.TotalStock > 0)
+					{
+						<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="btn btn-default add-to-cart">
+							<i class="fa fa-shopping-cart"></i>View Details
+						</a>
+					}
+					else
+					{
+						<a class="btn btn-default add-to-cart disabled" style="pointer-events: none; opacity: 0.6;">
+							<i class="fa fa-minus-square"></i>Sold Out
+						</a>
+					}
 
-  			@if (ViewBag.Page < ViewBag.TotalPages)  
-  			{  
-  				<a asp-action="Index" asp-route-page="@(ViewBag.Page + 1)" class="next">Next</a>  
-  				<a asp-action="Index" asp-route-page="@ViewBag.TotalPages" class="last">Last</a> <!-- Nút "Last" -->  
-			}
+					@if (User.Identity?.IsAuthenticated ?? false)
+					{
+						<ul class="nav nav-pills nav-justified">
+							<li>
+								<button class="btn btn-default add-btn-wishlist" data-product_id="@item.Id">
+									<i class="fa fa-plus-square"></i>
+									<a asp-action="AddWishList" asp-controller="Home" asp-route-Id="@item.Id"> Add Wishlist</a>
+								</button>
+							</li>
+							<li>
+								<button class="btn btn-default add-btn-compare" data-product_id="@item.Id">
+									<i class="fa fa-plus-square"></i> Add compare
+								</button>
+							</li>
+						</ul>
+					}
+				</div>
+			</div>
 		</div>
+	</div>
+}
 
+</div><!--features_items-->
 
+<div class="pagination">
+	@if (ViewBag.Page > 1)
+	{
+		<a asp-action="Index" asp-route-page="1" class="first">First</a>
+		<a asp-action="Index" asp-route-page="@(ViewBag.Page - 1)" class="prev">Previous</a>
+	}
+
+	@for (var i = 1; i <= ViewBag.TotalPages; i++)
+	{
+		<a asp-action="Index" asp-route-page="@i" class="@(i == ViewBag.Page ? "active" : "")">@i</a>
+	}
+
+	@if (ViewBag.Page < ViewBag.TotalPages)
+	{
+		<a asp-action="Index" asp-route-page="@(ViewBag.Page + 1)" class="next">Next</a>
+		<a asp-action="Index" asp-route-page="@ViewBag.TotalPages" class="last">Last</a>
+	}
+</div>
 
 @section Scripts {
 	<script>
@@ -74,10 +91,7 @@
 					}
 				});
 			});
-		});
-	</script>
-	<script>
-		$(document).ready(function () {
+
 			$('.add-btn-compare').click(function () {
 				var Id = $(this).data("product_id");
 

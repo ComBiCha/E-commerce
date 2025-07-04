@@ -12,9 +12,13 @@
             <span asp-validation-for="Name" class="text-danger" />
         </div>
         <div class="form-group">
+            <label>Hexcode</label>
+            <input asp-for="HexCode" class="form-control" />
+            <span asp-validation-for="HexCode" class="text-danger" />
+        </div>
+        <div class="form-group">
             <button class="btn btn-primary">Create</button>
         </div>
-
     </form>
     <a asp-action="Index">Back to List Colors</a>
 </div>
