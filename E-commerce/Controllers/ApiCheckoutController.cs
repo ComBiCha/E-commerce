@@ -497,13 +497,21 @@ namespace E_commerce.Controllers
 
             foreach (var cart in cartItems)
             {
+                // 🔹 SỬA: Include ProductQuantities như CheckoutController
                 var variation = await _datacontext.Variations
                     .Include(v => v.Material)
                     .Include(v => v.Color)
                     .Include(v => v.Product)
+                    .Include(v => v.ProductQuantities) // ✅ Thêm include này
                     .FirstOrDefaultAsync(v => v.Id == cart.VariationId);
 
                 if (variation == null) continue;
+
+                // 🔹 SỬA: Kiểm tra tồn kho như CheckoutController
+                if (cart.Quantity > variation.Stock)
+                {
+                    throw new Exception($"Số lượng yêu cầu cho sản phẩm {variation.Product.Name} vượt quá tồn kho ({variation.Stock}).");
+                }
 
                 // Tính discount cho từng item
                 decimal itemTotal = cart.Quantity * cart.Price;
@@ -538,13 +546,33 @@ namespace E_commerce.Controllers
                     _datacontext.Warranties.Add(warranty);
                 }
 
-                // Cập nhật stock
-                variation.Stock -= cart.Quantity;
-                variation.Product.Sold += cart.Quantity;
-                variation.Product.Quantity -= cart.Quantity;
+                // 🔹 SỬA: Sử dụng logic FIFO như CheckoutController
+                int quantityToDeduct = cart.Quantity;
+                var batchStocks = variation.ProductQuantities
+                    .Where(pq => pq.CurrentQuantityInBatch > 0)
+                    .OrderBy(pq => pq.DateCreated) // FIFO - lô cũ trước
+                    .ToList();
 
-                _datacontext.Update(variation);
+                foreach (var pq in batchStocks)
+                {
+                    if (quantityToDeduct <= 0) break;
+
+                    int deduct = Math.Min(quantityToDeduct, pq.CurrentQuantityInBatch);
+                    pq.CurrentQuantityInBatch -= deduct;
+                    pq.LastUpdated = DateTime.Now; // Cập nhật thời gian
+                    quantityToDeduct -= deduct;
+
+                    _datacontext.ProductQuantities.Update(pq);
+                }
+
+                // 🔹 SỬA: Chỉ cập nhật Product.Sold, KHÔNG trừ Product.Quantity
+                variation.Product.Sold += cart.Quantity;
+                // ❌ XÓA: variation.Product.Quantity -= cart.Quantity; 
+                // ❌ XÓA: variation.Stock -= cart.Quantity;
+
+                // 🔹 SỬA: Chỉ update Product, không update variation
                 _datacontext.Update(variation.Product);
+                // ❌ XÓA: _datacontext.Update(variation);
             }
 
             var user = await _datacontext.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
@@ -574,6 +602,7 @@ namespace E_commerce.Controllers
                 }
             }
 
+            // 🔹 THÊM: Cập nhật points cho user như CheckoutController
             if (user != null)
             {
                 int pointsToAdd = (int)(grandTotal * 0.01m); // 1% của tổng tiền

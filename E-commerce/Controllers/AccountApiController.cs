@@ -542,10 +542,11 @@ namespace E_commerce.Controllers
 
         private string GetMembershipTier(int points)
         {
-            if (points >= 1000) return "Gold";
-            if (points >= 500) return "Silver";
-            if (points >= 100) return "Bronze";
-            return "Basic";
+            if (points >= 50000) return "Diamond";
+            if (points >= 40000) return "Platinum";
+            if (points >= 20000) return "Gold";
+            if (points >= 10000) return "Silver";
+            return "Bronze";
         }
     }
 
