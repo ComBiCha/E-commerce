@@ -24,42 +24,42 @@ namespace E_commerce.Areas.Admin.Controllers
 			_webHostEnvironment = webHostEnvironment;
 			_productRepository = productRepository;
 		}
-		/*public async Task<IActionResult> Index()
+        /*public async Task<IActionResult> Index()
         {
             return View(await _dataContext.Products.OrderByDescending(p => p.Id).Include(p => p.Category).Include(p => p.Brand).ToListAsync());
         }*/
-		public async Task<IActionResult> Index(int pg = 1)
-		{
-			const int pageSize = 10;
+        public async Task<IActionResult> Index(int pg = 1)
+        {
+            const int pageSize = 5;
 
-			if (pg < 1)
-				pg = 1;
+            if (pg < 1)
+                pg = 1;
 
-			// Lấy danh sách sản phẩm kèm Variations
-			List<ProductModel> products = await _dataContext.Products
-				.Include(p => p.Category)
-				.Include(p => p.Brand)
-				.Include(p => p.Variations) // Include Variations để tính tổng Stock
-				.ToListAsync();
+            // Lấy danh sách sản phẩm kèm Variations
+            List<ProductModel> products = await _dataContext.Products
+                .Include(p => p.Category)
+                .Include(p => p.Brand)
+                .Include(p => p.Variations) // Include Variations để tính tổng Stock
+                .ToListAsync();
 
-			// Cập nhật Quantity = tổng Stock của tất cả Variations
-			foreach (var product in products)
-			{
-				product.Quantity = product.Variations?.Sum(v => v.Stock) ?? 0;
-			}
+            // Cập nhật Quantity = tổng Stock của tất cả Variations
+            foreach (var product in products)
+            {
+                product.Quantity = product.Variations?.Sum(v => v.Stock) ?? 0;
+            }
 
-			int recsCount = products.Count();
-			var pager = new Paginate(recsCount, pg, pageSize);
-			int recSkip = (pg - 1) * pageSize;
+            int recsCount = products.Count();
+            var pager = new Paginate(recsCount, pg, pageSize);
+            int recSkip = (pg - 1) * pageSize;
 
-			var data = products.Skip(recSkip).Take(pager.PageSize).ToList();
+            var data = products.Skip(recSkip).Take(pager.PageSize).ToList();
 
-			ViewBag.Pager = pager;
+            ViewBag.Pager = pager;
 
-			return View(data);
-		}
+            return View(data);
+        }
 
-		public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Details(int id)
 		{
 			var product = await _dataContext.Products
 				.Include(p => p.Category)

@@ -13,95 +13,126 @@
     // }
     int i = 0;
 }
-<h3>List Order</h3>
 
-<div>
-    <label for="statusFilter">Filter by Status:</label>
-    <select id="statusFilter" class="form-select" style="width: 200px;">
-        <option value="">All</option>
-        <option value="đơn hàng mới">Đơn hàng mới</option>
-        <option value="đơn hàng đã xác nhận">Đơn hàng đã xác nhận</option>
-        <option value="Đã giao cho đơn vị vận chuyển">Đã giao cho đơn vị vận chuyển</option>
-        <option value="Hàng đã giao tới nơi">Hàng đã giao tới nơi</option>
-        <option value="Đơn hàng đã hoàn thành">Đơn hàng đã hoàn thành</option>
-        <option value="Đơn hàng đã bị huỷ">Đơn hàng đã bị hủy</option>
-    </select>
-</div>
-<div class="row mb-3">
-    <div class="col-md-3">
-        <label for="startDate">Start Date:</label>
-        <input type="date" id="startDate" class="form-control">
+<link rel="stylesheet" href="~/css/admin-index.css" />
+
+<div class="order-page-container">
+    <h3>List Order</h3>
+
+    <div class="order-filter-section">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="statusFilter" class="order-filter-label">Filter by Status:</label>
+                <select id="statusFilter" class="order-status-select">
+                    <option value="">All</option>
+                    <option value="đơn hàng mới">Đơn hàng mới</option>
+                    <option value="đơn hàng đã xác nhận">Đơn hàng đã xác nhận</option>
+                    <option value="Đã giao cho đơn vị vận chuyển">Đã giao cho đơn vị vận chuyển</option>
+                    <option value="Hàng đã giao tới nơi">Hàng đã giao tới nơi</option>
+                    <option value="Đơn hàng đã hoàn thành">Đơn hàng đã hoàn thành</option>
+                    <option value="Đơn hàng đã bị huỷ">Đơn hàng đã bị hủy</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="startDate" class="order-filter-label">Start Date:</label>
+                <input type="date" id="startDate" class="order-date-input">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="endDate" class="order-filter-label">End Date:</label>
+                <input type="date" id="endDate" class="order-date-input">
+            </div>
+        </div>
     </div>
-    <div class="col-md-3">
-        <label for="endDate">End Date:</label>
-        <input type="date" id="endDate" class="form-control">
+
+    <div class="order-table-section">
+        <table class="table order-table" id="OrderTable">
+            <thead>
+                <tr>
+                    <th scope="col" class="order-table-col-id" style="text-align:left">#</th>
+                    <th scope="col" class="order-table-col-code" style="text-align:left">Order Code</th>
+                    <th scope="col" class="order-table-col-username" style="text-align:left">Username</th>
+                    <th scope="col" class="order-table-col-date" style="text-align:left">Order Date</th>
+                    <th scope="col" class="order-table-col-status" style="text-align:left">Status</th>
+                    <th scope="col" class="order-table-col-actions text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    i = i + 1;
+                    <tr>
+                        <th scope="row" class="order-table-col-id" style="text-align:left">@i</th>
+                        <td class="order-table-col-code" style="text-align:left">@item.OrderCode</td>
+                        <td class="order-table-col-username" style="text-align:left">@item.UserName</td>
+                        <td class="order-table-col-date" style="text-align:left">@item.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                        <td class="order-table-col-status text-center">
+                            @if (@item.Status == 1)
+                            {
+                                <span class="order-status-new">New</span>
+                            }
+                            else if (@item.Status == 2)
+                            {
+                                <span class="order-status-confirmed">Confirmed</span>
+                            }
+                            else if (@item.Status == 3)
+                            {
+                                <span class="order-status-shipping">Shipping</span>
+                            }
+                            else if (@item.Status == 4)
+                            {
+                                <span class="order-status-delivered">Delivered</span>
+                            }
+                            else if (@item.Status == 5)
+                            {
+                                <span class="order-status-completed">Completed</span>
+                            }
+                            else if (@item.Status == 6)
+                            {
+                                <span class="order-status-cancelled">Cancelled</span>
+                            }
+                        </td>
+                        <td class="text-center align-middle">
+                            <div class="btn-group" role="group">
+                                <a asp-action="ViewOrder"
+                                   asp-controller="Order"
+                                   asp-route-OrderCode="@item.OrderCode"
+                                   class="btn btn-outline-info btn-sm"
+                                   title="View Order">
+                                    <i class="fa-solid fa-eye"></i>
+                                </a>
+                                <button type="button"
+                                        class="btn btn-outline-primary btn-sm"
+                                        onclick="cloneOrder('@item.OrderCode')"
+                                        title="Clone Order">
+                                    <i class="fa-solid fa-copy"></i>
+                                </button>
+                                @if (item.Status != 5)
+                                {
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm"
+                                            onclick="deleteOrder('@item.OrderCode')"
+                                            title="Delete Order">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button"
+                                            class="btn btn-outline-secondary btn-sm"
+                                            disabled
+                                            title="Cannot delete completed order">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 </div>
-<table class="table" id="OrderTable">
-    <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Order Code</th>
-            <th scope="col">Order Username</th>
-            <th scope="col">Order Date</th>
-            <th scope="col">Order Status</th>
-            <th scope="col">Actions</th>
-            <th scope="col">Clone Order</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            i = i + 1;
-            <tr>
-                <th scope="row">@i</th>
-                <td>@item.OrderCode</td>
-                <td>@item.UserName</td>
-                <td>@item.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                <td>
-                    @if (@item.Status == 1)
-                    {
-                        <span class="text text-primary">đơn hàng mới</span>
-                    }
-                    else if (@item.Status == 2)
-                    {
-                        <span class="text text-danger">đơn hàng đã xác nhận</span>
-                    }
-                    else if(@item.Status == 3)
-                    {
-                        <span class="text text-warning">Đã giao cho đơn vị vận chuyển</span>
-                    }
-                    else if(@item.Status == 4)
-                    {
-                        <span class="text text-dark">Hàng đã giao tới nơi</span>
-                    }
-                    else if(@item.Status == 5)
-                    {
-                        <span class="text text-success">Đơn hàng đã hoàn thành</span>
-                    }
-                    else if (@item.Status == 6)
-                    {
-                        <span class="text text-danger">Đơn hàng đã bị huỷ</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="ViewOrder" class="btn btn-warning btn-sm" asp-controller="Order" asp-route-OrderCode="@item.OrderCode">View Order</a>
-                    @if(item.Status != 5)
-                    {
-                        <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Order" asp-route-ordercode="@item.OrderCode">Delete</a>
-                    }
-                </td>
-                <td>
-                    <button class="btn btn-primary btn-sm" onclick="cloneOrder('@item.OrderCode')">
-                        Clone Order
-                    </button>
-                </td>
-            </tr>
-        }
 
-
-    </tbody>
-</table>
 @* <partial name="_paging" model="@pager" /> *@
 @section Scripts {
     <script>
@@ -164,6 +195,14 @@
             }
         }
 
+    </script>
+
+    <script>
+                function deleteOrder(orderCode) {
+            if (confirm('Are you sure you want to delete this order?')) {
+                window.location.href = '@Url.Action("Delete", "Order")?ordercode=' + orderCode;
+            }
+        }
     </script>
 
 

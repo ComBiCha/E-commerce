@@ -6,7 +6,6 @@
 	<meta name="description" content="">
 	<meta name="author" content="">
 	<title>@ViewData["title"] - Admin Areas</title>
-	<link href="~/css/bootstrap.min.css" rel="stylesheet">
 	<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.1/css/font-awesome.css" rel="stylesheet">
 	<link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.min.css" rel="stylesheet">
 	<link href="https://cdn.datatables.net/buttons/3.1.2/css/buttons.dataTables.css" rel="stylesheet">
@@ -18,8 +17,10 @@
 	<link href="~/css/animate.css" rel="stylesheet">
 	<link href="~/css/main.css" rel="stylesheet">
 	<link href="~/css/responsive.css" rel="stylesheet">
+	<link rel="stylesheet" href="~/css/pagination.css" />
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 	<!--[if lt IE 9]>
-	<script src="js/html5shiv.js"></script>
+	<script src="js/html5shiv.js"></script>	
 	<script src="js/respond.min.js"></script>
 	<![endif]-->
 	<link rel="shortcut icon" href="images/ico/favicon.ico">
@@ -27,105 +28,97 @@
 	<link rel="apple-touch-icon-precomposed" sizes="114x114" href="images/ico/apple-touch-icon-114-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" sizes="72x72" href="images/ico/apple-touch-icon-72-precomposed.png">
 	<link rel="apple-touch-icon-precomposed" href="images/ico/apple-touch-icon-57-precomposed.png">
-
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+	
 
 </head><!--/head-->
 
 <body>
-	<header id="header">
-		<!--header-->
-		@* <div class="header_top">
-			<!--header_top-->
-			<div class="container">
-				<div class="row">
-					
-				</div>
-			</div>
-		</div><!--/header_top-->
-
-		<div class="header-middle">
-			<!--header-middle-->
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-4">
-						<div class="logo pull-left">
-							<a href="index.html"><img src="images/home/logo.png" alt="" /></a>
-						</div>
-						<div class="btn-group pull-right">
-
-						</div>
-					</div>
-				</div>
-			</div>
-		</div><!--/header-middle--> *@
-
-		<div class="header-bottom">
-			<!--header-bottom-->
-			<div class="container">
-				<div class="row">
-					<div class="col-sm-9">
-						<div class="navbar-header">
-							<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-								<span class="sr-only">Toggle navigation</span>
-								<span class="icon-bar"></span>
-								<span class="icon-bar"></span>
-								<span class="icon-bar"></span>
-							</button>
-						</div>
-						<div class="mainmenu pull-left">
-							<ul class="nav navbar-nav collapse navbar-collapse">
-								<li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li>
-								<li><a asp-controller="Statistic" asp-action="Index">Dashboard</a></li>
-								<li><a asp-controller="Product" asp-action="Index">Products</a></li>
-								<li><a asp-controller="Shipping" asp-action="Index">Shippings</a></li>
-								<li><a asp-controller="Category" asp-action="Index">Categories</a></li>
-								<li><a asp-controller="Brand" asp-action="Index">Brands</a></li>
-								<li><a asp-controller="Material" asp-action="Index">Materials</a></li>
-								<li><a asp-controller="Color" asp-action="Index">Colors</a></li>
-								<li><a asp-controller="Order" asp-action="Index">Orders</a></li>
-								<li><a asp-controller="Coupon" asp-action="Index">Coupons</a></li>
-								<li><a asp-controller="User" asp-action="Index">Users</a></li>
-								<li><a asp-controller="Role" asp-action="Index">Roles</a></li>
-								<li><a asp-controller="Slider" asp-action="Index">Sliders</a></li>
-								<li><a asp-controller="Contact" asp-action="Index">Contact</a></li>
-								<li><a asp-controller="Warranty" asp-action="Index">Warranties</a></li>
+	@* <header id="header"> *@
+	@* 	<div class="header-bottom"> *@
+	@* 		<!--header-bottom--> *@
+	@* 		<div class="container"> *@
+	@* 			<div class="row"> *@
+	@* 				<div class="col-sm-9"> *@
+	@* 					<div class="navbar-header"> *@
+	@* 						<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse"> *@
+	@* 							<span class="sr-only">Toggle navigation</span> *@
+	@* 							<span class="icon-bar"></span> *@
+	@* 							<span class="icon-bar"></span> *@
+	@* 							<span class="icon-bar"></span> *@
+	@* 						</button> *@
+	@* 					</div> *@
+	@* 					<div class="mainmenu pull-left"> *@
+	@* 						<ul class="nav navbar-nav collapse navbar-collapse"> *@
+	@* 							<li><a asp-area="" asp-controller="Home" asp-action="Index">Home</a></li> *@
+	@* 							<li><a asp-controller="Statistic" asp-action="Index">Dashboard</a></li> *@
+	@* 							<li><a asp-controller="Product" asp-action="Index">Products</a></li> *@
+	@* 							<li><a asp-controller="Shipping" asp-action="Index">Shippings</a></li> *@
+	@* 							<li><a asp-controller="Category" asp-action="Index">Categories</a></li> *@
+	@* 							<li><a asp-controller="Brand" asp-action="Index">Brands</a></li> *@
+	@* 							<li><a asp-controller="Material" asp-action="Index">Materials</a></li> *@
+	@* 							<li><a asp-controller="Color" asp-action="Index">Colors</a></li> *@
+	@* 							<li><a asp-controller="Order" asp-action="Index">Orders</a></li> *@
+	@* 							<li><a asp-controller="Coupon" asp-action="Index">Coupons</a></li> *@
+	@* 							<li><a asp-controller="User" asp-action="Index">Users</a></li> *@
+	@* 							<li><a asp-controller="Role" asp-action="Index">Roles</a></li> *@
+	@* 							<li><a asp-controller="Slider" asp-action="Index">Sliders</a></li> *@
+	@* 							<li><a asp-controller="Contact" asp-action="Index">Contact</a></li> *@
+	@* 							<li><a asp-controller="Warranty" asp-action="Index">Warranties</a></li> *@
 								
-							</ul>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div><!--/header-bottom-->
-	</header><!--/header-->
+	@* 						</ul> *@
+	@* 					</div> *@
+	@* 				</div> *@
+	@* 			</div> *@
+	@* 		</div> *@
+	@* 	</div><!--/header-bottom--> *@
+	@* </header><!--/header--> *@
 
 	
 
-	<section>
-		<br />
-		<br />
-		<br />
-		<br />
-		<br />
-		<br />
-		<br />
-		<div class="container">
-			<div class="row">
-				@Html.Partial("_NotificationPartical")
+	@* <section> *@
+	@* 	<br /> *@
+	@* 	<br /> *@
+	@* 	<br /> *@
+	@* 	<br /> *@
+	@* 	<br /> *@
+	@* 	<br /> *@
+	@* 	<br /> *@
+	@* 	<div class="container"> *@
+	@* 		<div class="row"> *@
+	@* 			@Html.Partial("_NotificationPartical") *@
+	@* 			@RenderBody() *@
+	@* 		</div> *@
+	@* 	</div> *@
+	@* </section> *@
+
+	@* <footer id="footer"> *@
+	@* 	<!--Footer--> *@
+		
+
+		
+
+		
+
+	@* </footer><!--/Footer--> *@
+
+
+	<div class="dashboard-container">
+		<div class="sidebar-wrapper">
+			@await Html.PartialAsync("_Sidebar")
+		</div>
+		<div class="main-content">
+			<div class="navbar-wrapper">
+				@await Html.PartialAsync("_Navbar")
+			</div>
+			<div class="content-wrapper">
 				@RenderBody()
 			</div>
+			<div class="footer-wrapper">
+				@await Html.PartialAsync("_Footer")
+			</div>
 		</div>
-	</section>
-
-	<footer id="footer">
-		<!--Footer-->
-		
-
-		
-
-		
-
-	</footer><!--/Footer-->
-
+	</div>
 
 
 	<script src="~/js/jquery.js"></script>
@@ -147,35 +140,94 @@
 	<script src="https://cdn.datatables.net/buttons/3.1.2/js/buttons.print.min.js"></script>
 	
 	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.14.1/dist/sweetalert2.all.min.js"></script>
-	<script>
-		$(function () {
-			var message = '@TempData["success"]';
-			if(message != '')
-				Swal.fire({
-				icon: "success",
-				title: "Yayyy",
-				text: message,
-				});
-		});
-		$(function () {
-			var message = '@TempData["error"]';
-			if(message != '')
-				Swal.fire({
-				icon: "error",
-				title: "Oops...",
-				text: message,
-				});
-		});
-	</script>
-	<script>
+	@* <script> *@
+	@* 	$(function () { *@
+	@* 		var message = '@TempData["success"]'; *@
+	@* 		if(message != '') *@
+	@* 			Swal.fire({ *@
+	@* 			icon: "success", *@
+	@* 			title: "Yayyy", *@
+	@* 			text: message, *@
+	@* 			}); *@
+	@* 	}); *@
+	@* 	$(function () { *@
+	@* 		var message = '@TempData["error"]'; *@
+	@* 		if(message != '') *@
+	@* 			Swal.fire({ *@
+	@* 			icon: "error", *@
+	@* 			title: "Oops...", *@
+	@* 			text: message, *@
+	@* 			}); *@
+	@* 	}); *@
+	@* </script> *@
+
+
+	<script> 
 		let table = new DataTable('#myTable', {
-		layout: {
-				topStart: {
-					buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
-				}
-			}
-		});
-	</script>
+		info: false, // Thêm dòng này
+		paging: false,
+		searching: true,
+		ordering: true,
+	 	layout: { 
+				topStart: { 
+					buttons: ['copy', 'csv', 'excel', 'pdf', 'print'] 
+	} 
+	 		} 
+		}); 
+	 </script>
 	@await RenderSectionAsync("Scripts",required:false)
 </body>
 </html>
+<style>
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
+	}
+
+	body {
+		background-color: #0f172a; /* Background màu đen xanh đậm */
+	}
+
+	.dashboard-container {
+		display: flex;
+		background-color: #0f172a;
+		color: white;
+	}
+
+	.sidebar-wrapper {
+		width: 280px;
+		background-color: #182237;
+		flex-shrink: 0;
+	}
+
+	.main-content {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		padding: 20px; /* Padding cho main content để tạo gap */
+		background-color: #0f172a; /* Background giữa các gap */
+	}
+
+	.navbar-wrapper {
+		background-color: #182237;
+		border-radius: 10px;
+		margin-bottom: 20px; /* Gap giữa navbar và content */
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+	}
+
+	.content-wrapper {
+		flex: 1;
+		overflow-y: auto;
+		overflow-x: auto; 
+		padding: 20px;
+		background-color: #182237;
+		border-radius: 10px;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+	}
+
+	.footer-wrapper {
+		flex-shrink: 0;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+	}
+</style>

@@ -3,84 +3,89 @@
 @{
     ViewData["Title"] = "Warranty Requests";
 }
+<link rel="stylesheet" href="~/css/admin-index.css" />
 
-<h2>@ViewData["Title"]</h2>
 
-<div>
-    <label for="statusFilter">Filter by Status:</label>
-    <select id="statusFilter" class="form-select" style="width: 200px;">
-        <option value="">All</option>
-        <option value="Đợi duyệt">Đợi duyệt</option>
-        <option value="Đã duyệt">Đã duyệt</option>
-        <option value="Đã tiếp nhận sản phẩm lỗi">Đã tiếp nhận sản phẩm lỗi</option>
-        <option value="Đã khắc phục">Đã khắc phục</option>
-        <option value="Đã hoàn thành">Đã hoàn thành</option>
-        <option value="Bị từ chối">Bị từ chối</option>
-        <option value="Đã bị huỷ">Đã bị huỷ</option>
-    </select>
-</div>
-<div class="row mb-3">
-    <div class="col-md-3">
-        <label for="startDate">Start Date:</label>
-        <input type="date" id="startDate" class="form-control">
+<div class="warranty-filter-section">
+    <h2>@ViewData["Title"]</h2>
+
+    <div class="filter-section">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="statusFilter" class="warranty-filter-label">Filter by Status:</label>
+                <select id="statusFilter" class="warranty-status-select">
+                    <option value="">All</option>
+                    <option value="Đợi duyệt">Đợi duyệt</option>
+                    <option value="Đã duyệt">Đã duyệt</option>
+                    <option value="Đã tiếp nhận sản phẩm lỗi">Đã tiếp nhận sản phẩm lỗi</option>
+                    <option value="Đã khắc phục">Đã khắc phục</option>
+                    <option value="Đã hoàn thành">Đã hoàn thành</option>
+                    <option value="Bị từ chối">Bị từ chối</option>
+                    <option value="Đã bị huỷ">Đã bị huỷ</option>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="startDate" class="warranty-filter-label">Start Date:</label>
+                <input type="date" id="startDate" class="warranty-date-input">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="endDate" class="warranty-filter-label">End Date:</label>
+                <input type="date" id="endDate" class="warranty-date-input">
+            </div>
+        </div>
     </div>
-    <div class="col-md-3">
-        <label for="endDate">End Date:</label>
-        <input type="date" id="endDate" class="form-control">
-    </div>
-</div>
 
 <div class="table-responsive">
     <table class="table table-bordered" id="WarrantyTable">
         <thead>
             <tr>
-                <th>#</th>
+                <th class="text-center">#</th>
                 <th>Warranty Code</th>
                 <th>User</th>
-                <th>Status</th>
-                <th>Created Date</th>
-                <th>Actions</th>
+                <th class="text-center">Status</th>
+                <th class="text-center">Created Date</th>
+                <th class="text-center">Actions</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var request in Model)
             {
                 <tr>
-                    <td>@request.Id</td>
+                    <td class="text-center">@request.Id</td>
                     <td>@request.WarrantyCode</td>
                     <td>@request.User.UserName</td>
-                    <td>
-                        @if (request.Status == 0)
-                        {
-                            <span class="badge bg-warning">Đợi duyệt</span>
-                        }
-                        else if (request.Status == 1)
-                        {
-                            <span class="badge bg-success">Đã duyệt</span>
-                        }
-                        else if (request.Status == 2)
-                        {
-                            <span class="badge bg-info">Đã tiếp nhận sản phẩm lỗi</span>
-                        }
-                        else if (request.Status == 3)
-                        {
-                            <span class="badge bg-primary">Đã khắc phục</span>
-                        }
-                        else if (request.Status == 4)
-                        {
-                            <span class="badge bg-dark">Đã hoàn thành</span>
-                        }
-                        else if (request.Status == 5)
-                        {
-                            <span class="badge bg-danger">Bị từ chối</span>
-                        }
-                        else if (request.Status == 6)
-                        {
-                            <span class="badge bg-danger">Đã bị huỷ</span>
-                        }
-                    </td>
-                    <td>@request.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
-                    <td>
+                        <td class="text-center">
+                            @if (request.Status == 0)
+                            {
+                                <span class="warranty-badge warranty-status-pending">Đợi duyệt</span>
+                            }
+                            else if (request.Status == 1)
+                            {
+                                <span class="warranty-badge warranty-status-approved">Đã duyệt</span>
+                            }
+                            else if (request.Status == 2)
+                            {
+                                <span class="warranty-badge warranty-status-received">Đã tiếp nhận sản phẩm lỗi</span>
+                            }
+                            else if (request.Status == 3)
+                            {
+                                <span class="warranty-badge warranty-status-fixed">Đã khắc phục</span>
+                            }
+                            else if (request.Status == 4)
+                            {
+                                <span class="warranty-badge warranty-status-completed">Đã hoàn thành</span>
+                            }
+                            else if (request.Status == 5)
+                            {
+                                <span class="warranty-badge warranty-status-rejected">Bị từ chối</span>
+                            }
+                            else if (request.Status == 6)
+                            {
+                                <span class="warranty-badge warranty-status-cancelled">Đã bị huỷ</span>
+                            }
+                        </td>
+                    <td class="text-center">@request.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                    <td class="text-center">
                         <a href="@Url.Action("ViewDetails", "Warranty", new { id = request.Id })" class="btn btn-info btn-sm">View Details</a>
                     </td>
                 </tr>
@@ -88,6 +93,8 @@
         </tbody>
     </table>
 </div>
+</div>
+
 @section Scripts {
     <script>
         $(document).ready(function () {
@@ -129,5 +136,6 @@
                 table.draw(); // Trigger a redraw with the date filter
             });
         });
+
     </script>
 }

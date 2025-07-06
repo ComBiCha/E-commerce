@@ -1,0 +1,813 @@
+﻿.container {
+    background-color: #182237;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+/* Headings */
+h3, h4 {
+    color: white;
+    margin: 30px 0 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+    border-bottom: 2px solid #2e374a;
+    padding-bottom: 10px;
+}
+
+/* Product Details Table */
+.table {
+    background-color: #151c2c;
+    color: white;
+    border: 2px solid #2e374a;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+    .table th {
+        background-color: #151c2c;
+        color: white;
+        border: 1px solid #2e374a;
+        padding: 15px;
+        font-weight: 600;
+        width: 150px;
+        vertical-align: top;
+    }
+
+    .table td {
+        background-color: #1d2435;
+        color: white;
+        border: 1px solid #2e374a;
+        padding: 15px;
+        vertical-align: top;
+    }
+
+    /* Images in table */
+    .table img {
+        border-radius: 8px;
+        border: 2px solid #2e374a;
+        max-width: 200px;
+        height: auto;
+    }
+
+/* Variations Table */
+.table-bordered {
+    background-color: #151c2c;
+    color: white;
+    border: 2px solid #2e374a;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+    .table-bordered thead th {
+        background-color: #151c2c;
+        color: white;
+        border: 1px solid #2e374a;
+        padding: 12px;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .table-bordered tbody td {
+        background-color: #1d2435;
+        color: white;
+        border: 1px solid #2e374a;
+        padding: 12px;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    /* Variation images */
+    .table-bordered img {
+        border-radius: 5px;
+        border: 2px solid #2e374a;
+        max-width: 100px;
+        height: auto;
+    }
+
+/* Buttons styling */
+.btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.3s ease;
+    margin: 2px;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    box-shadow: 0 2px 10px rgba(40, 167, 69, 0.3);
+}
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #218838, #1ea471);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+    }
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    box-shadow: 0 2px 10px rgba(220, 53, 69, 0.3);
+    padding: 12px 14px;
+}
+
+    .btn-danger:hover {
+        background: linear-gradient(135deg, #c82333, #a71e2a);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.4);
+    }
+
+.btn-primary {
+    background: linear-gradient(135deg, teal, #17a2b8) !important;
+    color: white;
+    box-shadow: 0 2px 10px rgba(0, 128, 128, 0.3);
+    padding: 15px 24px;
+    font-size: 14px;
+    border-radius: 5px !important;
+    margin: 0 !important;
+}
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #008080, #138496);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(0, 128, 128, 0.4);
+        text-decoration: none;
+        color: white;
+    }
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/* Alert messages */
+.alert {
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+    border: none;
+}
+
+.alert-danger {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #ff6b6b;
+    border: 2px solid rgba(220, 53, 69, 0.3);
+}
+
+.alert-success {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #51cf66;
+    border: 2px solid rgba(40, 167, 69, 0.3);
+}
+
+/* Form styling */
+form {
+    display: inline-block;
+}
+
+/* No variations message */
+.table-bordered tbody tr:only-child td {
+    text-align: center;
+    font-style: italic;
+    color: #6c757d;
+    padding: 30px;
+}
+
+/* =================================================== WARRANTY DETAILS PAGE STYLING ========================================================== */
+
+/* Container styling */
+.warranty-details-container {
+    background-color: #182237;
+    padding: 20px;
+    padding-top:0px;
+    color: white;
+}
+
+    /* Title styling */
+    .warranty-details-container h3,
+    .warranty-details-container h4 {
+        color: white;
+        margin-bottom: 20px;
+        font-weight: 600;
+    }
+
+    .warranty-details-container h3 {
+        font-size: 28px;
+        margin-bottom: 30px;
+    }
+
+    .warranty-details-container h4 {
+        font-size: 22px;
+        margin-top: 30px;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #2e374a;
+        padding-bottom: 10px;
+    }
+
+    /* HR styling */
+    .warranty-details-container hr {
+        border-color: #2e374a;
+        opacity: 0.5;
+    }
+
+    /* Description list styling */
+    .warranty-details-container .row {
+        margin-bottom: 15px;
+    }
+
+    .warranty-details-container dt {
+        color: #e2e8f0;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 8px 0;
+    }
+
+    .warranty-details-container dd {
+        color: #cbd5e0;
+        font-size: 14px;
+        padding: 8px 15px;
+        background-color: #151c2c;
+        border-radius: 5px;
+        margin-bottom: 10px;
+    }
+
+    /* Product image styling */
+    .warranty-details-container img {
+        border-radius: 8px;
+        border: 2px solid #2e374a;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease;
+    }
+
+        .warranty-details-container img:hover {
+            transform: scale(1.05);
+        }
+
+/* Status badge styling - Sử dụng custom classes */
+.warranty-status-pending {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+    color: #1f2937 !important;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.warranty-status-approved {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.warranty-status-received {
+    background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+    color: white !important;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.warranty-status-fixed {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+    color: white !important;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.warranty-status-completed {
+    background: linear-gradient(135deg, #6b7280, #4b5563) !important;
+    color: white !important;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.warranty-status-rejected {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: white !important;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.warranty-status-cancelled {
+    background: linear-gradient(135deg, #374151, #1f2937) !important;
+    color: #9ca3af !important;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Current status section */
+.warranty-current-status {
+    background-color: #151c2c;
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid #2e374a;
+    text-align: center;
+    margin: 20px 0;
+}
+
+    .warranty-current-status .badge {
+        font-size: 18px !important;
+        padding: 12px 24px !important;
+    }
+
+/* Action buttons styling */
+.warranty-action-buttons {
+    background-color: #151c2c;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #2e374a;
+    margin: 20px 0;
+}
+
+    .warranty-action-buttons .btn {
+        margin-right: 10px;
+        margin-bottom: 10px;
+        padding: 10px 20px;
+        font-weight: 500;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+    }
+
+    .warranty-action-buttons .btn-success {
+        background-color: #059669 !important;
+        border-color: #059669 !important;
+    }
+
+        .warranty-action-buttons .btn-success:hover {
+            background-color: #047857 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+    .warranty-action-buttons .btn-info {
+        background-color: #0891b2 !important;
+        border-color: #0891b2 !important;
+    }
+
+        .warranty-action-buttons .btn-info:hover {
+            background-color: #0e7490 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(8, 145, 178, 0.3);
+        }
+
+    .warranty-action-buttons .btn-primary {
+        background-color: #7c3aed !important;
+        border-color: #7c3aed !important;
+    }
+
+        .warranty-action-buttons .btn-primary:hover {
+            background-color: #6d28d9 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+        }
+
+    .warranty-action-buttons .btn-danger {
+        background-color: #dc2626 !important;
+        border-color: #dc2626 !important;
+    }
+
+        .warranty-action-buttons .btn-danger:hover {
+            background-color: #b91c1c !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+        }
+
+    .warranty-action-buttons .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+
+/* Back link styling */
+.warranty-back-link {
+    display: inline-block;
+    background-color: teal;
+    color: white !important;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+}
+
+    .warranty-back-link:hover {
+        background-color: #006666;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 128, 128, 0.3);
+        color: white !important;
+        text-decoration: none;
+    }
+
+/* Custom warranty status badges */
+.warranty-status-pending {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+    color: #1f2937 !important;
+}
+
+.warranty-status-approved {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white !important;
+}
+
+.warranty-status-received {
+    background: linear-gradient(135deg, #06b6d4, #0891b2) !important;
+    color: white !important;
+}
+
+.warranty-status-fixed {
+    background: linear-gradient(135deg, #8b5cf6, #7c3aed) !important;
+    color: white !important;
+}
+
+.warranty-status-completed {
+    background: linear-gradient(135deg, #6b7280, #4b5563) !important;
+    color: white !important;
+}
+
+.warranty-status-rejected {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: white !important;
+}
+
+.warranty-status-cancelled {
+    background: linear-gradient(135deg, #374151, #1f2937) !important;
+    color: #9ca3af !important;
+}
+
+.warranty-badge {
+    font-size: 15px;
+    padding: 6px 12px;
+    font-weight: 600;
+    border-radius: 6px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .warranty-details-container {
+        padding: 20px;
+        margin: 10px;
+    }
+
+        .warranty-details-container dt,
+        .warranty-details-container dd {
+            font-size: 13px;
+        }
+
+    .warranty-action-buttons .btn {
+        width: 100%;
+        margin-bottom: 10px;
+        margin-right: 0;
+    }
+}
+
+/* ===================================================== VIEW ORDER DETAILS ===================================================== */
+
+/* Container styling */
+.order-details-container {
+    background-color: #182237;
+    padding: 30px;
+    border-radius: 10px;
+    margin-top: 20px;
+    color: white;
+}
+
+    /* Title styling */
+    .order-details-container h3 {
+        color: white;
+        margin-bottom: 20px;
+        font-weight: 600;
+        font-size: 28px;
+    }
+
+    .order-details-container h4 {
+        color: white;
+        margin-bottom: 25px;
+        font-weight: 500;
+        font-size: 20px;
+    }
+
+/* Shipping address styling */
+.order-details-shipping-address {
+    background-color: #151c2c;
+    padding: 15px 20px;
+    border-radius: 8px;
+    border-left: 4px solid #FE980F;
+    margin-bottom: 25px;
+}
+
+    .order-details-shipping-address span {
+        color: #FE980F !important;
+        font-weight: 600;
+    }
+
+/* Table section styling */
+.order-details-table-section {
+    background-color: #151c2c;
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #2e374a;
+    overflow-x: auto;
+}
+
+/* Table styling */
+.order-details-table {
+    color: white !important;
+    margin-bottom: 0;
+    width: 100%;
+    table-layout: fixed !important;
+}
+
+/* Column width distribution */
+.order-details-col-id {
+    width: 5% !important;
+}
+
+.order-details-col-code {
+    width: 12% !important;
+}
+
+.order-details-col-username {
+    width: 15% !important;
+}
+
+.order-details-col-product {
+    width: 25% !important;
+}
+
+.order-details-col-price {
+    width: 10% !important;
+}
+
+.order-details-col-image {
+    width: 12% !important;
+}
+
+.order-details-col-quantity {
+    width: 8% !important;
+}
+
+.order-details-col-subtotal {
+    width: 13% !important;
+}
+
+/* Table header styling */
+.order-details-table thead th {
+    background-color: #1a2332;
+    color: white;
+    border-bottom: 2px solid #2e374a;
+    padding: 15px 10px;
+    font-weight: 600;
+    border: none;
+    text-align: center;
+    font-size: 14px;
+}
+
+/* Table body styling */
+.order-details-table tbody td,
+.order-details-table tbody th {
+    background-color: transparent;
+    border-bottom: 1px solid #2e374a;
+    padding: 15px 10px;
+    color: #e2e8f0;
+    vertical-align: middle;
+    border: none;
+    text-align: center;
+}
+
+.order-details-table tbody tr:hover {
+    background-color: rgba(0, 128, 128, 0.1);
+}
+
+/* Product image styling */
+.order-details-product-image {
+    border-radius: 8px;
+    border: 2px solid #2e374a;
+    transition: transform 0.3s ease;
+}
+
+    .order-details-product-image:hover {
+        transform: scale(1.1);
+        border-color: teal;
+    }
+
+/* Price styling */
+.order-details-original-price {
+    text-decoration: line-through !important;
+    color: #9ca3af !important;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.order-details-discounted-price {
+    color: #10b981 !important;
+    font-weight: bold !important;
+    font-size: 14px;
+}
+
+.order-details-regular-price {
+    color: #FE980F !important;
+    font-weight: bold !important;
+    font-size: 14px;
+}
+
+/* Total row styling */
+.order-details-total-row {
+    background-color: #1a2332 !important;
+    border-top: 3px solid #FE980F !important;
+}
+
+    .order-details-total-row td {
+        padding: 20px 8px !important;
+        font-weight: 600 !important;
+        vertical-align: middle !important;
+        text-align: center !important;
+        border: none !important;
+        font-size: 16px !important;
+        color: white !important;
+    }
+
+/* Total amounts styling */
+.order-details-total-amount,
+.order-details-grand-amount {
+    color: #FE980F !important;
+    font-weight: bold !important;
+}
+
+.order-details-grand-amount {
+    font-size: 18px !important;
+}
+
+/* Button styling */
+.order-status-update-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%) !important;
+    border: none !important;
+    color: white !important;
+    padding: 10px 12px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    white-space: nowrap !important;
+    width: 100% !important;
+    max-width: 120px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3) !important;
+}
+
+    .order-status-update-btn:hover {
+        background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4) !important;
+    }
+
+    .order-status-update-btn:disabled {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+        cursor: not-allowed !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }
+    /* Hide button completely when completed */
+    .order-status-update-btn.order-completed {
+        display: none !important;
+    }
+
+/* Status badges styling */
+.order-status-new,
+.order-status-confirmed,
+.order-status-shipping,
+.order-status-delivered,
+.order-status-completed,
+.order-status-cancelled {
+    padding: 8px 16px !important;
+    border-radius: 20px !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    display: inline-block !important;
+    color: white !important;
+}
+
+.order-status-new {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3) !important;
+}
+
+.order-status-confirmed {
+    background: linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%) !important;
+    box-shadow: 0 2px 10px rgba(124, 58, 237, 0.3) !important;
+}
+
+.order-status-shipping {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.3) !important;
+}
+
+.order-status-delivered {
+    background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%) !important;
+    box-shadow: 0 2px 10px rgba(14, 165, 233, 0.3) !important;
+}
+
+.order-status-completed {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+    box-shadow: 0 2px 10px rgba(34, 197, 94, 0.3) !important;
+}
+
+.order-status-cancelled {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    box-shadow: 0 2px 10px rgba(239, 68, 68, 0.3) !important;
+}
+
+/* DataTable buttons styling */
+.order-details-table-section .dt-buttons {
+    margin-bottom: 15px;
+}
+
+.order-details-table-section .dt-button {
+    background-color: teal !important;
+    border-color: teal !important;
+    color: white !important;
+    padding: 8px 16px !important;
+    border-radius: 5px !important;
+    margin-right: 10px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s ease !important;
+}
+
+    .order-details-table-section .dt-button:hover {
+        background-color: #006666 !important;
+        border-color: #006666 !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(0, 128, 128, 0.3) !important;
+    }
+
+.back-link {
+    color: teal;
+    text-decoration: none;
+    margin-top: 40px;
+    display: inline-block;
+}
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+/* Responsive */
+@media (max-width: 768px) {
+    .order-details-container {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .order-details-table-section {
+        padding: 15px;
+    }
+
+    .order-details-table thead th,
+    .order-details-table tbody td {
+        padding: 10px 5px;
+        font-size: 12px;
+    }
+
+    .order-details-product-image {
+        width: 80px !important;
+    }
+
+    .order-status-update-btn {
+        padding: 8px 12px !important;
+        font-size: 12px !important;
+    }
+}

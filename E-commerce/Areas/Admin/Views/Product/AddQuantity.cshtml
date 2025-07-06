@@ -52,3 +52,193 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 }
+
+<style>
+    /* Container styling */
+    .col-md-9 {
+        background-color: #182237;
+        padding: 30px;
+        border-radius: 10px;
+        margin-top: 20px;
+        max-width: 100%;
+    }
+
+    /* Headings */
+    h4, h3 {
+        color: white;
+        margin: 0 0 20px 0;
+        font-size: 24px;
+        font-weight: 600;
+        border-bottom: 2px solid #2e374a;
+        padding-bottom: 12px;
+    }
+
+    h3 {
+        margin-top: 40px;
+        font-size: 20px;
+    }
+
+    /* Form styling */
+    form {
+        background-color: #151c2c;
+        padding: 25px;
+        border-radius: 8px;
+        border: 2px solid #2e374a;
+        margin-bottom: 30px;
+    }
+
+    /* Form group */
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+        /* Labels */
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+    /* Input styling */
+    .form-control {
+        width: 100%;
+        padding: 15px;
+        background-color: #151c2c;
+        color: white;
+        border: 2px solid #2e374a;
+        border-radius: 5px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+        .form-control:focus {
+            outline: none;
+            border-color: teal;
+            box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.15);
+            background-color: #151c2c;
+            color: white;
+        }
+
+        .form-control:hover {
+            border-color: #4a5568;
+        }
+
+    /* Table styling */
+    .table {
+        background-color: #151c2c;
+        color: white;
+        border: 2px solid #2e374a;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 30px;
+        width: 100%;
+    }
+
+        .table thead th {
+            background-color: #18294d;
+            color: white;
+            border: 1px solid #2e374a;
+            padding: 15px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .table tbody td {
+            background-color: #151c2c;
+            color: white;
+            border: 1px solid #2e374a;
+            padding: 12px 15px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+    /* Striped rows */
+    .table-striped tbody tr:nth-of-type(odd) td {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    /* Total row styling */
+    .table tbody tr:last-child td {
+        background-color: #182237;
+        font-weight: 600;
+        border-top: 2px solid teal;
+    }
+
+    /* Buttons styling */
+    .btn {
+        padding: 13px 28px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+        margin: 5px 0;
+        font-size: 14px;
+        letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, teal, #17a2b8) !important;
+        color: white;
+        box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3);
+        border-radius: 5px !important;
+    }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #008080, #138496);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 128, 128, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+    .btn-secondary {
+        background: linear-gradient(135deg, #6c757d, #5a6268);
+        color: white;
+        box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        margin-top: 20px;
+    }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #5a6268, #495057);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
+            text-decoration: none;
+            color: white;
+        }
+
+    /* Hidden input styling */
+    input[type="hidden"] {
+        display: none;
+    }
+    
+    /* Animation for form */
+    form {
+        animation: fadeInUp 0.5s ease-out;
+    }
+
+    .table {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    @@keyframes fadeInUp {
+        from
+
+    {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    }
+</style>

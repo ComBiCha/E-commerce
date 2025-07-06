@@ -23,23 +23,24 @@ namespace E_commerce.Areas.Admin.Controllers
 
         public async Task<IActionResult> Index(int pg = 1)
         {
+            // Chỉ lấy 1 danh sách
             var usersWithRoles = await _userFacade.GetUsersWithRolesAsync();
-            var users = await _userFacade.GetAllUsersAsync();
 
-            const int pageSize = 10;
+            const int pageSize = 5;
             if (pg < 1) pg = 1;
 
-            int recsCount = users.Count;
+            // Dùng chung usersWithRoles cho pagination
+            int recsCount = usersWithRoles.Count;
             var pager = new Paginate(recsCount, pg, pageSize);
 
             int recSkip = (pg - 1) * pageSize;
-            var data = users.Skip(recSkip).Take(pager.PageSize).ToList();
+            var pagedUsersWithRoles = usersWithRoles.Skip(recSkip).Take(pager.PageSize).ToList();
 
             ViewBag.Pager = pager;
             var viewModel = new CombinedViewModel
             {
-                UsersWithRoles = usersWithRoles,
-                Users = data
+                UsersWithRoles = pagedUsersWithRoles, // Dùng data đã phân trang
+                Users = null // Không cần nữa
             };
 
             return View(viewModel);

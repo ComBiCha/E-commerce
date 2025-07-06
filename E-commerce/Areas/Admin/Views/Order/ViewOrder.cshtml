@@ -4,130 +4,128 @@
     decimal total = 0;
     decimal subtotal = 0;
 }
+<link rel="stylesheet" href="~/css/admin-detail.css" />
+
 @* For Admin *@
-<h3>Order Details</h3>
-<h4>Shipping Address: <span style="color:#FE980F">@ViewBag.Order.Address</span></h4>
-<table class="table" id="orderdetailsTable">
-    <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Order Code</th>
-            <th scope="col">UserName</th>
-            <th scope="col">Product Name</th>
-            <th scope="col">Product Price</th>
-            <th scope="col">Product Image</th>
-            <th scope="col">Quantity</th>
-            <th scope="col">Subtotal</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            decimal itemSubtotal = item.Quantity * (item.Price - (item.DiscountAmount/item.Quantity)); // Tính tổng giá sau giảm cho từng item
-            subtotal += itemSubtotal;
-            total += itemSubtotal; // Cập nhật tổng tiền đã giảm
-            <tr>
-                <input type="hidden" asp-for="@item.OrderCode" class="getId" />
-                <th>@item.Id</th>
-                <td>@item.OrderCode</td>
-                <td>@item.UserName</td>
-                <td>@item.Product.Name - [@item.Variation.Material.Name|@item.Variation.Color.Name|Size:@item.Variation.Size]</td>
-                <td>
-                    @if (item.DiscountAmount > 0)
-                    {
-                        <p style="text-decoration: line-through; color: gray;">$ @item.Price.ToString("N0")</p>
-                        <p style="color: green; font-weight: bold;">$@((item.Price - (item.DiscountAmount / item.Quantity)).ToString("N0"))</p>
-                    }
-                    else
-                    {
-                        <p style="color: orange; font-weight: bold;">$@item.Price.ToString("N0")</p>
-                    }
-                </td>
-                <td><img src="~/media/variations/@item.Variation.ImageUrl" width="120" /></td>
-                <td>@item.Quantity</td>
-                <td>$@subtotal.ToString("N0")</td>
-            </tr>
-        }
-        <!-- The total row is now outside the loop -->
-        <tr>
-            <td style="text-align:center;font-size: 20px;">Product Total: </td>
-            <td colspan="1" style="color:#FE980F;font-size: 20px;">$@total.ToString("N0")</td>
+<div class="order-details-container">
+    <h3>Order Details</h3>
 
-            <td style="text-align:center;font-size: 20px;">Shipping Cost: </td>
-            <td colspan="1" style="color:#FE980F;font-size: 20px;">$@ViewBag.Order.ShippingCost.ToString("N0")</td>
+    <div class="order-details-shipping-address">
+        <h4>Shipping Address: <span>@ViewBag.Order.Address</span></h4>
+    </div>
 
-            <td style="text-align:center;font-size: 22px; font-weight: bold;">Grand Total:</td>
-            <td colspan="1" style="color:#FE980F;font-size: 22px; font-weight: bold;">
-                $@((total + ViewBag.Order.ShippingCost).ToString("N0"))
-            </td>
-            
-            <td>
-                @* <select style="width:fit-content" class="form-control select-update-order">
-                    @if (@ViewBag.Order.Status == 1)
-                    {
-                        <option value="1" selected>New Order</option>
-                        <option value="0">Done</option>
-                    }
-                    else
-                    {
-                        <option value="1" >New Order</option>
-                        <option value="0" selected>Done</option>
-                    }
-                    
-                </select> *@
-                @if (ViewBag.Order.Status != 6)
+    <div class="order-details-table-section">
+        <table class="table order-details-table" id="orderdetailsTable">
+            <thead>
+                <tr>
+                    <th scope="col" class="order-details-col-id">#</th>
+                    <th scope="col" class="order-details-col-code">Order Code</th>
+                    <th scope="col" class="order-details-col-username">UserName</th>
+                    <th scope="col" class="order-details-col-product">Product Name</th>
+                    <th scope="col" class="order-details-col-price">Product Price</th>
+                    <th scope="col" class="order-details-col-image">Product Image</th>
+                    <th scope="col" class="order-details-col-quantity">Quantity</th>
+                    <th scope="col" class="order-details-col-subtotal">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
                 {
-                    <button id="statusUpdateButton" class="btn btn-primary">
-                        @{
-                            var buttonText = ViewBag.Order.Status switch
+                    decimal itemSubtotal = item.Quantity * (item.Price - (item.DiscountAmount/item.Quantity)); // Tính tổng giá sau giảm cho từng item
+                    subtotal += itemSubtotal;
+                    total += itemSubtotal; // Cập nhật tổng tiền đã giảm
+                    <tr>
+                        <input type="hidden" asp-for="@item.OrderCode" class="getId" />
+                        <th>@item.Id</th>
+                        <td>@item.OrderCode</td>
+                        <td>@item.UserName</td>
+                        <td>@item.Product.Name - [@item.Variation.Material.Name|@item.Variation.Color.Name|Size:@item.Variation.Size]</td>
+                        <td>
+                            @if (item.DiscountAmount > 0)
                             {
-                                1 => "Xác nhận đơn hàng",
-                                2 => "Đã gửi hàng đi",
-                                3 => "Hàng đã giao tới nơi",
-                                4 => "Hoàn thành đơn hàng",
-                                _ => "Đơn hàng đã hoàn thành"
-                            };
-                            @buttonText
-                        }
-                    </button>
+                                <p class="order-details-original-price">$ @item.Price.ToString("N0")</p>
+                                <p class="order-details-discounted-price">$@((item.Price - (item.DiscountAmount / item.Quantity)).ToString("N0"))</p>
+                            }
+                            else
+                            {
+                                <p class="order-details-regular-price">$@item.Price.ToString("N0")</p>
+                            }
+                        </td>
+                        <td><img src="~/media/variations/@item.Variation.ImageUrl" class="order-details-product-image" width="120" /></td>
+                        <td>@item.Quantity</td>
+                        <td>$@subtotal.ToString("N0")</td>
+                    </tr>
                 }
-            </td>
-            <td>
-                <span id="orderStatusText" class="text">
-                    @if (ViewBag.Order.Status == 1)
-                    {
-                        <span class="text-primary">đơn hàng mới</span>
-                    }
-                    else if (ViewBag.Order.Status == 2)
-                    {
-                        <span class="text-danger">đơn hàng đã xác nhận</span>
-                    }
-                    else if (ViewBag.Order.Status == 3)
-                    {
-                        <span class="text-warning">Đã giao cho đơn vị vận chuyển</span>
-                    }
-                    else if (ViewBag.Order.Status == 4)
-                    {
-                        <span class="text-dark">Hàng đã giao tới nơi</span>
-                    }
-                    else if (ViewBag.Order.Status == 5)
-                    {
+                <!-- The total row is now outside the loop -->
+                <tr class="order-details-total-row">
+                    <td class="order-details-product-total">Product Total:</td>
+                    <td class="order-details-total-amount">$@total.ToString("N0")</td>
 
-                    }
-                    else if (ViewBag.Order.Status == 6)
-                    {
-                        <span class="text text-danger">Đơn hàng đã bị huỷ</span>
-                    }
-                </span>
-            </td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    </tbody>
-</table>
+                    <td class="order-details-shipping-label">Shipping Cost:</td>
+                    <td class="order-details-shipping-amount">$@ViewBag.Order.ShippingCost.ToString("N0")</td>
 
+                    <td class="order-details-grand-label">Grand Total:</td>
+                    <td class="order-details-grand-amount">
+                        $@((total + ViewBag.Order.ShippingCost).ToString("N0"))
+                    </td>
+
+                    <td class="order-details-button-cell">
+                        @if (ViewBag.Order.Status != 6 && ViewBag.Order.Status < 5)
+                        {
+                            <button id="statusUpdateButton" class="order-status-update-btn">
+                                @{
+                                    var buttonText = ViewBag.Order.Status switch
+                                    {
+                                        1 => "Confirm",
+                                        2 => "Ship",
+                                        3 => "Deliver",
+                                        4 => "Complete",
+                                        _ => "Completed"
+                                    };
+                                    @buttonText
+                                }
+                            </button>
+                        }
+                        else if (ViewBag.Order.Status == 5)
+                        {
+                            <!-- Không hiện button gì cả hoặc hiện text -->
+                        }
+                    </td>
+
+                    <td class="order-details-status-cell">
+                        <span id="orderStatusText">
+                            @if (ViewBag.Order.Status == 1)
+                            {
+                                <span class="order-status-new">New</span>
+                            }
+                            else if (ViewBag.Order.Status == 2)
+                            {
+                                <span class="order-status-confirmed">Confirmed</span>
+                            }
+                            else if (ViewBag.Order.Status == 3)
+                            {
+                                <span class="order-status-shipping">Shipping</span>
+                            }
+                            else if (ViewBag.Order.Status == 4)
+                            {
+                                <span class="order-status-delivered">Delivered</span>
+                            }
+                            else if (ViewBag.Order.Status == 5)
+                            {
+                                <span class="order-status-completed">Completed</span>
+                            }
+                            else if (ViewBag.Order.Status == 6)
+                            {
+                                <span class="order-status-cancelled">Cancelled</span>
+                            }
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <a asp-action="Index" class="back-link">Back to List Order</a>
+</div>
 @section Scripts{
     <script>
         $(document).ready(function () {
@@ -161,24 +159,24 @@
                             var statusText = "";
                             switch (newStatus) {
                                 case 2:
-                                    buttonText = "Đã gửi hàng đi";
-                                    statusText = "<span class='text-danger'>đơn hàng đã xác nhận</span>";
+                                    buttonText = "Ship";
+                                    statusText = "<span class='order-status-confirmed'>Confirmed</span>";
                                     break;
                                 case 3:
-                                    buttonText = "Hàng đã giao tới nơi";
-                                    statusText = "<span class='text-warning'>Đã giao cho đơn vị vận chuyển</span>";
+                                    buttonText = "Deliver";
+                                    statusText = "<span class='order-status-shipping'>Shipping</span>";
                                     break;
                                 case 4:
-                                    buttonText = "Hoàn thành đơn hàng";
-                                    statusText = "<span class='text-dark'>Hàng đã giao tới nơi</span>";
+                                    buttonText = "Complete";
+                                    statusText = "<span class='order-status-delivered'>Delivered</span>";
                                     break;
                                 case 5:
-                                    buttonText = "Đơn hàng đã hoàn thành";
-                                    $('#statusUpdateButton').prop('disabled', true);
+                                    statusText = "<span class='order-status-completed'>Completed</span>";
+                                    $('#statusUpdateButton').addClass('order-completed');
                                     break;
                                 default:
-                                    buttonText = "Xác nhận đơn hàng";
-                                    statusText = "<span class='text-primary'>đơn hàng mới</span>";
+                                    buttonText = "Confirm";
+                                    statusText = "<span class='order-status-new'>New</span>";
                                     break;
                             }
                             $('#statusUpdateButton').text(buttonText);

@@ -7,8 +7,9 @@
 @{
     ViewData["title"] = "Edit Contact";
 }
+<link rel="stylesheet" href="~/css/admin-edit.css" />
+
 <h4>Edit Contact</h4>
-<div class="col-md-9">
     <form asp-action="Edit" asp-controller="Contact" method="post" enctype="multipart/form-data">
 
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -43,13 +44,10 @@
             <span asp-validation-for="ImageUpload" class="text-danger" />
             <img id="imgpreview" src="@Url.Content("~/media/contact/" + ViewBag.OldImage)" alt="Current Image" class="pt-2" style="max-width: 200px; max-height: 200px;" />
         </div>
-        <div class="form-group">
-            <button class="btn btn-primary">Update</button>
-        </div>
+        <button class="btn btn-primary contact-submit">Update</button>
 
     </form>
-    <a asp-action="Index">Back</a>
-</div>
+<a asp-action="Index" class="back-link">Back to Contact Info</a>
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
@@ -70,7 +68,7 @@
             readURL(this);
         });
     </script>
-    <script>
-        CKEDITOR.replace('Description');
-    </script>
+    @* <script> *@
+    @*     CKEDITOR.replace('Description'); *@
+    @* </script> *@
 }

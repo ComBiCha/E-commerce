@@ -4,6 +4,8 @@
     ViewData["Title"] = "Edit Product";
 }
 
+<link rel="stylesheet" href="~/css/admin-edit.css" />
+
 <h2>Edit Product</h2>
 
 <form asp-action="Edit" method="post" enctype="multipart/form-data">
@@ -12,11 +14,6 @@
     <div class="form-group">
         <label asp-for="Name">Product Name</label>
         <input asp-for="Name" class="form-control" required />
-    </div>
-    <div class="form-group">
-        <label>Description</label>
-        <textarea asp-for="Description" class="form-control"></textarea>
-        <span asp-validation-for="Description" class="text-danger" />
     </div>
     <div class="form-group">
         <label>WarrantyPeriod</label>
@@ -53,13 +50,17 @@
         <span asp-validation-for="ImageUpload2" class="text-danger" />
         <img id="imgpreview2" src="@Url.Content("~/media/products/" + ViewBag.OldImage2)" alt="Current Image2" class="pt-2" style="max-width: 200px; max-height: 200px;" />
     </div>
+    <div class="form-group">
+        <label>Description</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger" />
+    </div>
     <h3>Product Variations</h3>
     <div id="variations">
         @for (int i = 0; i < Model.Variations.Count; i++)
         {
             <input type="hidden" asp-for="Variations[i].Id" />
             <div class="variation-item">
-                <h3></h3>
                 <h4>Variations @(i+1):</h4>
                 <div class="form-group">
                     <label asp-for="Variations[i].MaterialId">Material</label>
@@ -97,10 +98,13 @@
             </div>
         }
     </div>
-    <button type="button" id="addVariation" class="btn btn-success">+ Add Variation</button>
+    <button type="button" id="addVariation" class="btn btn-success">Add Variation</button>
 
-    <button type="submit" class="btn btn-primary">Save Changes</button>
+    <button type="submit" class="btn btn-primary product-submit">Save Changes</button>
 </form>
+    <a asp-action="Index" class="back-link">Back to List User</a>
+
+
 
 @section Scripts {
     @{
@@ -129,8 +133,18 @@
         });
     </script>
     <script>
-        CKEDITOR.replace('Description');
+        CKEDITOR.replace('Description', {
+            uiColor: '#2e374a',
+            height: 200,
+            contentsCss: 'body { background-color: #182237; color: #b7bac1; font-family: inherit; margin: 8px; } p { margin: 0; color: #b7bac1; }',
+            toolbar: [
+                ['Bold', 'Italic', 'Underline'],
+                ['NumberedList', 'BulletedList'],
+                ['Link', 'Image']
+            ]
+        });
     </script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         let addButton = document.getElementById("addVariation");
