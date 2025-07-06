@@ -548,6 +548,309 @@ namespace E_commerce.Controllers
             if (points >= 10000) return "Silver";
             return "Bronze";
         }
+
+        // 🔹 API LẤY DANH SÁCH ORDER CỦA USER
+        [HttpGet("GetUserOrders")]
+        public async Task<IActionResult> GetUserOrders(string email)
+        {
+            try
+            {
+                Console.WriteLine($"GetUserOrders called with email: {email}");
+
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found" });
+
+                var orders = await _dataContext.Orders
+                    .Where(o => o.UserName == email)
+                    .OrderByDescending(o => o.CreatedDate)
+                    .Select(o => new
+                    {
+                        id = o.Id,
+                        orderCode = o.OrderCode,
+                        shippingCost = o.ShippingCost,
+                        address = o.Address,
+                        userName = o.UserName,
+                        createdDate = o.CreatedDate,
+                        status = o.Status,
+                        statusName = GetOrderStatusName(o.Status),
+                        paymentIntentId = o.PaymentIntentId,
+                        paymentMethod = GetPaymentMethod(o.PaymentIntentId),
+                        canCancel = o.Status <= 2, // Chỉ có thể hủy khi status <= 2
+                                                   // Tính tổng tiền đơn hàng
+                        totalAmount = _dataContext.OrderDetails
+                            .Where(od => od.OrderCode == o.OrderCode)
+                            .Sum(od => od.Price * od.Quantity - od.DiscountAmount) + o.ShippingCost,
+                        // Đếm số sản phẩm
+                        itemCount = _dataContext.OrderDetails
+                            .Where(od => od.OrderCode == o.OrderCode)
+                            .Sum(od => od.Quantity)
+                    })
+                    .ToListAsync();
+
+                return Ok(new { success = true, orders = orders });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetUserOrders error: {ex.Message}");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        // 🔹 API LẤY CHI TIẾT ORDER
+        [HttpGet("GetOrderDetails")]
+        public async Task<IActionResult> GetOrderDetails(string orderCode, string email)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found" });
+
+                var order = await _dataContext.Orders
+                    .FirstOrDefaultAsync(o => o.OrderCode == orderCode && o.UserName == email);
+
+                if (order == null)
+                    return NotFound(new { success = false, message = "Order not found" });
+
+                var orderDetails = await _dataContext.OrderDetails
+                    .Include(od => od.Product)
+                        .ThenInclude(p => p.Warranty)
+                    .Include(od => od.Variation)
+                        .ThenInclude(v => v.Material)
+                    .Include(od => od.Variation)
+                        .ThenInclude(v => v.Color)
+                    .Where(od => od.OrderCode == orderCode)
+                    .Select(od => new
+                    {
+                        id = od.Id,
+                        productId = od.ProductId,
+                        variationId = od.VariationId,
+                        productName = od.Product.Name,
+                        price = od.Price,                    // 🔹 Giá gốc
+                        quantity = od.Quantity,
+                        discountAmount = od.DiscountAmount,  // 🔹 Tổng discount cho item này
+                        finalPrice = od.Price - (od.DiscountAmount / od.Quantity), // 🔹 Giá cuối cho 1 item
+                        subtotal = od.Quantity * (od.Price - (od.DiscountAmount / od.Quantity)), // 🔹 Tổng tiền đã giảm
+                        imageUrl = od.Variation.ImageUrl,
+                        material = od.Variation.Material.Name,
+                        color = od.Variation.Color.Name,
+                        size = od.Variation.Size,
+                        warrantyCode = od.Product.Warranty.FirstOrDefault().WarrantyCode,
+                        warrantyExpirationDate = od.Product.Warranty.FirstOrDefault().ExpirationDate
+                    })
+                    .ToListAsync();
+
+                var productTotal = orderDetails.Sum(od => od.subtotal);
+                var grandTotal = productTotal + order.ShippingCost;
+
+                var result = new
+                {
+                    success = true,
+                    order = new
+                    {
+                        id = order.Id,
+                        orderCode = order.OrderCode,
+                        shippingCost = order.ShippingCost,
+                        address = order.Address,
+                        userName = order.UserName,
+                        createdDate = order.CreatedDate,
+                        status = order.Status,
+                        statusName = GetOrderStatusName(order.Status),
+                        paymentIntentId = order.PaymentIntentId,
+                        paymentMethod = GetPaymentMethod(order.PaymentIntentId),
+                        canCancel = order.Status <= 2,
+                        productTotal = productTotal,
+                        grandTotal = grandTotal
+                    },
+                    orderDetails = orderDetails
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetOrderDetails error: {ex.Message}");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        // 🔹 API HỦY ORDER
+        [HttpPost("CancelOrder")]
+        public async Task<IActionResult> CancelOrder([FromBody] CancelOrderRequest request)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(request.Email);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found" });
+
+                var order = await _dataContext.Orders
+                    .FirstOrDefaultAsync(o => o.OrderCode == request.OrderCode && o.UserName == request.Email);
+
+                if (order == null)
+                    return NotFound(new { success = false, message = "Order not found or you do not have permission to cancel this order" });
+
+                // Kiểm tra trạng thái có thể hủy
+                if (order.Status > 2)
+                    return BadRequest(new { success = false, message = "Order has already been processed and cannot be canceled" });
+
+                // Lấy chi tiết đơn hàng để hoàn kho
+                var orderDetails = await _dataContext.OrderDetails
+                    .Include(od => od.Variation)
+                        .ThenInclude(v => v.Product)
+                            .ThenInclude(p => p.Variations)
+                                .ThenInclude(v => v.ProductQuantities)
+                    .Where(od => od.OrderCode == request.OrderCode)
+                    .ToListAsync();
+
+                using var transaction = await _dataContext.Database.BeginTransactionAsync();
+
+                try
+                {
+                    // Hoàn kho
+                    foreach (var orderDetail in orderDetails)
+                    {
+                        if (orderDetail.Variation != null)
+                        {
+                            int quantityToRestock = orderDetail.Quantity;
+
+                            var productQuantities = await _dataContext.ProductQuantities
+                                .Where(pq => pq.VariationId == orderDetail.Variation.Id)
+                                .OrderByDescending(pq => pq.DateCreated)
+                                .ToListAsync();
+
+                            if (productQuantities.Any())
+                            {
+                                var latestBatch = productQuantities.First();
+                                latestBatch.CurrentQuantityInBatch += quantityToRestock;
+                                latestBatch.LastUpdated = DateTime.Now;
+                                _dataContext.ProductQuantities.Update(latestBatch);
+                            }
+                            else
+                            {
+                                var newBatch = new BatchModel
+                                {
+                                    BatchCode = $"RESTOCK-{request.OrderCode}-{DateTime.Now.Ticks}",
+                                    ImportDate = DateTime.Now
+                                };
+                                _dataContext.Batches.Add(newBatch);
+                                await _dataContext.SaveChangesAsync();
+
+                                var newProductQuantity = new ProductQuantityModel
+                                {
+                                    VariationId = orderDetail.Variation.Id,
+                                    BatchId = newBatch.Id,
+                                    InitialQuantity = quantityToRestock,
+                                    CurrentQuantityInBatch = quantityToRestock,
+                                    DateCreated = DateTime.Now,
+                                    LastUpdated = DateTime.Now
+                                };
+                                _dataContext.ProductQuantities.Add(newProductQuantity);
+                            }
+                        }
+                    }
+
+                    // Cập nhật trạng thái đơn hàng
+                    order.Status = 6; // Đã hủy
+                    _dataContext.Orders.Update(order);
+
+                    // Cập nhật số lượng đã bán
+                    foreach (var orderDetail in orderDetails)
+                    {
+                        var product = orderDetail.Variation?.Product;
+                        if (product != null)
+                        {
+                            product.Sold = Math.Max(0, product.Sold - orderDetail.Quantity);
+                            _dataContext.Products.Update(product);
+                        }
+                    }
+
+                    await _dataContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Order has been canceled successfully. Stock has been restored and refund request has been processed."
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception("Error during order cancellation: " + ex.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"CancelOrder error: {ex.Message}");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        // 🔹 API XÁC NHẬN NHẬN HÀNG
+        [HttpPost("ConfirmDelivery")]
+        public async Task<IActionResult> ConfirmDelivery([FromBody] ConfirmDeliveryRequest request)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(request.Email);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found" });
+
+                var order = await _dataContext.Orders
+                    .FirstOrDefaultAsync(o => o.OrderCode == request.OrderCode && o.UserName == request.Email);
+
+                if (order == null)
+                    return NotFound(new { success = false, message = "Order not found or you do not have permission to confirm this delivery" });
+
+                if (order.Status == 4) // Hàng đã giao tới nơi
+                {
+                    order.Status = 5; // Đơn hàng đã hoàn thành
+                    await _dataContext.SaveChangesAsync();
+
+                    return Ok(new { success = true, message = "Order has been confirmed as received" });
+                }
+                else
+                {
+                    return BadRequest(new { success = false, message = "This order cannot be confirmed at this stage" });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ConfirmDelivery error: {ex.Message}");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        // Helper methods
+        private static string GetOrderStatusName(int status)
+        {
+            return status switch
+            {
+                1 => "New Order",
+                2 => "Confirmed",
+                3 => "In Transit",
+                4 => "Delivered",
+                5 => "Completed",
+                6 => "Cancelled",
+                _ => "Unknown"
+            };
+        }
+
+        private static string GetPaymentMethod(string paymentIntentId)
+        {
+            if (string.IsNullOrEmpty(paymentIntentId) || paymentIntentId.StartsWith("COD"))
+                return "Cash on Delivery";
+
+            if (paymentIntentId.StartsWith("pi_") || paymentIntentId.StartsWith("cs_"))
+                return "Stripe Card";
+
+            if (paymentIntentId.StartsWith("PAYID-"))
+                return "PayPal";
+
+            return "Unknown";
+        }
     }
 
     // Thêm request model vào cuối file:
@@ -594,5 +897,17 @@ namespace E_commerce.Controllers
     {
         public int AddressId { get; set; }
         public string Email { get; set; }
+    }
+
+    public class CancelOrderRequest
+    {
+        public string Email { get; set; }
+        public string OrderCode { get; set; }
+    }
+
+    public class ConfirmDeliveryRequest
+    {
+        public string Email { get; set; }
+        public string OrderCode { get; set; }
     }
 }
