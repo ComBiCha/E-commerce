@@ -1,0 +1,79 @@
+﻿@model E_commerce.Models.Paginate
+
+<div class="pagination-container">
+    <!-- Previous Button -->
+    @if (Model.CurrentPage > 1)
+    {
+        <a href="@Url.Action("Index", new { pg = Model.CurrentPage - 1 })"
+           class="pagination-button">
+            Previous
+        </a>
+    }
+    else
+    {
+        <span class="pagination-button disabled">Previous</span>
+    }
+
+    <!-- Page Info with Input -->
+    <div class="page-info">
+        <span>Page </span>
+        <input type="text"
+               id="pageInput"
+               value="@Model.CurrentPage"
+               class="page-input"
+               data-total-pages="@Model.TotalPages"
+               onkeydown="handlePageInput(event)" />
+        <span> of @Model.TotalPages</span>
+    </div>
+
+    <!-- Next Button -->
+    @if (Model.CurrentPage < Model.TotalPages)
+    {
+        <a href="@Url.Action("Index", new { pg = Model.CurrentPage + 1 })"
+           class="pagination-button">
+            Next
+        </a>
+    }
+    else
+    {
+        <span class="pagination-button disabled">Next</span>
+    }
+</div>
+
+<script>
+    function handlePageInput(event) {
+        if (event.key === 'Enter') {
+            const input = event.target;
+            const currentPage = parseInt(input.value);
+            const totalPages = parseInt(input.getAttribute('data-total-pages'));
+
+            if (currentPage >= 1 && currentPage <= totalPages) {
+                // Redirect to new page
+                const currentUrl = new URL(window.location);
+                currentUrl.searchParams.set('pg', currentPage);
+                window.location.href = currentUrl.toString();
+            } else {
+                // Reset to current page if invalid
+                input.value = @Model.CurrentPage;
+                alert('Please enter a valid page number between 1 and ' + totalPages);
+            }
+        }
+    }
+
+    // Validate input on change
+    document.addEventListener('DOMContentLoaded', function() {
+        const pageInput = document.getElementById('pageInput');
+        if (pageInput) {
+            pageInput.addEventListener('input', function(e) {
+                const value = e.target.value;
+                const totalPages = parseInt(e.target.getAttribute('data-total-pages'));
+
+                if (value && (isNaN(value) || value < 1 || value > totalPages)) {
+                    e.target.style.borderColor = '#dc2626';
+                } else {
+                    e.target.style.borderColor = '#374151';
+                }
+            });
+        }
+    });
+</script>

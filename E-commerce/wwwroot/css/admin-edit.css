@@ -1,0 +1,728 @@
+﻿
+.container {
+    background-color: #182237;
+    padding: 30px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+/* Headings */
+h2, h3, h4 {
+    color: white;
+    margin: 30px 0 15px 0;
+    font-size: 24px;
+    font-weight: 600;
+    border-bottom: 2px solid #2e374a;
+    padding-bottom: 10px;
+}
+
+h3 {
+    font-size: 20px;
+    margin-top: 40px;
+}
+
+h4 {
+    font-size: 18px;
+    margin-top: 25px;
+}
+
+/* Form styling */
+form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    background-color: #182237;
+}
+
+/* Form groups */
+.form-group {
+    flex: 0 0 calc(50% - 10px);
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+    /* Brand chiếm full width - sử dụng nth-child để target form-group thứ 6 (Brand) */
+    .form-group:nth-child(6) {
+        flex: 0 0 100% !important;
+    }
+
+    /* Description và button chiếm full width */
+    .form-group:has(textarea),
+    .form-group:has(button[type="submit"]) {
+        flex: 0 0 100%;
+    }
+
+    /* Labels */
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: white;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+/* Input, select, textarea styling */
+.form-control,
+.form-control-file {
+    padding: 15px;
+    background-color: #151c2c;
+    color: white;
+    border: 2px solid #2e374a;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+    .form-control:focus {
+        outline: none;
+        border-color: teal;
+        box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.15);
+        background-color: #151c2c;
+        color: white;
+    }
+
+    .form-control:hover {
+        border-color: #4a5568;
+    }
+
+/* Textarea specific */
+textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+}
+
+/* File inputs */
+.form-control-file {
+    padding: 10px;
+    background-color: transparent;
+    border: 2px dashed #2e374a;
+    color: white;
+}
+
+/* Select dropdown */
+select.form-control {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+/* ===== VARIATIONS SECTION ===== */
+
+/* Variations container */
+#variations {
+    flex: 0 0 100%;
+    margin: 20px 0;
+}
+
+/* Variation items */
+.variation-item {
+    background-color: #151c2c;
+    border: 2px solid #2e374a;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+    .variation-item h4 {
+        color: white;
+        margin-bottom: 15px;
+        font-size: 16px;
+        border-bottom: 1px solid #2e374a;
+        padding-bottom: 8px;
+    }
+
+    /* Variation form groups */
+    .variation-item .form-group {
+        flex: 0 0 calc(50% - 10px);
+        margin-bottom: 15px;
+    }
+
+        .variation-item .form-group:has(input[type="file"]) {
+            flex: 0 0 100%;
+        }
+
+    /* Variation inputs */
+    .variation-item .form-control {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+/* Images */
+img {
+    border-radius: 8px;
+    border: 2px solid #2e374a;
+    margin-top: 10px;
+}
+
+#imgpreview, #imgpreview2 {
+    max-width: 200px;
+    max-height: 200px;
+    display: block;
+}
+
+/* ===== BUTTONS STYLING ===== */
+
+/* Add Variation Button */
+#addVariation {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 20px 0;
+}
+
+    #addVariation:hover {
+        background: linear-gradient(135deg, #218838, #1ea471);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+    }
+
+    #addVariation::before {
+        content: '+';
+        font-size: 18px;
+        font-weight: bold;
+        margin-right: 8px;
+    }
+
+/* Submit Button */
+.product-submit {
+    background: linear-gradient(135deg, teal, #17a2b8) !important;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    margin-top: 20px;
+    flex: 0 0 100%;
+}
+
+    .product-submit:hover {
+        background: linear-gradient(135deg, #008080, #138496);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 128, 128, 0.4);
+    }
+
+/* Validation */
+.text-danger {
+    color: #ff6b6b;
+    font-size: 12px;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Hidden inputs */
+input[type="hidden"] {
+    display: none;
+}
+
+.back-link {
+    color: teal;
+    text-decoration: none;
+    margin-top: 40px;
+    display: inline-block;
+}
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+/* ================================================================ EDIT USER SPECIFIC STYLES =================================================================================== */
+/* Submit Button */
+.user-submit {
+    background: linear-gradient(135deg, teal, #17a2b8) !important;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    margin-top: 20px;
+    flex: 0 0 100%;
+}
+
+    .user-submit:hover {
+        background: linear-gradient(135deg, #008080, #138496);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 128, 128, 0.4);
+    }
+
+/* ================================================================ EDIT BRAND SPECIFIC STYLES =================================================================================== */
+.brand-submit {
+    background: linear-gradient(135deg, teal, #17a2b8) !important;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    margin-top: 20px;
+    flex: 0 0 100%;
+}
+
+    .brand-submit:hover {
+        background: linear-gradient(135deg, #008080, #138496);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 128, 128, 0.4);
+    }
+
+/* ================================================================ EDIT COLOR SPECIFIC STYLES =================================================================================== */
+.color-submit {
+    background: linear-gradient(135deg, teal, #17a2b8) !important;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    margin-top: 20px;
+    flex: 0 0 100%;
+}
+
+    .color-submit:hover {
+        background: linear-gradient(135deg, #008080, #138496);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 128, 128, 0.4);
+    }
+
+/* ================================================================ EDIT CONTACT SPECIFIC STYLES =================================================================================== */
+.contact-submit {
+    background: linear-gradient(135deg, teal, #17a2b8) !important;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    margin-top: 20px;
+    flex: 0 0 100%;
+}
+
+    .contact-submit:hover {
+        background: linear-gradient(135deg, #008080, #138496);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 128, 128, 0.4);
+    }
+
+/* ================================================================ EDIT COUPON SPECIFIC STYLES =================================================================================== */
+.coupon-submit {
+    background: linear-gradient(135deg, teal, #17a2b8) !important;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    margin-top: 20px;
+    flex: 0 0 100%;
+}
+
+    .coupon-submit:hover {
+        background: linear-gradient(135deg, #008080, #138496);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 128, 128, 0.4);
+    }
+
+/* ================================================================ EDIT MATERIAL SPECIFIC STYLES =================================================================================== */
+.material-submit {
+    background: linear-gradient(135deg, teal, #17a2b8) !important;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    margin-top: 20px;
+    flex: 0 0 100%;
+}
+
+    .material-submit:hover {
+        background: linear-gradient(135deg, #008080, #138496);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 128, 128, 0.4);
+    }
+
+/* ================================================================ EDIT SLIDER SPECIFIC STYLES =================================================================================== */
+.slider-submit {
+    background: linear-gradient(135deg, teal, #17a2b8) !important;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 128, 128, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    width: 100%;
+    margin-top: 20px;
+    flex: 0 0 100%;
+}
+
+    .slider-submit:hover {
+        background: linear-gradient(135deg, #008080, #138496);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 128, 128, 0.4);
+    }
+
+/* ===================================================== EDIT ORDER PAGE STYLING =========================================================== */
+
+
+/* Container styling */
+.edit-order-container {
+    background-color: #182237;
+    padding: 5px;
+}
+
+    /* Title styling */
+    .edit-order-container h2 {
+        color: white;
+        margin-bottom: 30px;
+        font-weight: 600;
+        font-size: 32px;
+        text-align: center;
+        border-bottom: 3px solid #FE980F;
+        padding-bottom: 15px;
+    }
+
+    .edit-order-container h3 {
+        color: white;
+        margin: 30px 0 20px 0;
+        font-weight: 600;
+        font-size: 24px;
+        border-left: 4px solid #FE980F;
+        padding-left: 15px;
+    }
+
+/* Form styling */
+.edit-order-form {
+    background-color: #151c2c;
+    border-radius: 8px;
+    padding: 25px;
+    border: 1px solid #2e374a;
+    margin-bottom: 30px;
+}
+
+/* Form fields container */
+.edit-order-fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+/* Form field styling */
+.edit-order-field {
+    display: flex;
+    flex-direction: column;
+}
+
+    .edit-order-field label {
+        color: white;
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .edit-order-field input {
+        background-color: #1a2332;
+        border: 2px solid #2e374a;
+        color: white;
+        padding: 12px 15px;
+        border-radius: 6px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+        .edit-order-field input:focus {
+            outline: none;
+            border-color: #FE980F;
+            box-shadow: 0 0 0 3px rgba(254, 152, 15, 0.1);
+        }
+
+        .edit-order-field input[readonly] {
+            background-color: #0f1419;
+            color: #9ca3af;
+            cursor: not-allowed;
+        }
+
+/* Table section styling - Full width */
+/* If the above doesn't work, try this more aggressive approach */
+.edit-order-form .edit-order-table-section {
+    margin-left: -25px !important;
+    margin-right: -25px !important;
+    width: calc(100% + 50px) !important;
+}
+
+
+/* Table styling */
+.edit-order-table {
+    width: 100%;
+    color: white;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+    .edit-order-table thead th {
+        background-color: #1a2332;
+        color: white;
+        padding: 20px 30px;
+        text-align: center;
+        font-weight: 600;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #2e374a;
+    }
+
+    .edit-order-table tbody td {
+        padding: 20px 30px;
+        text-align: center;
+        border-bottom: 1px solid #2e374a;
+        vertical-align: middle;
+        color: #e2e8f0;
+    }
+
+    .edit-order-table tbody tr:hover {
+        background-color: rgba(0, 128, 128, 0.1);
+    }
+
+/* Product image styling */
+.edit-order-product-image {
+    border-radius: 8px;
+    border: 2px solid #2e374a;
+    transition: transform 0.3s ease;
+    max-width: 120px;
+    height: auto;
+}
+
+    .edit-order-product-image:hover {
+        transform: scale(1.1);
+        border-color: teal;
+    }
+
+/* Quantity input styling */
+.edit-order-quantity-input {
+    background-color: #1a2332 !important;
+    border: 2px solid #2e374a !important;
+    color: white !important;
+    padding: 8px 12px !important;
+    border-radius: 6px !important;
+    font-size: 14px !important;
+    width: 80px !important;
+    text-align: center !important;
+    transition: all 0.3s ease !important;
+}
+
+    .edit-order-quantity-input:focus {
+        outline: none !important;
+        border-color: #FE980F !important;
+        box-shadow: 0 0 0 3px rgba(254, 152, 15, 0.1) !important;
+    }
+
+/* Price display styling */
+.edit-order-price {
+    color: #FE980F;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.edit-order-subtotal {
+    color: #10b981;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* Submit button styling */
+.edit-order-submit-btn {
+    background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+    border: none !important;
+    color: white !important;
+    padding: 15px 30px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    font-size: 16px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.5px !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3) !important;
+    display: block !important;
+    margin: 0 auto !important;
+    min-width: 200px !important;
+}
+
+    .edit-order-submit-btn:hover {
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(34, 197, 94, 0.4) !important;
+    }
+
+    .edit-order-submit-btn:active {
+        transform: translateY(0) !important;
+    }
+
+/* Validation error styling */
+.edit-order-validation {
+    background-color: #1a2332;
+    border: 1px solid #ef4444;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+    .edit-order-validation .text-danger {
+        color: #ef4444 !important;
+        font-weight: 500;
+    }
+
+/* Empty state styling */
+.edit-order-empty-state {
+    text-align: center;
+    color: #9ca3af;
+    font-style: italic;
+    padding: 40px 30px;
+    background-color: #0f1419;
+    border-radius: 6px;
+    margin: 0 30px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .edit-order-container {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .edit-order-fields {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .edit-order-table-section {
+        margin-left: -20px;
+        margin-right: -20px;
+        padding: 15px 0;
+    }
+
+    .edit-order-table thead th,
+    .edit-order-table tbody td {
+        padding: 12px 20px;
+        font-size: 12px;
+    }
+
+    .edit-order-product-image {
+        max-width: 80px;
+    }
+
+    .edit-order-quantity-input {
+        width: 60px !important;
+        padding: 6px 8px !important;
+        font-size: 12px !important;
+    }
+
+    .edit-order-submit-btn {
+        padding: 12px 24px !important;
+        font-size: 14px !important;
+        min-width: 150px !important;
+    }
+
+    .edit-order-empty-state {
+        margin: 0 20px;
+        padding: 30px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .edit-order-container {
+        padding: 15px;
+        margin: 5px;
+    }
+
+        .edit-order-container h2 {
+            font-size: 24px;
+        }
+
+        .edit-order-container h3 {
+            font-size: 20px;
+        }
+
+    .edit-order-table-section {
+        margin-left: -15px;
+        margin-right: -15px;
+        overflow-x: scroll;
+    }
+
+    .edit-order-table thead th,
+    .edit-order-table tbody td {
+        padding: 10px 15px;
+        font-size: 11px;
+    }
+
+    .edit-order-empty-state {
+        margin: 0 15px;
+        padding: 25px 15px;
+    }
+}

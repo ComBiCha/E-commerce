@@ -2,23 +2,25 @@
 @{
     ViewData["title"] = "Create Coupon";
 }
+<link rel="stylesheet" href="~/css/admin-create.css" />
+
 <h4>Create Coupon</h4>
-<div class="col-md-9">
-    <form asp-action="Create" enctype="multipart/form-data">
+<div class="container">
+    <form asp-action="Create" enctype="multipart/form-data" class="form">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
             <label>Code</label>
-            <input asp-for="Code" class="form-control" />
+            <input asp-for="Code" placeholder="Code" />
             <span asp-validation-for="Code" class="text-danger" />
         </div>
         <div class="form-group">
             <label>Discount Amount</label>
-            <input asp-for="DiscountAmount" class="form-control" type="number" step="0.01" />
+            <input asp-for="DiscountAmount" placeholder="DiscountAmount" type="number" step="0.01" />
             <span asp-validation-for="DiscountAmount" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>Percentage / Fixed Amount</label>
-            <select asp-for="IsPercentage" class="form-control">
+            <select asp-for="IsPercentage">
                 <option value="true">Percentage (%)</option>
                 <option value="false">Fixed Amount</option>
             </select>
@@ -26,29 +28,27 @@
         </div>
         <div class="form-group">
             <label>Min Order Value</label>
-            <input asp-for="MinOrderValue" class="form-control" type="number" />
+            <input asp-for="MinOrderValue" placeholder="MinOrderValue" type="number" />
             <span asp-validation-for="MinOrderValue" class="text-danger"></span>
         </div>
         <div class="form-group">
             <label>Max Usage</label>
-            <input asp-for="MaxUsage" class="form-control" type="number" />
+            <input asp-for="MaxUsage" placeholder="MaxUsage" type="number" />
             <span asp-validation-for="MaxUsage" class="text-danger"></span>
         </div>
         <div class="form-group">
-            <input asp-for="UsedCount" class="form-control" type="number" hidden readonly value="0" />
-            <span asp-validation-for="UsedCount" class="text-danger"></span>
-        </div>
-        <div class="form-group">
             <label>Expiry Date</label>
-            <input asp-for="ExpiryDate" class="form-control" type="datetime-local" />
+            <input asp-for="ExpiryDate" placeholder="ExpiryDate" type="datetime-local" />
             <span asp-validation-for="ExpiryDate" class="text-danger"></span>
         </div>
+        <input asp-for="UsedCount" type="number" hidden readonly value="0" />
+        <span asp-validation-for="UsedCount" class="text-danger"></span>
         <div class="form-group">
             <button class="btn btn-primary">Create</button>
         </div>
 
     </form>
-    <a asp-action="Index">Back to List Coupon</a>
+    <a asp-action="Index" class="back-link">Back to List Coupon</a>
 </div>
 @section Scripts {
     @{

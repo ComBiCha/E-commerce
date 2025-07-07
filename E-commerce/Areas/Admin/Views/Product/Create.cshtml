@@ -3,77 +3,95 @@
     ViewData["Title"] = "Create Product";
 }
 
+<link rel="stylesheet" href="~/css/admin-create.css" />
+
+
 <h4>Create Product</h4>
-<div class="col-md-9">
-    <form asp-action="Create" enctype="multipart/form-data">
+<div class="container">
+    <form asp-action="Create" enctype="multipart/form-data" class="form"> 
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
         <div class="form-group">
             <label>Name</label>
-            <input asp-for="Name" class="form-control" />
+            <input asp-for="Name" placeholder="Name" />
             <span asp-validation-for="Name" class="text-danger" />
         </div>
-
-        <div class="form-group">
-            <label>Description</label>
-            <textarea asp-for="Description" class="form-control"></textarea>
-            <span asp-validation-for="Description" class="text-danger" />
-        </div>
-
         <div class="form-group">
             <label>Price</label>
-            <input asp-for="Price" pattern="[0-9.,]+" class="form-control typing-price" />
+            <input asp-for="Price" pattern="[0-9.,]+" typing-price" placeholder="Price" />
             <span style="color:orange;" id="price-convert"></span>
             <span asp-validation-for="Price" class="text-danger" />
         </div>
 
         <div class="form-group">
-            <label>WarrantyPeriod</label>
-            <input asp-for="WarrantyPeriod" class="form-control" />
+            <label>Warranty Period</label>
+            <input asp-for="WarrantyPeriod" placeholder="Warranty Period" />
             <span asp-validation-for="WarrantyPeriod" class="text-danger" />
         </div>
 
         <div class="form-group">
             <label>Category</label>
-            <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
-                <option>--Choose a Category--</option>
+            <select asp-for="CategoryId" asp-items="ViewBag.Categories">
+                <option>--Choose a Category</option>
             </select>
             <span asp-validation-for="CategoryId" class="text-danger" />
         </div>
 
         <div class="form-group">
             <label>Brand</label>
-            <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands">
-                <option>--Choose a Brand--</option>
+            <select asp-for="BrandId" asp-items="ViewBag.Brands">
+                <option>--Choose a Brand</option>
             </select>
             <span asp-validation-for="BrandId" class="text-danger" />
         </div>
 
         <div class="form-group">
             <label>Image</label>
-            <input asp-for="ImageUpload" class="form-control-file" />
+            <input asp-for="ImageUpload" />
             <span asp-validation-for="ImageUpload" class="text-danger" />
             <img id="imgpreview" class="pt-2" style="max-width: 200px; display:none;" />
         </div>
 
         <div class="form-group">
             <label>Image 2</label>
-            <input asp-for="ImageUpload2" class="form-control-file" />
+            <input asp-for="ImageUpload2" />
             <span asp-validation-for="ImageUpload2" class="text-danger" />
             <img id="imgpreview2" class="pt-2" style="max-width: 200px; display:none;" />
         </div>
-
+        <div class="form-group">
+            <label>Description</label>
+            <textarea asp-for="Description" rows="16" placeholder="Description"></textarea>
+            <span asp-validation-for="Description" class="text-danger"></span>
+        </div>
         <h4>Add Variations (Optional)</h4>
-        <button type="button" id="add-variation" class="btn btn-success mb-2">+ Add Variation</button>
+        <button type="button" id="add-variation" class="btn btn-success">Add Variation</button>
         <div id="variations-container"></div>
 
         <div class="form-group">
-            <button class="btn btn-primary">Create</button>
+            <button class="btn btn-primary" style="background:none">Create</button>
         </div>
     </form>
-
-    <a asp-action="Index">Back to List Product</a>
+    <a asp-action="Index" class="back-link">Back to List User</a>
 </div>
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+    <script>
+        $(document).ready(function () {
+            function readURL(input, previewId) {
+                if (input.files && input.files[0]) {
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        $("#" + previewId).attr("src", e.target.result).width(200).height(200).show();
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }
+            }
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
@@ -81,8 +99,18 @@
     <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
 
     <script>
-        CKEDITOR.replace('Description');
-
+        CKEDITOR.replace('Description', {
+            uiColor: '#2e374a',
+            height: 200,
+            contentsCss: 'body { background-color: #182237; color: #b7bac1; font-family: inherit; margin: 8px; } p { margin: 0; color: #b7bac1; }',
+            toolbar: [
+                ['Bold', 'Italic', 'Underline'],
+                ['NumberedList', 'BulletedList'],
+                ['Link', 'Image']
+            ]
+        });
+    </script>
+    <script>
         $(".typing-price").on("keyup", function () {
             var currency_input = $(this).val();
             $("#price-convert").html(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(currency_input));

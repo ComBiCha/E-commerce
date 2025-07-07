@@ -4,105 +4,107 @@
     ViewData["Title"] = "Edit Product";
 }
 
-<h4>Edit Product</h4>
-<div class="col-md-9">
-    <form asp-action="Edit" enctype="multipart/form-data">
-        <input type="hidden" asp-for="Id" />
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<link rel="stylesheet" href="~/css/admin-edit.css" />
 
-        <div class="form-group">
-            <label>Name</label>
-            <input asp-for="Name" class="form-control" />
-            <span asp-validation-for="Name" class="text-danger" />
-        </div>
+<h2>Edit Product</h2>
 
-        <div class="form-group">
-            <label>Description</label>
-            <textarea asp-for="Description" class="form-control"></textarea>
-            <span asp-validation-for="Description" class="text-danger" />
-        </div>
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="Name">Product Name</label>
+        <input asp-for="Name" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>WarrantyPeriod</label>
+        <input asp-for="WarrantyPeriod" class="form-control" />
+        <span asp-validation-for="WarrantyPeriod" class="text-danger" />
+    </div>
+    <div class="form-group">
+        <label asp-for="Price">Price</label>
+        <input asp-for="Price" type="number" step="0.01" class="form-control" required />
+    </div>
+    <div class="form-group">
+        <label>Category</label>
+        <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories">
+            <option>--Choose a Category</option>
+        </select>
+        <span asp-validation-for="CategoryId" class="text-danger" />
+    </div>
+    <div class="form-group">
+        <label>Brand</label>
+        <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands">
+            <option>--Choose a Brand</option>
+        </select>
+        <span asp-validation-for="BrandId" class="text-danger" />
+    </div>
+    <div class="form-group">
+        <label>Image</label>
+        <input asp-for="ImageUpload" class="form-control-file" />
+        <span asp-validation-for="ImageUpload" class="text-danger" />
+        <img id="imgpreview" src="@Url.Content("~/media/products/" + ViewBag.OldImage)" alt="Current Image" class="pt-2" style="max-width: 200px; max-height: 200px;" />
+    </div>
+    <div class="form-group">
+        <label>Image 2</label>
+        <input asp-for="ImageUpload2" class="form-control-file" />
+        <span asp-validation-for="ImageUpload2" class="text-danger" />
+        <img id="imgpreview2" src="@Url.Content("~/media/products/" + ViewBag.OldImage2)" alt="Current Image2" class="pt-2" style="max-width: 200px; max-height: 200px;" />
+    </div>
+    <div class="form-group">
+        <label>Description</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger" />
+    </div>
+    <h3>Product Variations</h3>
+    <div id="variations">
+        @for (int i = 0; i < Model.Variations.Count; i++)
+        {
+            <input type="hidden" asp-for="Variations[i].Id" />
+            <div class="variation-item">
+                <h4>Variations @(i+1):</h4>
+                <div class="form-group">
+                    <label asp-for="Variations[i].MaterialId">Material</label>
+                    <select asp-for="Variations[i].MaterialId" asp-items="ViewBag.Materials" class="form-control"></select>
+                </div>
 
-        <div class="form-group">
-            <label>Price</label>
-            <input asp-for="Price" class="form-control typing-price" />
-            <span id="price-convert" style="color: orange;"></span>
-            <span asp-validation-for="Price" class="text-danger" />
-        </div>
+                <div class="form-group">
+                    <label asp-for="Variations[i].ColorId">Color</label>
+                    <select asp-for="Variations[i].ColorId" asp-items="ViewBag.Colors" class="form-control"></select>
+                </div>
 
-        <div class="form-group">
-            <label>WarrantyPeriod</label>
-            <input asp-for="WarrantyPeriod" class="form-control" />
-            <span asp-validation-for="WarrantyPeriod" class="text-danger" />
-        </div>
+                <div class="form-group">
+                    <label asp-for="Variations[i].Price">Price</label>
+                    <input asp-for="Variations[i].Price" type="number" step="0.01" class="form-control" required />
+                </div>
 
-        <div class="form-group">
-            <label>Category</label>
-            <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.Categories"></select>
-            <span asp-validation-for="CategoryId" class="text-danger" />
-        </div>
+                <div class="form-group">
+                    <label asp-for="Variations[i].Stock">Stock</label>
+                    <input asp-for="Variations[i].Stock" type="number" class="form-control" value="0" readonly />
+                </div>
 
-        <div class="form-group">
-            <label>Brand</label>
-            <select asp-for="BrandId" class="form-control" asp-items="ViewBag.Brands"></select>
-            <span asp-validation-for="BrandId" class="text-danger" />
-        </div>
-
-        <div class="form-group">
-            <label>Image</label>
-            <input asp-for="ImageUpload" class="form-control-file" />
-            <img id="imgpreview" src="@Url.Content("~/media/products/" + ViewBag.OldImage)" style="max-width: 200px;" />
-        </div>
-
-        <div class="form-group">
-            <label>Image 2</label>
-            <input asp-for="ImageUpload2" class="form-control-file" />
-            <img id="imgpreview2" src="@Url.Content("~/media/products/" + ViewBag.OldImage2)" style="max-width: 200px;" />
-        </div>
-
-        <h4>Add Variations</h4>
-        <button type="button" id="add-variation" class="btn btn-success mb-2">+ Add Variation</button>
-        <div id="variations-container">
-            @for (int i = 0; i < Model.Variations.Count; i++)
-            {
-                <div class="variation border p-3 my-2">
-                    <input type="hidden" asp-for="Variations[@i].Id" />
-                    <h5>Variation @(i + 1)</h5>
-                    <div class="form-group">
-                        <label>Material</label>
-                        <select asp-for="Variations[@i].MaterialId" class="form-control" asp-items="ViewBag.Materials"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Color</label>
-                        <select asp-for="Variations[@i].ColorId" class="form-control" asp-items="ViewBag.Colors"></select>
-                    </div>
-                    <div class="form-group">
-                        <label>Price</label>
-                        <input asp-for="Variations[@i].Price" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <input type="hidden" asp-for="Variations[@i].Stock" />
-                    </div>
-                    <div class="form-group">
-                        <label>Size</label>
-                        <input asp-for="Variations[@i].Size" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <label>Variation Image</label>
-                        <input asp-for="Variations[@i].ImageUpload" class="form-control-file" />
-                        @if (!string.IsNullOrEmpty(Model.Variations[i].ImageUrl))
-                        {
-                            <img src="~/media/variations/@Model.Variations[i].ImageUrl" width="100" />
-                        }
-                    </div>
+                <div class="form-group">
+                    <label asp-for="Variations[i].Size">Size</label>
+                    <input asp-for="Variations[i].Size" type="number" class="form-control" required />
                 </div>
             }
         </div>
 
-        <button class="btn btn-primary">Save Changes</button>
-    </form>
+                <div class="form-group">
+                    <label>Variation Image</label>
+                    <input type="file" name="VariationImages" class="form-control" />
+                    @if (!string.IsNullOrEmpty(Model.Variations[i].ImageUrl))
+                    {
+                        <img src="~/media/variations/@Model.Variations[i].ImageUrl" width="100" />
+                    }
+                </div>
+            </div>
+        }
+    </div>
+    <button type="button" id="addVariation" class="btn btn-success">Add Variation</button>
 
-    <a asp-action="Index">Back to List</a>
-</div>
+    <button type="submit" class="btn btn-primary product-submit">Save Changes</button>
+</form>
+    <a asp-action="Index" class="back-link">Back to List User</a>
 
 @section Scripts {
     <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
@@ -124,38 +126,80 @@
             $("#ImageUpload2").change(function () {
                 readURL(this, "imgpreview2");
             });
+        });
+    </script>
+    <script>
+        CKEDITOR.replace('Description', {
+            uiColor: '#2e374a',
+            height: 200,
+            contentsCss: 'body { background-color: #182237; color: #b7bac1; font-family: inherit; margin: 8px; } p { margin: 0; color: #b7bac1; }',
+            toolbar: [
+                ['Bold', 'Italic', 'Underline'],
+                ['NumberedList', 'BulletedList'],
+                ['Link', 'Image']
+            ]
+        });
+    </script>
 
-            $("#add-variation").click(function () {
-                var index = $(".variation").length;
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let addButton = document.getElementById("addVariation");
 
-                var materialOptions = `<option value="">--Choose Material--</option>`;
-                materials.forEach(mat => {
-                    materialOptions += `<option value="${mat.value}">${mat.text}</option>`;
-                });
+        if (addButton) {
+            addButton.addEventListener("click", function () {
+                console.log("Button clicked!"); // Kiểm tra sự kiện click
+                
+                let variationsContainer = document.getElementById("variations");
+                let index = document.querySelectorAll(".variation-item").length; // Lấy số lượng variations hiện có
+                
+                let variationHtml = `
+                    <div class="variation-item border p-3 mb-3" style="position: relative;">
+                        <input type="hidden" name="Variations[${index}].Id" value="0" />
+                        <h4>Variation ${index + 1}:</h4>
 
-                var colorOptions = `<option value="">--Choose Color--</option>`;
-                colors.forEach(col => {
-                    colorOptions += `<option value="${col.value}">${col.text}</option>`;
-                });
+                        <div class="form-group">
+                            <label>Material</label>
+                            <select name="Variations[${index}].MaterialId" class="form-control">
+                                @foreach (var material in ViewBag.Materials)
+                                {
+                                    <option value="@material.Value">@material.Text</option>
+                                }
+                            </select>
+                        </div>
 
-                var html = `
-                <div class="variation border p-3 my-2">
-                    <input type="hidden" name="Variations[${index}].Id" value="0" />
-                    <h5>Variation ${index + 1}</h5>
-                    <div class="form-group">
-                        <label>Material</label>
-                        <select name="Variations[${index}].MaterialId" class="form-control">${materialOptions}</select>
-                    </div>
-                    <div class="form-group">
-                        <label>Color</label>
-                        <select name="Variations[${index}].ColorId" class="form-control">${colorOptions}</select>
-                    </div>
-                    <div class="form-group">
-                        <label>Price</label>
-                        <input name="Variations[${index}].Price" class="form-control" />
-                    </div>
-                    <div class="form-group">
-                        <input type="hidden" name="Variations[${index}].Stock" value="0" />
+                        <div class="form-group">
+                            <label>Color</label>
+                            <select name="Variations[${index}].ColorId" class="form-control">
+                                @foreach (var color in ViewBag.Colors)
+                                {
+                                    <option value="@color.Value">@color.Text</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Price</label>
+                            <input type="number" name="Variations[${index}].Price" class="form-control" step="0.01" required />
+                        </div>
+
+                        <div class="form-group">
+                            <input type="hidden" name="Variations[${index}].Stock" value="0" />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Size</label>
+                            <input type="number" name="Variations[${index}].Size" class="form-control" required />
+                        </div>
+
+                        <div class="form-group">
+                            <label>Variation Image</label>
+                            <input type="file" name="VariationImages" class="form-control" />
+                        </div>
+
+                        <!-- Nút Remove -->
+                        <button type="button" class="btn btn-danger btn-sm removeVariation" style="position: absolute; top: 10px; right: 10px;">
+                            Remove
+                        </button>
                     </div>
                     <div class="form-group">
                         <label>Size</label>

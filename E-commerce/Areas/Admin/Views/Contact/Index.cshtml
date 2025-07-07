@@ -12,39 +12,65 @@
     //     pageNo = pager.CurrentPage;
     // }
 }
+<link rel="stylesheet" href="~/css/admin-index.css" />
+
 <h3>Contact Info</h3>
 
-<table class="table" id="contactTable">
-    <thead>
-        <tr>
-            <th scope="col">Name</th>
-            <th scope="col">Description</th>
-            <th scope="col">Map</th>
-            <th scope="col">Phone</th>
-            <th scope="col">Email</th>
-            <th scope="col">LogoImg</th>
-            <th scope="col">Action</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach(var item in Model)
-        {
+<div class="table-container">
+    <table class="table table-hover" id="contactTable">
+        <thead>
             <tr>
-                <td>@item.Name</td>
-                <td>@Html.Raw(@item.Description)</td>
-                <td>@Html.Raw(@item.Map)</td>
-                <td>@item.Phone</td>
-                <td>@item.Email</td>
-                <td><img src="~/media/contact/@item.LogoImg" width="120" /></td>
-                <td>
-                    <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Contact">Edit</a>
-                </td>
+                <th scope="col">Name</th>
+                <th scope="col">Description</th>
+                <th scope="col">Map</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Email</th>
+                <th scope="col">LogoImg</th>
+                <th scope="col" class="text-center">Action</th>
             </tr>
-        }
+        </thead>
+        <tbody>
+            @foreach(var item in Model)
+            {
+                <tr>
+                    <td>@item.Name</td>
+                    <td>@Html.Raw(@item.Description)</td>
+                    <td>
+                        <div class="map-container">
+                            @Html.Raw(@item.Map)
+                        </div>
+                    </td>
+                    <td>@item.Phone</td>
+                    <td>@item.Email</td>
+                    <td><img src="~/media/contact/@item.LogoImg" width="120" /></td>
+                    <td class="text-center align-middle">
+                        <div class="btn-group" role="group">
+                            <button type="button"
+                                    class="btn btn-outline-secondary btn-sm"
+                                    disabled
+                                    title="Nothing to view">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <a asp-action="Edit"
+                               asp-controller="Contact"
+                               class="btn btn-outline-warning btn-sm">
+                                <i class="fa-solid fa-edit"></i>
+                            </a>
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    disabled
+                                    title="Nothing to view">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            }
         
 
-    </tbody>
-</table>
+        </tbody>
+    </table>
+</div>
 @* <partial name="_paging" model="@pager" /> *@
 @section Scripts{
     <script>

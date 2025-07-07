@@ -2,8 +2,9 @@
 @{
     ViewData["title"] = "Edit Material";
 }
+<link rel="stylesheet" href="~/css/admin-edit.css" />
+
 <h4>Edit Material</h4>
-<div class="col-md-9">
     <form asp-action="Edit" enctype="multipart/form-data">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
@@ -11,13 +12,10 @@
             <input asp-for="Name" class="form-control" />
             <span asp-validation-for="Name" class="text-danger" />
         </div>
-        <div class="form-group">
-            <button class="btn btn-primary">Update</button>
-        </div>
+    <button class="btn btn-primary material-submit">Update</button>
 
     </form>
-    <a asp-action="Index">Back to List Materials</a>
-</div>
+<a asp-action="Index" class="back-link">Back to List Material</a>
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");

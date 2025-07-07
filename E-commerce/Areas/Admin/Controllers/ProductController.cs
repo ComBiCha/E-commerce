@@ -31,7 +31,8 @@ namespace E_commerce.Areas.Admin.Controllers
         }*/
         public async Task<IActionResult> Index(int pg = 1)
         {
-            const int pageSize = 10;
+
+            const int pageSize = 5;
 
             if (pg < 1)
                 pg = 1;

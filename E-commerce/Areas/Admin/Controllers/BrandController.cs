@@ -17,9 +17,23 @@ namespace E_commerce.Areas.Admin.Controllers
 		{
 			_dataContext = context;
 		}
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pg = 1)
         {
-            return View(await _dataContext.Brands.OrderByDescending(p => p.Id).ToListAsync());
+            const int pageSize = 5;
+            if (pg < 1) pg = 1;
+
+            int recsCount = await _dataContext.Brands.CountAsync();
+            var pager = new Paginate(recsCount, pg, pageSize);
+
+            int recSkip = (pg - 1) * pageSize;
+            var brands = await _dataContext.Brands
+                .OrderBy(p => p.Id) // ✅ Sửa: Sắp xếp TĂNG DẦN
+                .Skip(recSkip)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.Pager = pager;
+            return View(brands);
         }
         /*public async Task<IActionResult> Index(int pg = 1)
         {
@@ -94,43 +108,57 @@ namespace E_commerce.Areas.Admin.Controllers
             TempData["success"] = "Product removed successfully";
             return RedirectToAction("Index");
         }
+        [HttpGet]
         public async Task<IActionResult> Edit(int Id)
         {
             BrandModel brand = await _dataContext.Brands.FindAsync(Id);
+            if (brand == null)
+            {
+                return NotFound();
+            }
             return View(brand);
         }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(BrandModel brand, int Id)
+        public async Task<IActionResult> Edit(int Id, BrandModel brand)
         {
+            if (Id != brand.Id)
+            {
+                return BadRequest();
+            }
+
             if (ModelState.IsValid)
             {
-
-                brand.Slug = brand.Name.Replace(" ", "-");
-                var slug = await _dataContext.Brands.FirstOrDefaultAsync(p => p.Slug == brand.Slug);
-                if (slug != null)
+                try
                 {
-                    ModelState.AddModelError("", "Brand already exist");
+                    brand.Slug = brand.Name.Replace(" ", "-");
+
+                    // Check slug tồn tại NHƯNG loại trừ chính record đang edit
+                    var existingSlug = await _dataContext.Brands
+                        .FirstOrDefaultAsync(p => p.Slug == brand.Slug && p.Id != brand.Id);
+
+                    if (existingSlug != null)
+                    {
+                        ModelState.AddModelError("", "Brand with this name already exists");
+                        return View(brand);
+                    }
+
+                    _dataContext.Update(brand);
+                    await _dataContext.SaveChangesAsync();
+                    TempData["success"] = "Brand updated successfully";
+                    return RedirectToAction("Index");
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("", "An error occurred while updating the brand");
                     return View(brand);
                 }
-                _dataContext.Update(brand);
-                await _dataContext.SaveChangesAsync();
-                TempData["success"] = "Brand updated successfully";
-                return RedirectToAction("Index");
             }
             else
             {
-                TempData["error"] = "Model error";
-                List<string> errors = new List<string>();
-                foreach (var value in ModelState.Values)
-                {
-                    foreach (var error in value.Errors)
-                    {
-                        errors.Add(error.ErrorMessage);
-                    }
-                }
-                string errorMessage = string.Join("\n", errors);
-                return BadRequest(errorMessage);
+                TempData["error"] = "Model validation failed";
+                return View(brand);
             }
         }
     }

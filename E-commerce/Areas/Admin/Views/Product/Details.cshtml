@@ -1,6 +1,8 @@
 ﻿@model ProductModel
+<link rel="stylesheet" href="~/css/admin-detail.css" />
 
-<h3>Chi Tiết Sản Phẩm</h3>
+
+<h3>Product Details</h3>
 <table class="table">
     <tr>
         <th>Name:</th>
@@ -20,7 +22,7 @@
     </tr>
     <tr>
         <th>Price:</th>
-        <td>@Model.Price.ToString("C")</td>
+        <td>$@Model.Price.ToString("N0")</td>
     </tr>
     <tr>
         <th>Picture:</th>
@@ -67,10 +69,10 @@
         @foreach (var variation in Model.Variations)
         {
             <tr>
-                <td>@variation.Material?.Name</td>
-                <td>@variation.Color?.Name</td>
-                <td>@variation.Price.ToString("C")</td>
-                <td>@variation.Stock</td> <!-- Số lượng còn lại của biến thể -->
+                <td>@variation.Material.Name</td>
+                <td>@variation.Color.Name</td>
+                <td>$@variation.Price.ToString("N0")</td>
+                <td>@variation.Stock</td>
                 <td>@variation.Size</td>
                 <td>
                     @if (!string.IsNullOrEmpty(variation.ImageUrl))
@@ -93,12 +95,4 @@
     </tbody>
 </table>
 
-@if (!Model.Variations.Any())
-{
-    <form asp-action="DeleteProduct" method="post" onsubmit="return confirm('Are you sure you want to delete this product?');">
-        <input type="hidden" name="productId" value="@Model.Id" />
-        <button type="submit" class="btn btn-danger">Delete Product</button>
-    </form>
-}
-
-<a asp-action="Index" class="btn btn-primary">Quay lại danh sách</a>
+<a asp-action="Index" class="btn btn-primary">Back to Product List</a>

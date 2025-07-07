@@ -13,34 +13,74 @@
     //     pageNo = pager.CurrentPage;
     // }
 }
-<h3>List Color</h3>
-<a asp-action="Create" asp-controller="Color">Add Color</a>
+<link rel="stylesheet" href="~/css/admin-index.css" />
 
-<table class="table" id="myTable">
-    <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Color Name</th>
-            <th scope="col">Color Manage</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
+<div class="top">
+    <h3>List Color</h3>
+    <a asp-action="Create" asp-controller="Color" class="add-button">Add Color</a>
+</div>
+
+<div class="table-container">
+    <table class="table table-hover" id="myTable">
+        <thead>
             <tr>
-                <th scope="row">@item.Id</th>
-                <td>@item.Name</td>
-                <td>
-                    <a asp-action="Edit" class="btn btn-warning btn-sm" asp-controller="Color" asp-route-Id="@item.Id">Edit</a>
-                    <a asp-action="Delete" class="btn btn-danger btn-sm confirmDeletion" asp-controller="Color" asp-route-Id="@item.Id">Delete</a>
-                </td>
+                <th scope="col" class="text-center">#</th>
+                <th scope="col">Color Name</th>
+                <th scope="col" class="text-center">Color Manage</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @{
+                int stt = (ViewBag.Pager.CurrentPage - 1) * ViewBag.Pager.PageSize + 1;
+            }
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="text-center align-middle">
+                        <span class="badge bg-secondary">@stt</span>
+                    </td>
+                    <td>@item.Name</td>
+                    <td class="text-center align-middle">
+                        <div class="btn-group" role="group">
+                            <button type="button"
+                                    class="btn btn-outline-secondary btn-sm"
+                                    disabled
+                                    title="Nothing to view">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                            <a asp-action="Edit"
+                               asp-controller="Color"
+                               asp-route-Id="@item.Id"
+                               class="btn btn-outline-warning btn-sm">
+                                <i class="fa-solid fa-edit"></i>
+                            </a>
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm"
+                                    onclick="deleteColor(@item.Id)">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                stt++;
+            }
+        </tbody>
+    </table>
+    @await Html.PartialAsync("_Pagination", ViewBag.Pager as E_commerce.Models.Paginate)
+
+</div>
 @* <partial name="_paging" model="@pager" /> *@
 @* @section Scripts {
     <script>
         let table = new DataTable('#categoryTable');
     </script>
 } *@
+
+<script>
+    function deleteColor(colorId) {
+        if (confirm('Are you sure you want to delete this color?')) {
+            // Redirect đến action Delete với GET
+            window.location.href = '@Url.Action("Delete", "Color")?Id=' + colorId;
+        }
+    }
+</script>

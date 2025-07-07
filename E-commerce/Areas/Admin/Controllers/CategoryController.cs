@@ -22,11 +22,22 @@ namespace E_commerce.Areas.Admin.Controllers
             _categorySingleton = CategorySingleton.GetInstance(scopeFactory);
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pg = 1)
         {
             // Lấy danh sách danh mục qua CategorySingleton
             var categories = await _categorySingleton.GetAllCategoriesAsync();
-            return View(categories);
+
+            const int pageSize = 5;
+            if (pg < 1) pg = 1;
+
+            int recsCount = categories.Count;
+            var pager = new Paginate(recsCount, pg, pageSize);
+
+            int recSkip = (pg - 1) * pageSize;
+            var data = categories.Skip(recSkip).Take(pager.PageSize).ToList();
+
+            ViewBag.Pager = pager;
+            return View(data);
         }
 
         [HttpGet]

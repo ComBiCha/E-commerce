@@ -1,0 +1,35 @@
+﻿<div class="footer-container">
+    <div class="logo">MERDI</div>
+    <div class="text">© All rights reserved.</div>
+</div>
+
+<style>
+    .footer-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        color: white;
+        margin-top: auto;
+    }
+
+    .logo {
+        font-size: 16px;
+        font-weight: bold;
+        color: #b7bac1;
+    }
+
+    .text {
+        color: #b7bac1;
+        font-size: 14px;
+    }
+
+    /* Responsive design */
+    @@media (max-width: 768px) {
+        .footer-container
+        {
+          flex-direction: column;
+          gap: 10px;
+          text-align: center;
+        }
+    }
+</style>
