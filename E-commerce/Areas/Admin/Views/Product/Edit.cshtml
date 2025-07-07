@@ -1,4 +1,4 @@
-﻿@model E_commerce.Models.ProductModel
+﻿@model ProductModel
 
 @{
     ViewData["Title"] = "Edit Product";
@@ -86,6 +86,8 @@
                     <label asp-for="Variations[i].Size">Size</label>
                     <input asp-for="Variations[i].Size" type="number" class="form-control" required />
                 </div>
+            }
+        </div>
 
                 <div class="form-group">
                     <label>Variation Image</label>
@@ -104,29 +106,23 @@
 </form>
     <a asp-action="Index" class="back-link">Back to List User</a>
 
-
-
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
     <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
     <script>
-                $(document).ready(function () {
-            function readURL(input, previewId) {
-                if (input.files && input.files[0]) {
-                    let reader = new FileReader();
-                    reader.onload = function (e) {
-                        $("#" + previewId).attr("src", e.target.result).width(200).height(200).show();
-                    };
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
+        CKEDITOR.replace('Description');
+
+        var materials = @Html.Raw(Json.Serialize(ViewBag.Materials));
+        var colors = @Html.Raw(Json.Serialize(ViewBag.Colors));
+
+        $(document).ready(function () {
+            $(".typing-price").on("keyup", function () {
+                var input = $(this).val();
+                $("#price-convert").html(new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(input));
+            });
 
             $("#ImageUpload").change(function () {
                 readURL(this, "imgpreview");
             });
-
             $("#ImageUpload2").change(function () {
                 readURL(this, "imgpreview2");
             });
@@ -205,23 +201,28 @@
                             Remove
                         </button>
                     </div>
-                `;
+                    <div class="form-group">
+                        <label>Size</label>
+                        <input name="Variations[${index}].Size" class="form-control" />
+                    </div>
+                    <div class="form-group">
+                        <label>Variation Image</label>
+                        <input type="file" name="Variations[${index}].ImageUpload" class="form-control-file" />
+                    </div>
+                </div>`;
 
-                variationsContainer.insertAdjacentHTML("beforeend", variationHtml);
+                $("#variations-container").append(html);
             });
 
-            // Lắng nghe sự kiện click trên toàn bộ variationsContainer
-            document.getElementById("variations").addEventListener("click", function (e) {
-                if (e.target.classList.contains("removeVariation")) {
-                    e.target.closest(".variation-item").remove(); // Xóa variation khi ấn Remove
+            function readURL(input, previewId) {
+                if (input.files && input.files[0]) {
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        $("#" + previewId).attr("src", e.target.result).show();
+                    };
+                    reader.readAsDataURL(input.files[0]);
                 }
-            });
-        } else {
-            console.error("Button #addVariation not found!");
-        }
-    });
-</script>
-
-
-
+            }
+        });
+    </script>
 }

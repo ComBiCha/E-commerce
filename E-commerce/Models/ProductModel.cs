@@ -21,7 +21,6 @@ namespace E_commerce.Models
 		public int BrandId { get; set; }
         [Required, Range(1, int.MaxValue, ErrorMessage = "Choose one Category")]
         public int CategoryId { get; set; }
-        public int Quantity { get; set; }
         public int Sold { get; set; }
         public CategoryModel Category { get; set; }
 		public BrandModel Brand { get; set; }
@@ -30,7 +29,9 @@ namespace E_commerce.Models
 		public string Image { get; set; }
 		public string Image2 { get; set; }
 
-		[NotMapped]
+        [NotMapped]
+        public int TotalStock => Variations?.Sum(v => v.Stock) ?? 0;
+        [NotMapped]
 		[FileExtension]
 		public IFormFile? ImageUpload { get; set; }
         [NotMapped]

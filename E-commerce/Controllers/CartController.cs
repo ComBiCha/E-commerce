@@ -1,6 +1,7 @@
 ﻿using E_commerce.Models;
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -34,6 +35,7 @@ namespace E_commerce.Controllers
 			var variations = _dataContext.Variations
 			.Include(v => v.Material)
 			.Include(v => v.Color)// Load thêm Material vào Variation
+			.Include(p => p.ProductQuantities)
 			.Where(v => variationIds.Contains(v.Id))
 			.ToDictionary(v => v.Id);
 
@@ -213,7 +215,7 @@ namespace E_commerce.Controllers
             return RedirectToAction("Index");
 		}
 		[HttpPost]
-		public async Task<IActionResult> GetShippingPrice(ShippingModel shippingModel, string quan, string tinh, string phuong, string detailAddress)
+        public async Task<IActionResult> GetShippingPrice(ShippingModel shippingModel, string quan, string tinh, string phuong, string detailAddress)
 		{
 			var existingShipping = await _dataContext.Shippings.FirstOrDefaultAsync(x => x.City == tinh && x.District == quan && x.Ward == phuong);
 
@@ -326,62 +328,91 @@ namespace E_commerce.Controllers
         }
 
 
-        [HttpPost]
-        public async Task<IActionResult> UpdateQuantity([FromBody] UpdateQuantityModel model)
-        {
-            if (model == null)
-            {
-                return Json(new { success = false, error = "Invalid data received!" });
-            }
+		[HttpPost]
+		public async Task<IActionResult> UpdateQuantity([FromBody] UpdateQuantityModel model)
+		{
+			if (model == null)
+			{
+				return Json(new { success = false, error = "Invalid data received!" });
+			}
 
-            Console.WriteLine($"Request: ProductId = {model.ProductId}, VariationId = {model.VariationId}, Quantity = {model.NewQuantity}");
-            List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
-            foreach (var item in cart)
-            {
-                Console.WriteLine($"Cart: ProductId = {item.ProductId}, VariationId = {item.VariationId}, Quantity = {item.Quantity}");
-            }
+			Console.WriteLine($"Request: ProductId = {model.ProductId}, VariationId = {model.VariationId}, Quantity = {model.NewQuantity}");
 
+			List<CartItemModel> cart = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
 
-            CartItemModel cartItem = cart.FirstOrDefault(c =>
-			c.ProductId == (long)model.ProductId &&
-			c.VariationId == (int)model.VariationId);
+			// Tìm sản phẩm trong giỏ
+			var cartItem = cart.FirstOrDefault(c =>
+				c.ProductId == model.ProductId &&
+				c.VariationId == model.VariationId);
 
+			if (cartItem == null)
+			{
+				return Json(new { success = false, error = "Product not found in the cart!" });
+			}
 
+			// Lấy biến thể từ DB kèm tồn kho
+			var variation = await _dataContext.Variations
+				.Include(v => v.ProductQuantities)
+				.FirstOrDefaultAsync(v => v.Id == model.VariationId);
 
+			if (variation == null)
+			{
+				return Json(new { success = false, error = "This product variation does not exist!" });
+			}
 
-            if (cartItem == null)
-            {
-                return Json(new { success = false, error = "Product not found in the cart!" });
-            }
+			// Tính tổng tồn kho
+			int availableStock = variation.ProductQuantities?.Sum(q => q.CurrentQuantityInBatch) ?? 0;
 
-            var variation = await _dataContext.Variations.FirstOrDefaultAsync(v => v.Id == model.VariationId);
-            if (variation == null)
-            {
-                return Json(new { success = false, error = "This product variation does not exist!" });
-            }
+			if (model.NewQuantity > availableStock)
+			{
+				return Json(new
+				{
+					success = false,
+					error = $"The maximum quantity available for this product is {availableStock}."
+				});
+			}
 
-            if (model.NewQuantity > variation.Stock)
-            {
-                return Json(new { success = false, error = $"The maximum quantity available for this product is {variation.Stock}." });
-            }
+			// Cập nhật giỏ hàng
+			cartItem.Quantity = model.NewQuantity;
+			HttpContext.Session.SetJson("Cart", cart);
 
+			decimal newPrice = cartItem.Quantity * cartItem.Price;
 
-
-            cartItem.Quantity = model.NewQuantity;
-            HttpContext.Session.SetJson("Cart", cart);
-
-			decimal newPrice = cartItem.Quantity * cartItem.Price; // Tính giá mới
-            Console.WriteLine($"CartItem NewPrice: {newPrice}");
-
-
-            return Json(new
-            {
-                success = true,
-                newPrice = newPrice
+			return Json(new
+			{
+				success = true,
+				newPrice = newPrice
 			});
+		}
+
+		//==================================================================================================
+		//============================================API SESSION===========================================
+		//==================================================================================================
+		[HttpGet("api/Cart/GetCart")]
+        public async Task<IActionResult> GetCart()
+        {
+            // Lấy cart từ session
+            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+
+            // Lấy danh sách Variation từ database dựa trên VariationId
+            var variationIds = cartItems.Select(x => x.VariationId).Distinct().ToList();
+            var variations = await _dataContext.Variations
+                .Include(v => v.Material)
+                .Include(v => v.Color)
+                .Where(v => variationIds.Contains(v.Id))
+                .ToDictionaryAsync(v => v.Id);
+
+            // Gán thông tin Variation vào từng CartItemModel
+            foreach (var item in cartItems)
+            {
+                if (variations.ContainsKey(item.VariationId))
+                {
+                    item.Variation = variations[item.VariationId];
+                }
+            }
+
+            return Json(cartItems);
         }
-
-
 
 
 

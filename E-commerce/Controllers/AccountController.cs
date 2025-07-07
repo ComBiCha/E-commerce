@@ -397,8 +397,6 @@ namespace E_commerce.Controllers
         }
         public async Task<IActionResult> CancelOrder(string orderCode)
         {
-
-            // Tìm đơn hàng theo OrderCode và UserName
             var order = await _dataContext.Orders
                 .FirstOrDefaultAsync(o => o.OrderCode == orderCode);
 
@@ -408,61 +406,106 @@ namespace E_commerce.Controllers
                 return RedirectToAction("PersonalOrder");
             }
 
-            // Nếu đơn hàng đã được xử lý hoặc vận chuyển thì không cho hủy
-            if (order.Status > 2) // 1 = Đơn mới, 2 = Xác nhận, 3 = Đang giao, 4 = Hoàn thành
+            // Nếu đơn hàng đã xử lý thì không cho hủy
+            if (order.Status > 2)
             {
                 TempData["error"] = "Order has already been processed and cannot be canceled.";
                 return RedirectToAction("PersonalOrder");
             }
 
-            // Lấy danh sách OrderDetails dựa trên OrderCode
             var orderDetails = await _dataContext.OrderDetails
                 .Include(od => od.Variation)
-                .ThenInclude(v => v.Product)
+                    .ThenInclude(v => v.Product)
+                        .ThenInclude(p => p.Variations)
+                            .ThenInclude(v => v.ProductQuantities)
                 .Where(od => od.OrderCode == orderCode)
                 .ToListAsync();
 
-            // Hoàn lại số lượng sản phẩm & giảm số lượng đã bán
-            foreach (var orderDetail in orderDetails)
+            await using var transaction = await _dataContext.Database.BeginTransactionAsync();
+
+            try
             {
-                if (orderDetail.Variation != null)
+                foreach (var orderDetail in orderDetails)
                 {
-                    orderDetail.Variation.Stock += orderDetail.Quantity; // Cộng lại số lượng đã mua
-                    if (orderDetail.Variation.Product != null)
+                    if (orderDetail.Variation != null)
                     {
-                        orderDetail.Variation.Product.Sold -= orderDetail.Quantity; // Giảm số lượng đã bán
-                        orderDetail.Variation.Product.Quantity += orderDetail.Quantity;
-                        if (orderDetail.Variation.Product.Sold < 0)
+                        int quantityToRestock = orderDetail.Quantity;
+
+                        var productQuantities = await _dataContext.ProductQuantities
+                            .Where(pq => pq.VariationId == orderDetail.Variation.Id)
+                            .OrderByDescending(pq => pq.DateCreated)
+                            .ToListAsync();
+
+                        if (productQuantities.Any())
                         {
-                            orderDetail.Variation.Product.Sold = 0;
+                            var latestBatch = productQuantities.First();
+                            latestBatch.CurrentQuantityInBatch += quantityToRestock;
+                            latestBatch.LastUpdated = DateTime.Now;
+                            _dataContext.ProductQuantities.Update(latestBatch);
                         }
-                        _dataContext.Products.Update(orderDetail.Variation.Product);
+                        else
+                        {
+                            var newBatch = new BatchModel
+                            {
+                                BatchCode = $"RESTOCK-{orderCode}-{DateTime.Now.Ticks}",
+                                ImportDate = DateTime.Now
+                            };
+                            _dataContext.Batches.Add(newBatch);
+                            await _dataContext.SaveChangesAsync();
+
+                            var newProductQuantity = new ProductQuantityModel
+                            {
+                                VariationId = orderDetail.Variation.Id,
+                                BatchId = newBatch.Id,
+                                InitialQuantity = quantityToRestock,
+                                CurrentQuantityInBatch = quantityToRestock,
+                                DateCreated = DateTime.Now,
+                                LastUpdated = DateTime.Now
+                            };
+                            _dataContext.ProductQuantities.Add(newProductQuantity);
+                        }
                     }
-                    _dataContext.Variations.Update(orderDetail.Variation);
                 }
-            }
 
-            // ✅ **Xử lý hoàn tiền theo phương thức thanh toán**
-            if (!string.IsNullOrEmpty(order.PaymentIntentId))
+                // Hoàn tiền nếu có
+                if (!string.IsNullOrEmpty(order.PaymentIntentId))
+                {
+                    if (order.PaymentIntentId.StartsWith("pi_"))
+                    {
+                        await ProcessStripeRefund(order.PaymentIntentId);
+                    }
+                    else if (order.PaymentIntentId.StartsWith("PAYID-"))
+                    {
+                        await ProcessPayPalRefund(order.PaymentIntentId);
+                    }
+                }
+
+                order.Status = 6; // Đã hủy
+                _dataContext.Orders.Update(order);
+                foreach (var orderDetail in orderDetails)
+                {
+                    var product = orderDetail.Variation?.Product;
+                    if (product != null)
+                    {
+                        product.Sold = Math.Max(0, product.Sold - orderDetail.Quantity);
+                        _dataContext.Products.Update(product);
+                    }
+                }
+                await _dataContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["success"] = "Order has been canceled successfully, stock has been restored, and refund request has been processed.";
+                return RedirectToAction("Home");
+            }
+            catch (Exception ex)
             {
-                if (order.PaymentIntentId.StartsWith("pi_"))
-                {
-                    await ProcessStripeRefund(order.PaymentIntentId);
-                }
-                else if (order.PaymentIntentId.StartsWith("PAYID-"))
-                {
-                    await ProcessPayPalRefund(order.PaymentIntentId);
-                }
+                await transaction.RollbackAsync();
+                TempData["error"] = "Đã xảy ra lỗi khi hủy đơn hàng: " + ex.Message;
+                return RedirectToAction("PersonalOrder");
             }
-
-            // Cập nhật trạng thái đơn hàng thành "Đã hủy"
-            order.Status = 6;
-            _dataContext.Orders.Update(order);
-            await _dataContext.SaveChangesAsync();
-
-            TempData["success"] = "Order has been canceled successfully, stock has been restored, and refund request has been processed.";
-            return RedirectToAction("Home");
         }
+
+
 
 
 

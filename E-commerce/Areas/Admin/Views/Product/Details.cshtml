@@ -13,8 +13,8 @@
         <td>@Html.Raw(Model.Description)</td>
     </tr>
     <tr>
-        <th>Quantity:</th>
-        <td>@Model.Quantity</td>
+        <th>Total Quantity (Stock):</th>
+        <td>@Model.TotalStock</td> <!-- TỔNG tồn kho từ tất cả biến thể -->
     </tr>
     <tr>
         <th>Sold:</th>
@@ -34,22 +34,23 @@
     </tr>
     <tr>
         <th>Category:</th>
-        <td>@Model.Category.Name</td>
+        <td>@Model.Category?.Name</td>
     </tr>
     <tr>
         <th>Brand:</th>
-        <td>@Model.Brand.Name</td>
+        <td>@Model.Brand?.Name</td>
     </tr>
 </table>
+
 @if (TempData["ErrorMessage"] != null)
 {
     <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
 }
-
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
 }
+
 <h4>Variations</h4>
 <table class="table table-bordered">
     <thead>
@@ -57,7 +58,7 @@
             <th>Materials</th>
             <th>Colors</th>
             <th>Price</th>
-            <th>Quantity</th>
+            <th>Quantity</th> <!-- Tồn kho từng biến thể -->
             <th>Size</th>
             <th>Picture</th>
             <th>Add Quantity</th>
@@ -80,7 +81,6 @@
                     }
                 </td>
                 <td>
-                    <!-- Nút "+" để mở trang thêm số lượng -->
                     <a href="@Url.Action("AddQuantity", "Product", new { variationId = variation.Id })" class="btn btn-success">+</a>
                 </td>
                 <td>
@@ -95,9 +95,4 @@
     </tbody>
 </table>
 
-
 <a asp-action="Index" class="btn btn-primary">Back to Product List</a>
-
-
-
-

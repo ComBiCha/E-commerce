@@ -1,0 +1,376 @@
+﻿@{
+    var role = ViewBag.Role as string;
+    var currentUser = ViewBag.UserName as string;
+}
+<style>
+    .chat-container {
+        max-width: 1000px;
+        margin: 80px auto;
+        background-color: #fff;
+        border-radius: 15px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        display: flex;
+        height: 600px;
+        overflow: hidden;
+    }
+
+    .user-item.new-message {
+        font-weight: bold;
+        background-color: #ffeeba;
+    }
+
+    .user-list {
+        width: 30%;
+        border-right: 1px solid #ccc;
+        overflow-y: auto;
+        background: #f1f1f1;
+        padding: 10px;
+    }
+
+    .user-item {
+        padding: 12px;
+        cursor: pointer;
+        border-bottom: 1px solid #ddd;
+        border-radius: 5px;
+        margin-bottom: 5px;
+    }
+
+        .user-item:hover, .user-item.active {
+            background-color: #007bff;
+            color: #fff;
+            font-weight: bold;
+        }
+
+    .chat-content {
+        width: 70%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat-header {
+        padding: 15px;
+        background-color: #007bff;
+        color: white;
+        font-size: 1.3rem;
+        font-weight: 500;
+    }
+
+    .chat-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        background-color: #f8f9fa;
+    }
+
+    .chat-message {
+        margin-bottom: 15px;
+        max-width: 70%;
+        padding: 12px 16px;
+        border-radius: 20px;
+        clear: both;
+        word-wrap: break-word;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .message-left {
+        background-color: #dee2e6;
+        float: left;
+    }
+
+    .message-right {
+        background-color: #cfe2ff;
+        float: right;
+        text-align: right;
+    }
+
+    .chat-footer {
+        padding: 15px;
+        background-color: #f1f3f5;
+        border-top: 1px solid #ddd;
+    }
+</style>
+
+<div class="chat-container">
+    @* Ẩn danh sách người dùng nếu là khách hàng *@
+    <div class="user-list" id="userList" style="@(role == "User" ? "display:none" : "")">
+        <!-- Users will be loaded here -->
+    </div>
+
+    <div class="chat-content">
+        <div class="chat-header" id="chatHeader">
+            Select a user to chat
+        </div>
+
+        <div class="chat-body" id="messagesList"></div>
+
+        <div class="chat-footer d-none" id="chatFooter">
+            <div class="input-group">
+                <input type="file" id="imageInput" accept="image/*" class="form-control me-2" />
+                <textarea id="messageInput" class="form-control me-2" rows="1" placeholder="Type your message..."></textarea>
+                <button id="sendButton" class="btn btn-primary" onclick="sendMessage()" disabled>Send</button>
+                <input type="hidden" id="receiver" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+    <script>
+        const currentUser = "@currentUser"; 
+        const role = "@role";               
+        let customerSupportUserName = "";   
+        let currentSelectedUser = "";       
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/chatHub")
+            .build();
+
+        connection.start().then(async function () {
+            console.log("SignalR Connected");
+
+            try {
+                const csRes = await fetch("/Chat/GetCustomerSupportUserName");
+                customerSupportUserName = await csRes.json();
+                console.log("Customer Support UserName fetched:", customerSupportUserName);
+            } catch (error) {
+                console.error("Failed to fetch Customer Support UserName:", error);
+            }
+
+            if (role === "User") {
+                document.getElementById("receiver").value = customerSupportUserName;
+                document.getElementById("chatHeader").textContent = "Chatting with: Customer Service Agent";
+                document.getElementById("chatFooter").classList.remove("d-none");
+                loadChatHistory(customerSupportUserName);
+            } else {
+                loadChatUsers();
+            }
+        }).catch(function (err) {
+            console.error("SignalR Connection Error: ", err.toString());
+        });
+
+        connection.on("ReceiveMessage", function (sender, message, imageUrl) {
+            console.log(`Received message from ${sender}: ${message} (Image: ${imageUrl})`);
+            console.log(`Current user (logged in): ${currentUser}, Selected chat (UI): ${currentSelectedUser}, Role: ${role}`);
+
+            let shouldDisplayInCurrentChat = false;
+
+            if (role === "User") {
+                if (sender === currentUser || sender === customerSupportUserName) {
+                    shouldDisplayInCurrentChat = true;
+                }
+            } else {
+                const isMyOwnSentMessage = (sender === currentUser) || (role === "Admin" && sender === customerSupportUserName);
+                const isFromCurrentSelectedPartner = (sender === currentSelectedUser);
+                if (isMyOwnSentMessage && document.getElementById("receiver").value === currentSelectedUser) {
+                    shouldDisplayInCurrentChat = true;
+                } else if (isFromCurrentSelectedPartner) {
+                    shouldDisplayInCurrentChat = true;
+                }
+            }
+            if (shouldDisplayInCurrentChat) {
+                addMessageToList(sender, message, imageUrl);
+            } else {
+                highlightNewMessage(sender);
+            }
+        });
+
+        connection.on("UpdateUserList", function (newUserName) {
+            console.log(`Updating user list for new user: ${newUserName}`);
+            loadChatUsers();
+        });
+
+        connection.on("LoadUserList", function () {
+            console.log("Reloading user list based on server request.");
+            loadChatUsers();
+        });
+
+
+        async function loadChatUsers() {
+            try {
+                const res = await fetch("/Chat/GetChatUsers");
+                const users = await res.json();
+                const userList = document.getElementById("userList");
+                userList.innerHTML = "";
+
+                // Sort users: current selected first, then others
+                users.sort((a, b) => {
+                    if (a === currentSelectedUser) return -1;
+                    if (b === currentSelectedUser) return 1;
+                    return 0;
+                });
+
+                users.forEach(u => {
+                    const div = document.createElement("div");
+                    div.className = "user-item";
+                    div.textContent = u;
+                    div.setAttribute("data-user", u);
+                    if (u === currentSelectedUser) {
+                        div.classList.add("active");
+                    }
+                    div.addEventListener("click", (event) => selectUser(u, event));
+                    userList.appendChild(div);
+                });
+                if (role !== "User" && users.length > 0) {
+                    if (currentSelectedUser === "" || !users.includes(currentSelectedUser)) {
+                        selectUser(users[0], null);
+                    } else {
+                        const selectedElement = document.querySelector(`.user-item[data-user="${currentSelectedUser}"]`);
+                        if (selectedElement) {
+                            selectedElement.classList.add("active");
+                            document.getElementById("receiver").value = currentSelectedUser;
+                            document.getElementById("chatHeader").textContent = "Chatting with: " + currentSelectedUser;
+                            document.getElementById("chatFooter").classList.remove("d-none");
+                        }
+                    }
+                }
+
+            } catch (error) {
+                console.error("Failed to load chat users:", error);
+            }
+        }
+
+        function selectUser(userName, event) {
+            const receiverInput = document.getElementById("receiver");
+            const chatHeader = document.getElementById("chatHeader");
+            const chatFooter = document.getElementById("chatFooter");
+
+            currentSelectedUser = userName;
+
+            receiverInput.value = userName;
+            chatHeader.textContent = "Chatting with: " + userName;
+
+            document.querySelectorAll(".user-item").forEach(el => {
+                el.classList.remove("active", "new-message");
+                el.style.backgroundColor = "";
+                el.style.fontWeight = "";
+            });
+
+            if (event?.currentTarget) {
+                event.currentTarget.classList.add("active");
+            } else {
+                const selectedElement = document.querySelector(`.user-item[data-user="${userName}"]`);
+                if (selectedElement) {
+                    selectedElement.classList.add("active");
+                }
+            }
+
+            chatFooter.classList.remove("d-none");
+            loadChatHistory(userName);
+        }
+
+        async function sendMessage() {
+            const receiver = document.getElementById("receiver").value;
+            if (!receiver) {
+                alert("Please select a user to chat with first.");
+                return;
+            }
+
+            const message = document.getElementById("messageInput").value.trim();
+            const imageInput = document.getElementById("imageInput");
+            let imageUrl = "";
+
+            if (imageInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append("image", imageInput.files[0]);
+
+                try {
+                    const uploadResponse = await fetch("/Chat/UploadImage", {
+                        method: "POST",
+                        body: formData
+                    });
+                    const result = await uploadResponse.json();
+                    imageUrl = result.imageUrl;
+                } catch (err) {
+                    console.error("Upload error:", err);
+                    alert("Failed to upload image.");
+                    return;
+                }
+            }
+
+            if (!message && !imageUrl) {
+                return;
+            }
+
+            try {
+                await connection.invoke("SendMessage", receiver, message, imageUrl);
+            } catch (err) {
+                console.error("SignalR error:", err.toString());
+            }
+
+            document.getElementById("messageInput").value = "";
+            imageInput.value = "";
+            updateSendButtonState();
+        }
+
+        function updateSendButtonState() {
+            const msg = document.getElementById("messageInput").value.trim();
+            const img = document.getElementById("imageInput");
+            document.getElementById("sendButton").disabled = !(msg || img.files.length > 0);
+        }
+
+        function highlightNewMessage(sender) {
+            const userItems = document.querySelectorAll(".user-item");
+            let found = false;
+            userItems.forEach(item => {
+                if (item.textContent === sender) {
+                    item.classList.add("new-message");
+                    found = true;
+                }
+            });
+
+            if (!found && sender !== currentUser) {
+                loadChatUsers(); 
+            }
+        }
+
+        document.getElementById("messageInput").addEventListener("input", updateSendButtonState);
+        document.getElementById("imageInput").addEventListener("change", updateSendButtonState);
+
+        async function loadChatHistory(username) {
+            try {
+                const res = await fetch(`/Chat/GetChatHistory?receiver=${username}`);
+                const messages = await res.json();
+                const list = document.getElementById("messagesList");
+                list.innerHTML = "";
+                messages.forEach(m => addMessageToList(m.sender, m.content, m.imageUrl));
+                list.scrollTop = list.scrollHeight; 
+            } catch (error) {
+                console.error("Error loading chat history:", error);
+            }
+        }
+
+        function addMessageToList(sender, message, imageUrl) {
+            const msgDiv = document.createElement("div");
+            let isMyMessage = false;
+
+            if (role === "User") {
+                isMyMessage = (sender === currentUser);
+            } else {
+                if (sender === currentUser || (role === "Admin" && sender === customerSupportUserName)) {
+                    isMyMessage = true;
+                }
+            }
+
+            msgDiv.classList.add("chat-message", isMyMessage ? "message-right" : "message-left");
+            let html = "";
+
+            if (!isMyMessage) {
+                if (role === "User" && sender === customerSupportUserName) {
+                    html += `<strong>Customer Support</strong><br>`;
+                } else {
+                    html += `<strong>${sender}</strong><br>`;
+                }
+            }
+
+            if (message) html += `<span>${message}</span><br>`;
+            if (imageUrl) html += `<img src="${imageUrl}" alt="Image" style="max-width:200px; border-radius:10px; margin-top: 5px;" />`;
+            msgDiv.innerHTML = html;
+            document.getElementById("messagesList").appendChild(msgDiv);
+            document.getElementById("messagesList").scrollTop = document.getElementById("messagesList").scrollHeight;
+        }
+    </script>
+}
+}
+}

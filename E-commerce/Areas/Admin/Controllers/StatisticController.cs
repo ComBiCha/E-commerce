@@ -43,6 +43,7 @@ namespace E_commerce.Areas.Admin.Controllers
 				}
 
 				var orderCounts = orders
+					.Where(o => o.Status != 6)
 					.GroupBy(o => new { Year = o.CreatedDate.Year, Month = o.CreatedDate.Month })
 					.Select(g => new
 					{
@@ -71,6 +72,7 @@ namespace E_commerce.Areas.Admin.Controllers
 					return new JsonResult(new { message = "No orders found." });
 				}
 				var monthlyRevenue = orders
+                    .Where(order => order.Status != 6)
 					.Join(_context.OrderDetails,
 						  order => order.OrderCode,
 						  detail => detail.OrderCode,
@@ -103,6 +105,7 @@ namespace E_commerce.Areas.Admin.Controllers
 					return new JsonResult(new { message = "No orders found." });
 				}
 				var quarterlyRevenue = orders
+                    .Where(order => order.Status != 6)
 					.Join(_context.OrderDetails,
 						  order => order.OrderCode,
 						  detail => detail.OrderCode,
@@ -133,11 +136,15 @@ namespace E_commerce.Areas.Admin.Controllers
 		{
 			try
 			{
-				var orders = _context.Orders.ToList();
-				if (orders == null || !orders.Any())
+				var orders = _context.Orders
+					.Where(o => o.Status != 6) // ❌ Bỏ đơn đã huỷ
+					.ToList();
+
+				if (!orders.Any())
 				{
-					return new JsonResult(new { message = "No orders found." });
+					return new JsonResult(new { message = "No valid orders found." });
 				}
+
 				var totalData = orders
 					.GroupJoin(
 						_context.OrderDetails,
@@ -145,12 +152,12 @@ namespace E_commerce.Areas.Admin.Controllers
 						detail => detail.OrderCode,
 						(order, orderDetails) => new
 						{
-							Revenue = orderDetails.Sum(detail => (detail.Price * detail.Quantity - detail.DiscountAmount) )
+							Revenue = orderDetails.Sum(detail => (detail.Price * detail.Quantity - detail.DiscountAmount))
 						})
 					.ToList();
 
 				var totalRevenue = totalData.Sum(x => x.Revenue);
-				var totalOrders = totalData.Count();
+				var totalOrders = orders.Count; // ✅ Sử dụng orders đã lọc
 
 				return new JsonResult(new
 				{
@@ -170,33 +177,33 @@ namespace E_commerce.Areas.Admin.Controllers
         {
             try
             {
-                var orderDetail = _context.OrderDetails.ToList();
-                if (orderDetail == null || !orderDetail.Any())
-                {
-                    return new JsonResult(new { message = "No orders found." });
-                }
-                var topProducts = orderDetail
-                    .GroupBy(od => od.ProductId)
-                    .Select(g => new
-                    {
-                        ProductId = g.Key,
-                        TotalQuantitySold = g.Sum(od => od.Quantity)
-                    })
-                    .OrderByDescending(p => p.TotalQuantitySold)
-                    .Take(5)
-                    .Join(_context.Products,
-                          od => od.ProductId,
-                          p => p.Id,
-                          (od, p) => new
-                          {
-                              p.Name,
-                              p.Image,
-                              od.TotalQuantitySold
-                          })
-                    .ToList();
+				var topProducts = _context.OrderDetails
+		            .Join(_context.Orders,
+			              od => od.OrderCode,
+			              o => o.OrderCode,
+			              (od, o) => new { OrderDetail = od, Order = o })
+		            .Where(joined => joined.Order.Status != 6) // Loại trừ đơn bị hủy
+		            .GroupBy(joined => joined.OrderDetail.ProductId)
+		            .Select(g => new
+		            {
+			            ProductId = g.Key,
+			            TotalQuantitySold = g.Sum(x => x.OrderDetail.Quantity)
+		            })
+		            .OrderByDescending(p => p.TotalQuantitySold)
+		            .Take(5)
+		            .Join(_context.Products,
+			              od => od.ProductId,
+			              p => p.Id,
+			              (od, p) => new
+			              {
+				              p.Name,
+				              p.Image,
+				              od.TotalQuantitySold
+			              })
+		            .ToList();
 
-                return new JsonResult(topProducts);
-            }
+				return new JsonResult(topProducts);
+			}
             catch (Exception ex)
             {
                 Console.WriteLine($"Error in GetTop5BestSellingProducts: {ex.Message}");
@@ -224,7 +231,8 @@ namespace E_commerce.Areas.Admin.Controllers
                         Category = g.Key,
                         TotalProducts = g.Count(),
                     })
-                    .ToList();
+					.OrderByDescending(x => x.TotalProducts)
+					.ToList();
 
                 // Thống kê số lượng sản phẩm theo thương hiệu
                 var productsByBrand = products
@@ -234,7 +242,8 @@ namespace E_commerce.Areas.Admin.Controllers
                         Brand = g.Key,
                         TotalProducts = g.Count(),
                     })
-                    .ToList();
+					.OrderByDescending(x => x.TotalProducts)
+					.ToList();
 
                 // Kết quả trả về
                 var result = new
@@ -282,7 +291,8 @@ namespace E_commerce.Areas.Admin.Controllers
 
                 // Tính doanh thu bằng cách group các đơn hàng với chi tiết của chúng
                 var totalData = orders
-                    .GroupJoin(
+					.Where(order => order.Status != 6)
+					.GroupJoin(
                         _context.OrderDetails,
                         order => order.OrderCode,
                         detail => detail.OrderCode,
@@ -322,7 +332,8 @@ namespace E_commerce.Areas.Admin.Controllers
 
                 // Tính tổng doanh thu từng tháng
                 var monthlyRevenue = orders
-                    .Join(_context.OrderDetails,
+					.Where(order => order.Status != 6)
+					.Join(_context.OrderDetails,
                           order => order.OrderCode,
                           detail => detail.OrderCode,
                           (order, detail) => new { order.CreatedDate, detail.Price, detail.Quantity })

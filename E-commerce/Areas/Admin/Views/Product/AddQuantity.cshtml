@@ -1,52 +1,37 @@
-﻿@model ProductQuantityModel
+﻿@model E_commerce.Models.ViewModel.AddStockViewModel
 @{
-    ViewData["title"] = "Add Quantity";
-    var total_quantities = 0;
-    var key = 1;
+    ViewData["Title"] = "Add Quantity to Product Variation";
+    var variation = Model.Variation;
 }
-<h4>Add Quantity</h4>
-<div class="col-md-9">
-    <form asp-action="StoreProductQuantity" method="post">
-        <input type="hidden" asp-for="VariationId" />
 
-        <div class="form-group">
-            <label>Quantity</label>
-            <input type="number" asp-for="Quantity" class="form-control" required />
-        </div>
+<h4>Add Stock for: <span class="text-primary">@variation.Product.Name</span></h4>
+<p>
+    <strong>Variation:</strong> @variation.Size / @variation.Color?.Name / @variation.Material?.Name
+</p>
 
-        <button type="submit" class="btn btn-primary">Add</button>
-    </form>
-    <h3>Existing Product Quantities:</h3>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Quantity Added</th>
-                <th>Date</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var productQuantity in ViewBag.ProductByQuantity)
-            {
-                total_quantities += productQuantity.Quantity;
-                <tr>
-                    <td>@key</td>
-                    <td>@productQuantity.Quantity</td>
-                    <td>@productQuantity.DateCreated</td>
-                </tr>
-                key++;
-            }
-            <tr>
-                <td colspan="2"><strong>Total Quantities:</strong></td>
-                <td><strong>@total_quantities</strong></td>
-            </tr>
-        </tbody>
-    </table>
+<form asp-action="StoreProductQuantity" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Variation.Id" />
 
-    <a asp-controller="Product" asp-action="Details" asp-route-id="@Model.Variation.ProductId" class="btn btn-secondary">
-        Back to Product Details
-    </a>
-</div>
+    <div class="form-group">
+        <label asp-for="BatchCode">Batch Code <span class="text-danger">*</span></label>
+        <input asp-for="BatchCode" class="form-control" placeholder="e.g. IMPORT20250625-001" />
+        <span asp-validation-for="BatchCode" class="text-danger"></span>
+    </div>
+
+    <div class="form-group mt-2">
+        <label asp-for="Quantity">Quantity <span class="text-danger">*</span></label>
+        <input asp-for="Quantity" class="form-control" type="number" min="1" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Add Quantity</button>
+</form>
+
+<a asp-action="Details" asp-controller="Product" asp-route-id="@variation.ProductId" class="btn btn-secondary mt-3">
+    Back to Product Details
+</a>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
@@ -242,3 +227,4 @@
 
     }
 </style>
+

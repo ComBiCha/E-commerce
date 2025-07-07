@@ -19,8 +19,7 @@ namespace E_commerce.Repository
 
             _datacontext.Orders.Add(order);
             await _datacontext.SaveChangesAsync();
-
-            return "/Checkout/OrderConfirmation?ordercode=" + order.OrderCode;
+			return "/Checkout/OrderConfirmation?ordercode=" + order.OrderCode;
         }
     }
 
