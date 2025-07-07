@@ -77,23 +77,6 @@
 
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
-    <script>
-        $(document).ready(function () {
-            function readURL(input, previewId) {
-                if (input.files && input.files[0]) {
-                    let reader = new FileReader();
-                    reader.onload = function (e) {
-                        $("#" + previewId).attr("src", e.target.result).width(200).height(200).show();
-                    };
-                    reader.readAsDataURL(input.files[0]);
-                }
-            }
-
-@section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
 
     <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
