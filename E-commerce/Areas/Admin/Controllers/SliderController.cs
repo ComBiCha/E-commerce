@@ -20,10 +20,26 @@ namespace E_commerce.Areas.Admin.Controllers
 			_dataContext = context;
             _webHostEnvironment = webHostEnvironment;
         }
-		public async Task<IActionResult> Index()
-		{
-			return View(await _dataContext.Sliders.OrderByDescending(p => p.Id).ToListAsync());
-		}
+        public async Task<IActionResult> Index(int pg = 1)
+        {
+            const int pageSize = 5;
+            if (pg < 1) pg = 1;
+
+            // Đếm tổng số records
+            int recsCount = await _dataContext.Sliders.CountAsync();
+            var pager = new Paginate(recsCount, pg, pageSize);
+
+            // Lấy data với Skip/Take trực tiếp từ DB
+            int recSkip = (pg - 1) * pageSize;
+            var sliders = await _dataContext.Sliders
+                .OrderBy(p => p.Id) // Sắp xếp tăng dần (ai tạo trước ở trên)
+                .Skip(recSkip)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.Pager = pager;
+            return View(sliders);
+        }
         [HttpGet]
         public IActionResult Create()
         {

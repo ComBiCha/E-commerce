@@ -4,11 +4,10 @@
     ViewData["Title"] = "Warranty Request Details";
 }
 
-<h3>@ViewData["Title"]</h3>
+<link rel="stylesheet" href="~/css/admin-detail.css" />
 
-<div>
-    <h4>Warranty Request Information</h4>
-    <hr />
+<div class="warranty-details-container">
+    <h3>Warranty Request Information</h3>
     <dl class="row">
         <dt class="col-sm-2">Warranty Code:</dt>
         <dd class="col-sm-10">@Model.WarrantyCode</dd>
@@ -23,31 +22,31 @@
         <dd class="col-sm-10">
             @if (Model.Status == 0)
             {
-                <span class="badge bg-warning">Đợi duyệt</span>
+                <span class="badge warranty-status-pending">Đợi duyệt</span>
             }
             else if (Model.Status == 1)
             {
-                <span class="badge bg-success">Đã duyệt</span>
+                <span class="badge warranty-status-approved">Đã duyệt</span>
             }
             else if (Model.Status == 2)
             {
-                <span class="badge bg-info">Đã tiếp nhận sản phẩm lỗi</span>
+                <span class="badge warranty-status-received">Đã tiếp nhận sản phẩm lỗi</span>
             }
             else if (Model.Status == 3)
             {
-                <span class="badge bg-primary">Đã khắc phục</span>
+                <span class="badge warranty-status-fixed">Đã khắc phục</span>
             }
             else if (Model.Status == 4)
             {
-                <span class="badge bg-dark">Đã hoàn thành</span>
+                <span class="badge warranty-status-completed">Đã hoàn thành</span>
             }
             else if (Model.Status == 5)
             {
-                <span class="badge bg-danger">Bị từ chối</span>
+                <span class="badge warranty-status-rejected">Bị từ chối</span>
             }
             else if (Model.Status == 6)
             {
-                <span class="badge bg-danger">Đã bị huỷ</span>
+                <span class="badge warranty-status-cancelled">Đã bị huỷ</span>
             }
         </dd>
 
@@ -59,7 +58,6 @@
     </dl>
 
     <h4>Product Information</h4>
-    <hr />
     <dl class="row">
         <dt class="col-sm-2">Product Name:</dt>
         <dd class="col-sm-10">@Model.Warranty.Product.Name - @Model.Warranty.Variation.Material.Name - @Model.Warranty.Variation.Color.Name - @Model.Warranty.Variation.Size</dd>
@@ -80,31 +78,31 @@
     <p id="warrantyStatusText" style="font-size:24px;">
         @if (Model.Status == 0)
         {
-            <span class="badge bg-warning">Đợi duyệt</span>
+            <span class="badge warranty-status-pending">Đợi duyệt</span>
         }
         else if (Model.Status == 1)
         {
-            <span class="badge bg-success">Đã duyệt</span>
+            <span class="badge warranty-status-approved">Đã duyệt</span>
         }
         else if (Model.Status == 2)
         {
-            <span class="badge bg-info">Đã tiếp nhận sản phẩm lỗi</span>
+            <span class="badge warranty-status-received">Đã tiếp nhận sản phẩm lỗi</span>
         }
         else if (Model.Status == 3)
         {
-            <span class="badge bg-primary">Đã khắc phục</span>
+            <span class="badge warranty-status-fixed">Đã khắc phục</span>
         }
         else if (Model.Status == 4)
         {
-            <span class="badge bg-dark">Đã hoàn thành</span>
+            <span class="badge warranty-status-completed">Đã hoàn thành</span>
         }
         else if (Model.Status == 5)
         {
-            <span class="badge bg-danger">Bị từ chối</span>
+            <span class="badge warranty-status-rejected">Bị từ chối</span>
         }
         else if (Model.Status == 6)
         {
-            <span class="badge bg-danger">Đã bị huỷ</span>
+            <span class="badge warranty-status-cancelled">Đã bị huỷ</span>
         }
     </p>
 
@@ -112,7 +110,7 @@
     @if (Model.Status != 6)
     {
         <h4>Update Status</h4>
-        <div id="actionButtons" style="margin-bottom:20px;">
+        <div class="warranty-action-buttons" id="actionButtons">
             <!-- Accept Button -->
             <button id="acceptButton" class="btn btn-success" @(Model.Status == 0 ? "" : "disabled")>
                 Duyệt bảo hành
@@ -135,7 +133,7 @@
             </button>
         </div>
     }
-    <a style="margin-bottom:30px;" asp-action="Index">Back to List Warranty</a>
+    <a class="warranty-back-link" asp-action="Index">Back to List Warranty</a>
 </div>
 
 @section Scripts {
@@ -148,7 +146,7 @@
                 if (status == 1) statusText = "<span class='text-success'>Đã duyệt</span>";
                 if (status == 2) statusText = "<span class='text-info'>Đã tiếp nhận sản phẩm lỗi</span>";
                 if (status == 3) statusText = "<span class='text-primary'>Đã khắc phục</span>";
-                if (status == 4) statusText = "<span class='text-dark'>Đã hoàn thành</span>";
+                if (status == 4) statusText = "<span class='text-light'>Đã hoàn thành</span>";
                 if (status == 5) statusText = "<span class='text-danger'>Bị từ chối</span>";
                 if (status == 5) statusText = "<span class='text-danger'>Đã bị huỷ</span>";
 

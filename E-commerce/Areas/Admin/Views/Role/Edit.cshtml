@@ -3,6 +3,8 @@
 @{
     ViewData["title"] = "Edit Role";
 }
+<link rel="stylesheet" href="~/css/admin-edit.css" />
+
 <h4>Edit Role</h4>
 <div class="col-md-9">
     <form asp-action="Edit" enctype="multipart/form-data">
@@ -13,12 +15,10 @@
             <input asp-for="Name" class="form-control" />
             <span asp-validation-for="Name" class="text-danger" />
         </div>
-        <div class="form-group">
-            <button class="btn btn-primary">Update</button>
-        </div>
+            <button class="btn btn-primary color-submit">Update</button>
 
     </form>
-    <a asp-action="Index">Back to List Role</a>
+    <a asp-action="Index" class="back-link">Back to List Role</a>
 </div>
 @section Scripts {
     @{

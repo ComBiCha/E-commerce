@@ -1,9 +1,15 @@
-﻿using E_commerce.Models;
+﻿using E_commerce.Areas.Admin.Repository;
+using E_commerce.Models;
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
+using E_commerce.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PayPal.Api;
+using Stripe;
+using System.Security.Claims;
 
 namespace E_commerce.Controllers
 {
@@ -14,12 +20,14 @@ namespace E_commerce.Controllers
         private readonly SignInManager<AppUserModel> _signInManager;
         private UserManager<AppUserModel> _userManager;
         private readonly DataContext _dataContext;
+        private readonly IEmailSender _emailSender;
 
-        public AccountApiController(SignInManager<AppUserModel> signInManager, UserManager<AppUserModel> userManager, DataContext dataContext)
+        public AccountApiController(SignInManager<AppUserModel> signInManager, UserManager<AppUserModel> userManager, DataContext dataContext, IEmailSender emailSender)
         {
             _signInManager = signInManager;
             _userManager = userManager;
             _dataContext = dataContext;
+            _emailSender = emailSender;
         }
 
         [HttpPost("Login")]
@@ -153,6 +161,232 @@ namespace E_commerce.Controllers
             else
             {
                 return BadRequest(new { success = false, message = string.Join(", ", result.Errors.Select(e => e.Description)) });
+            }
+        }
+
+        [HttpPost("ChangePassword")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            try
+            {
+                Console.WriteLine($"ChangePassword called for email: {request.Email}");
+
+                if (string.IsNullOrWhiteSpace(request.Email) ||
+                    string.IsNullOrWhiteSpace(request.CurrentPassword) ||
+                    string.IsNullOrWhiteSpace(request.NewPassword))
+                {
+                    return BadRequest(new { success = false, message = "All fields are required" });
+                }
+
+                var user = await _userManager.FindByEmailAsync(request.Email);
+                if (user == null)
+                {
+                    return NotFound(new { success = false, message = "User not found" });
+                }
+
+                // 🔹 KIỂM TRA MẬT KHẨU CŨ
+                var isCurrentPasswordValid = await _userManager.CheckPasswordAsync(user, request.CurrentPassword);
+                if (!isCurrentPasswordValid)
+                {
+                    return BadRequest(new { success = false, message = "Current password is incorrect" });
+                }
+
+                // 🔹 ĐỔI MẬT KHẨU MỚI
+                var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
+
+                if (result.Succeeded)
+                {
+                    Console.WriteLine($"Password changed successfully for: {user.Email}");
+
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Password has been changed successfully"
+                    });
+                }
+                else
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    Console.WriteLine($"Password change failed: {errors}");
+
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Failed to change password",
+                        errors = result.Errors.Select(e => e.Description)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ChangePassword error: {ex.Message}");
+                return BadRequest(new { success = false, message = "An error occurred while changing password" });
+            }
+        }
+
+        [HttpPost("ForgotPassword")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+        {
+            try
+            {
+                Console.WriteLine($"ForgotPassword called with email: {request.Email}");
+
+                if (string.IsNullOrWhiteSpace(request.Email))
+                {
+                    return BadRequest(new { success = false, message = "Email is required" });
+                }
+
+                var user = await _userManager.FindByEmailAsync(request.Email);
+                if (user == null)
+                {
+                    // 🔹 VÌ LÝ DO BẢO MẬT, KHÔNG TIẾT LỘ EMAIL KHÔNG TỒN TẠI
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "If your email exists in our system, you will receive a password reset link shortly."
+                    });
+                }
+
+                // 🔹 TẠO TOKEN RESET PASSWORD
+                string resetToken = Guid.NewGuid().ToString();
+
+                // 🔹 LƯU TOKEN VÀO DATABASE
+                user.Token = resetToken;
+                var updateResult = await _userManager.UpdateAsync(user);
+
+                if (!updateResult.Succeeded)
+                {
+                    Console.WriteLine($"Failed to update user token: {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
+                    return BadRequest(new { success = false, message = "Failed to generate reset token" });
+                }
+
+                // 🔹 TẠO RESET LINK
+                var resetLink = $"{Request.Scheme}://{Request.Host}/Account/NewPassword?email={user.Email}&token={resetToken}";
+
+                // 🔹 GỬI EMAIL
+                var subject = "Password Reset Request - Merdi Collection";
+                var message = $@"Password Reset Request
+
+                Hello,
+
+                You requested to reset your password for your Merdi Collection account.
+
+                To reset your password, click on the following link:
+                {resetLink}
+
+                IMPORTANT:
+                - This link will expire in 24 hours
+                - If you didn't request this reset, please ignore this email
+                - For security, never share this link with anyone
+
+                If you have any questions, please contact our support team.
+
+                Best regards,
+                Merdi Collection Team";
+
+                await _emailSender.SendEmailAsync(user.Email, subject, message);
+
+                Console.WriteLine($"Password reset email sent successfully to: {user.Email}");
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "If your email exists in our system, you will receive a password reset link shortly."
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ForgotPassword error: {ex.Message}");
+                Console.WriteLine($"StackTrace: {ex.StackTrace}");
+                return BadRequest(new { success = false, message = "An error occurred while processing your request" });
+            }
+        }
+
+        [HttpPost("ResetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+        {
+            try
+            {
+                Console.WriteLine($"ResetPassword called with email: {request.Email}");
+
+                if (string.IsNullOrWhiteSpace(request.Email) ||
+                    string.IsNullOrWhiteSpace(request.Token) ||
+                    string.IsNullOrWhiteSpace(request.NewPassword))
+                {
+                    return BadRequest(new { success = false, message = "All fields are required" });
+                }
+
+                // 🔹 TÌM USER VỚI EMAIL VÀ TOKEN
+                var user = await _userManager.Users
+                    .FirstOrDefaultAsync(u => u.Email == request.Email && u.Token == request.Token);
+
+                if (user == null)
+                {
+                    return BadRequest(new { success = false, message = "Invalid or expired reset token" });
+                }
+
+                // 🔹 ĐỔI PASSWORD
+                var resetToken = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var result = await _userManager.ResetPasswordAsync(user, resetToken, request.NewPassword);
+
+                if (result.Succeeded)
+                {
+                    // 🔹 XÓA TOKEN SAU KHI RESET THÀNH CÔNG
+                    user.Token = null;
+                    await _userManager.UpdateAsync(user);
+
+                    Console.WriteLine($"Password reset successfully for: {user.Email}");
+
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Password has been reset successfully. You can now login with your new password."
+                    });
+                }
+                else
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    Console.WriteLine($"Password reset failed: {errors}");
+
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Failed to reset password",
+                        errors = result.Errors.Select(e => e.Description)
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ResetPassword error: {ex.Message}");
+                return BadRequest(new { success = false, message = "An error occurred while resetting password" });
+            }
+        }
+
+        [HttpPost("VerifyResetToken")]
+        public async Task<IActionResult> VerifyResetToken([FromBody] VerifyTokenRequest request)
+        {
+            try
+            {
+                var user = await _userManager.Users
+                    .FirstOrDefaultAsync(u => u.Email == request.Email && u.Token == request.Token);
+
+                if (user == null)
+                {
+                    return BadRequest(new { success = false, message = "Invalid or expired reset token" });
+                }
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Token is valid",
+                    email = user.Email
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"VerifyResetToken error: {ex.Message}");
+                return BadRequest(new { success = false, message = "An error occurred while verifying token" });
             }
         }
 
@@ -548,8 +782,335 @@ namespace E_commerce.Controllers
             if (points >= 10000) return "Silver";
             return "Bronze";
         }
+
+        // 🔹 API LẤY DANH SÁCH ORDER CỦA USER
+        [HttpGet("GetUserOrders")]
+        public async Task<IActionResult> GetUserOrders(string email)
+        {
+            try
+            {
+                Console.WriteLine($"GetUserOrders called with email: {email}");
+
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found" });
+
+                var orders = await _dataContext.Orders
+                    .Where(o => o.UserName == email)
+                    .OrderByDescending(o => o.CreatedDate)
+                    .Select(o => new
+                    {
+                        id = o.Id,
+                        orderCode = o.OrderCode,
+                        shippingCost = o.ShippingCost,
+                        address = o.Address,
+                        userName = o.UserName,
+                        createdDate = o.CreatedDate,
+                        status = o.Status,
+                        statusName = GetOrderStatusName(o.Status),
+                        paymentIntentId = o.PaymentIntentId,
+                        paymentMethod = GetPaymentMethod(o.PaymentIntentId),
+                        canCancel = o.Status <= 2, // Chỉ có thể hủy khi status <= 2
+                                                   // Tính tổng tiền đơn hàng
+                        totalAmount = _dataContext.OrderDetails
+                            .Where(od => od.OrderCode == o.OrderCode)
+                            .Sum(od => od.Price * od.Quantity - od.DiscountAmount) + o.ShippingCost,
+                        // Đếm số sản phẩm
+                        itemCount = _dataContext.OrderDetails
+                            .Where(od => od.OrderCode == o.OrderCode)
+                            .Sum(od => od.Quantity)
+                    })
+                    .ToListAsync();
+
+                return Ok(new { success = true, orders = orders });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetUserOrders error: {ex.Message}");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        // 🔹 API LẤY CHI TIẾT ORDER
+        [HttpGet("GetOrderDetails")]
+        public async Task<IActionResult> GetOrderDetails(string orderCode, string email)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found" });
+
+                var order = await _dataContext.Orders
+                    .FirstOrDefaultAsync(o => o.OrderCode == orderCode && o.UserName == email);
+
+                if (order == null)
+                    return NotFound(new { success = false, message = "Order not found" });
+
+                var orderDetails = await _dataContext.OrderDetails
+                    .Include(od => od.Product)
+                        .ThenInclude(p => p.Warranty)
+                    .Include(od => od.Variation)
+                        .ThenInclude(v => v.Material)
+                    .Include(od => od.Variation)
+                        .ThenInclude(v => v.Color)
+                    .Where(od => od.OrderCode == orderCode)
+                    .Select(od => new
+                    {
+                        id = od.Id,
+                        productId = od.ProductId,
+                        variationId = od.VariationId,
+                        productName = od.Product.Name,
+                        price = od.Price,                    // 🔹 Giá gốc
+                        quantity = od.Quantity,
+                        discountAmount = od.DiscountAmount,  // 🔹 Tổng discount cho item này
+                        finalPrice = od.Price - (od.DiscountAmount / od.Quantity), // 🔹 Giá cuối cho 1 item
+                        subtotal = od.Quantity * (od.Price - (od.DiscountAmount / od.Quantity)), // 🔹 Tổng tiền đã giảm
+                        imageUrl = od.Variation.ImageUrl,
+                        material = od.Variation.Material.Name,
+                        color = od.Variation.Color.Name,
+                        size = od.Variation.Size,
+                        warrantyCode = od.Product.Warranty.FirstOrDefault().WarrantyCode,
+                        warrantyExpirationDate = od.Product.Warranty.FirstOrDefault().ExpirationDate
+                    })
+                    .ToListAsync();
+
+                var productTotal = orderDetails.Sum(od => od.subtotal);
+                var grandTotal = productTotal + order.ShippingCost;
+
+                var result = new
+                {
+                    success = true,
+                    order = new
+                    {
+                        id = order.Id,
+                        orderCode = order.OrderCode,
+                        shippingCost = order.ShippingCost,
+                        address = order.Address,
+                        userName = order.UserName,
+                        createdDate = order.CreatedDate,
+                        status = order.Status,
+                        statusName = GetOrderStatusName(order.Status),
+                        paymentIntentId = order.PaymentIntentId,
+                        paymentMethod = GetPaymentMethod(order.PaymentIntentId),
+                        canCancel = order.Status <= 2,
+                        productTotal = productTotal,
+                        grandTotal = grandTotal
+                    },
+                    orderDetails = orderDetails
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetOrderDetails error: {ex.Message}");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        // 🔹 API HỦY ORDER
+        [HttpPost("CancelOrder")]
+        public async Task<IActionResult> CancelOrder([FromBody] CancelOrderRequest request)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(request.Email);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found" });
+
+                var order = await _dataContext.Orders
+                    .FirstOrDefaultAsync(o => o.OrderCode == request.OrderCode && o.UserName == request.Email);
+
+                if (order == null)
+                    return NotFound(new { success = false, message = "Order not found or you do not have permission to cancel this order" });
+
+                // Kiểm tra trạng thái có thể hủy
+                if (order.Status > 2)
+                    return BadRequest(new { success = false, message = "Order has already been processed and cannot be canceled" });
+
+                // Lấy chi tiết đơn hàng để hoàn kho
+                var orderDetails = await _dataContext.OrderDetails
+                    .Include(od => od.Variation)
+                        .ThenInclude(v => v.Product)
+                            .ThenInclude(p => p.Variations)
+                                .ThenInclude(v => v.ProductQuantities)
+                    .Where(od => od.OrderCode == request.OrderCode)
+                    .ToListAsync();
+
+                using var transaction = await _dataContext.Database.BeginTransactionAsync();
+
+                try
+                {
+                    // Hoàn kho
+                    foreach (var orderDetail in orderDetails)
+                    {
+                        if (orderDetail.Variation != null)
+                        {
+                            int quantityToRestock = orderDetail.Quantity;
+
+                            var productQuantities = await _dataContext.ProductQuantities
+                                .Where(pq => pq.VariationId == orderDetail.Variation.Id)
+                                .OrderByDescending(pq => pq.DateCreated)
+                                .ToListAsync();
+
+                            if (productQuantities.Any())
+                            {
+                                var latestBatch = productQuantities.First();
+                                latestBatch.CurrentQuantityInBatch += quantityToRestock;
+                                latestBatch.LastUpdated = DateTime.Now;
+                                _dataContext.ProductQuantities.Update(latestBatch);
+                            }
+                            else
+                            {
+                                var newBatch = new BatchModel
+                                {
+                                    BatchCode = $"RESTOCK-{request.OrderCode}-{DateTime.Now.Ticks}",
+                                    ImportDate = DateTime.Now
+                                };
+                                _dataContext.Batches.Add(newBatch);
+                                await _dataContext.SaveChangesAsync();
+
+                                var newProductQuantity = new ProductQuantityModel
+                                {
+                                    VariationId = orderDetail.Variation.Id,
+                                    BatchId = newBatch.Id,
+                                    InitialQuantity = quantityToRestock,
+                                    CurrentQuantityInBatch = quantityToRestock,
+                                    DateCreated = DateTime.Now,
+                                    LastUpdated = DateTime.Now
+                                };
+                                _dataContext.ProductQuantities.Add(newProductQuantity);
+                            }
+                        }
+                    }
+
+                    // Cập nhật trạng thái đơn hàng
+                    order.Status = 6; // Đã hủy
+                    _dataContext.Orders.Update(order);
+
+                    // Cập nhật số lượng đã bán
+                    foreach (var orderDetail in orderDetails)
+                    {
+                        var product = orderDetail.Variation?.Product;
+                        if (product != null)
+                        {
+                            product.Sold = Math.Max(0, product.Sold - orderDetail.Quantity);
+                            _dataContext.Products.Update(product);
+                        }
+                    }
+
+                    await _dataContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Order has been canceled successfully. Stock has been restored and refund request has been processed."
+                    });
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception("Error during order cancellation: " + ex.Message);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"CancelOrder error: {ex.Message}");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        // 🔹 API XÁC NHẬN NHẬN HÀNG
+        [HttpPost("ConfirmDelivery")]
+        public async Task<IActionResult> ConfirmDelivery([FromBody] ConfirmDeliveryRequest request)
+        {
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(request.Email);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found" });
+
+                var order = await _dataContext.Orders
+                    .FirstOrDefaultAsync(o => o.OrderCode == request.OrderCode && o.UserName == request.Email);
+
+                if (order == null)
+                    return NotFound(new { success = false, message = "Order not found or you do not have permission to confirm this delivery" });
+
+                if (order.Status == 4) // Hàng đã giao tới nơi
+                {
+                    order.Status = 5; // Đơn hàng đã hoàn thành
+                    await _dataContext.SaveChangesAsync();
+
+                    return Ok(new { success = true, message = "Order has been confirmed as received" });
+                }
+                else
+                {
+                    return BadRequest(new { success = false, message = "This order cannot be confirmed at this stage" });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ConfirmDelivery error: {ex.Message}");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        // Helper methods
+        private static string GetOrderStatusName(int status)
+        {
+            return status switch
+            {
+                1 => "New Order",
+                2 => "Confirmed",
+                3 => "In Transit",
+                4 => "Delivered",
+                5 => "Completed",
+                6 => "Cancelled",
+                _ => "Unknown"
+            };
+        }
+
+        private static string GetPaymentMethod(string paymentIntentId)
+        {
+            if (string.IsNullOrEmpty(paymentIntentId) || paymentIntentId.StartsWith("COD"))
+                return "Cash on Delivery";
+
+            if (paymentIntentId.StartsWith("pi_") || paymentIntentId.StartsWith("cs_"))
+                return "Stripe Card";
+
+            if (paymentIntentId.StartsWith("PAYID-"))
+                return "PayPal";
+
+            return "Unknown";
+        }
     }
 
+    public class ChangePasswordRequest
+    {
+        public string Email { get; set; }
+        public string CurrentPassword { get; set; }
+        public string NewPassword { get; set; }
+    }
+
+    public class ForgotPasswordRequest
+    {
+        public string Email { get; set; }
+    }
+
+    public class ResetPasswordRequest
+    {
+        public string Email { get; set; }
+        public string Token { get; set; }
+        public string NewPassword { get; set; }
+    }
+
+    public class VerifyTokenRequest
+    {
+        public string Email { get; set; }
+        public string Token { get; set; }
+    }
     // Thêm request model vào cuối file:
     public class UpdateProfileRequest
     {
@@ -594,5 +1155,17 @@ namespace E_commerce.Controllers
     {
         public int AddressId { get; set; }
         public string Email { get; set; }
+    }
+
+    public class CancelOrderRequest
+    {
+        public string Email { get; set; }
+        public string OrderCode { get; set; }
+    }
+
+    public class ConfirmDeliveryRequest
+    {
+        public string Email { get; set; }
+        public string OrderCode { get; set; }
     }
 }

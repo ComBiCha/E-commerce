@@ -17,9 +17,25 @@ namespace E_commerce.Areas.Admin.Controllers
 		{
 			_dataContext = context;
 		}
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int pg = 1)
         {
-            return View(await _dataContext.Materials.OrderByDescending(p => p.Id).ToListAsync());
+            const int pageSize = 5;
+            if (pg < 1) pg = 1;
+
+            // Đếm tổng số records
+            int recsCount = await _dataContext.Materials.CountAsync();
+            var pager = new Paginate(recsCount, pg, pageSize);
+
+            // Lấy data với Skip/Take trực tiếp từ DB
+            int recSkip = (pg - 1) * pageSize;
+            var materials = await _dataContext.Materials
+                .OrderBy(p => p.Id) // Sắp xếp tăng dần (ai tạo trước ở trên)
+                .Skip(recSkip)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.Pager = pager;
+            return View(materials);
         }
         /*public async Task<IActionResult> Index(int pg = 1)
         {
