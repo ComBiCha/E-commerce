@@ -3,8 +3,10 @@
 @{
     ViewData["Title"] = "Statistics";
 }
+<link rel="stylesheet" href="~/css/admin-index.css" />
 
-<h1 style="text-align:center">Statistics</h1>
+
+<h1 style="text-align:center; color:white">Statistics</h1>
 
 
 <!DOCTYPE html>
@@ -32,223 +34,136 @@
     <script defer data-site="sangrk-001-site1.ptempurl.com" src="https://api.nepcha.com/js/nepcha-analytics.js"></script>
 </head>
 
-<body class="g-sidenav-show  bg-gray-100">
-    <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg ">
-        <div class="container-fluid py-4">
-            <div class="row">
-                <div class="col-lg-12 col-12">
-                    <div class="row">
-                        <div class="col-lg-3 col-md-6 col-12">
-                            <div class="card">
-                                <span class="mask bg-primary opacity-10 border-radius-lg"></span>
-                                
-                                <div class="card-body p-3 position-relative" onclick="window.location.href='/Admin/Statistic/Index2'">
-                                    <div class="row">
-                                        <div class="col-8 text-start">
-                                            <div class="icon icon-shape bg-white shadow text-center border-radius-2xl">
-                                                <i class="fa-solid fa-receipt fa-xl"></i>
-                                            </div>
-                                            <h3 class="text-white font-weight-bolder mb-0 mt-3"><span id="totalOrder">0</span></h3>
-                                            <span class="text-white text-sm">Total Orders</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-12 mt-4 mt-md-0">
-                            @* <div class="card">
-                                <span class="mask bg-dark opacity-10 border-radius-lg"></span>
-                                <div class="card-body p-3 position-relative">
-                                    <div class="row">
-                                        <div class="col-8 text-start">
-                                            <div class="icon icon-shape bg-white shadow text-center border-radius-2xl">
-                                                <i class="fa-solid fa-money-bill fa-xl"></i>
-                                            </div>
-                                            <h3 class="text-white font-weight-bolder mb-0 mt-3"><span id="totalRevenue">$0.00</span></h3>
-                                            <span class="text-white text-sm">Total Revenue</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> *@
-                            <div class="card" onclick="openRevenueModal()">
-                                <span class="mask bg-dark opacity-10 border-radius-lg"></span>
-                                <div class="card-body p-3 position-relative">
-                                    <div class="row">
-                                        <div class="col-8 text-start">
-                                            <div class="icon icon-shape bg-white shadow text-center border-radius-2xl">
-                                                <i class="fa-solid fa-money-bill fa-xl"></i>
-                                            </div>
-                                            <h3 class="text-white font-weight-bolder mb-0 mt-3"><span id="totalRevenue">$0.00</span></h3>
-                                            <span class="text-white text-sm">Total Revenue</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+<body class="dashboard-container">
+    <main class="main-content">
+        <div class="dashboard-content">
+            <!-- Stats Cards Row -->
+            <div class="stats-row">
+                <div class="stats-card" onclick="window.location.href='/Admin/Statistic/Index2'">
+                    <div class="stats-card-icon">
+                        <i class="fa-solid fa-receipt"></i>
+                    </div>
+                    <div class="stats-card-number" id="totalOrder">0</div>
+                    <div class="stats-card-label">Total Orders</div>
+                </div>
 
-                            <!-- The Modal -->
-                            <div id="customModal" class="custom-modal">
-                                <div class="custom-modal-content">
-                                    <div class="custom-modal-header">
-                                        <span class="close-btn" id="closeModal">&times;</span>
-                                        <h3>Revenue Details</h3>
-                                    </div>
-                                    <div class="custom-modal-body">
-                                        <h4>Today's Revenue: <span style="color:#FE980F" id="todayRevenue">Loading...</span></h4>
-                                        <h4>Current Month: <span id="currentMonth">Loading...</span></h4>
-                                        <h4>Previous Month: <span id="previousMonth">Loading...</span></h4>
-                                        <h4>Growth: <span style="color:#FE980F" id="growth">Loading...</span></h4>
-                                    </div>
-                                </div>
-                            </div>
+                <div class="stats-card revenue-card" onclick="openRevenueModal()">
+                    <div class="stats-card-icon">
+                        <i class="fa-solid fa-money-bill"></i>
+                    </div>
+                    <div class="stats-card-number" id="totalRevenue">$0.00</div>
+                    <div class="stats-card-label">Total Revenue</div>
+                </div>
 
+                <div class="stats-card">
+                    <div class="stats-card-icon">
+                        <i class="fa-solid fa-laptop"></i>
+                    </div>
+                    <div class="stats-card-number" id="totalQuantity">0</div>
+                    <div class="stats-card-label">Total Products</div>
+                </div>
 
+                <div class="stats-card">
+                    <div class="stats-card-icon">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <div class="stats-card-number" id="userCount">0</div>
+                    <div class="stats-card-label">Total Users</div>
+                </div>
+            </div>
 
+            <!-- Top Products Section -->
+            <div class="products-section">
+                <h5>Top 5 Best Selling Products</h5>
+                <table id="topProductsTable" class="products-table">
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Image</th>
+                            <th>Total Quantity Sold</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data populated here -->
+                    </tbody>
+                </table>
+            </div>
+         
+           
+            <!-- Charts Section -->
+            <div class="charts-section">
+                <div class="chart-card">
+                    <h3>Monthly Orders</h3>
+                    <div class="chart-container">
+                        <canvas id="chart-bars" class="chart-canvas" height="320"></canvas>
+                    </div>
+                </div>
 
-
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-12">
-                            <div class="card">
-                                <span class="mask bg-dark opacity-10 border-radius-lg"></span>
-                                <div class="card-body p-3 position-relative">
-                                    <div class="row">
-                                        <div class="col-8 text-start">
-                                            <div class="icon icon-shape bg-white shadow text-center border-radius-2xl">
-                                                <i class="fa-solid fa-laptop fa-xl"></i>
-                                            </div>
-                                            <h3 class="text-white font-weight-bolder mb-0 mt-3"><span id="totalQuantity">0</span></h3>
-                                            <span class="text-white text-sm">Total Products</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-3 col-md-6 col-12">
-                            <div class="card">
-                                <span class="mask bg-dark opacity-10 border-radius-lg"></span>
-                                <div class="card-body p-3 position-relative">
-                                    <div class="row">
-                                        <div class="col-8 text-start">
-                                            <div class="icon icon-shape bg-white shadow text-center border-radius-2xl">
-                                                <i class="fa-solid fa-user fa-xl"></i>
-                                            </div>
-                                            <h3 class="text-white font-weight-bolder mb-0 mt-3"><span id="userCount">0</span></h3>
-                                            <span class="text-white text-sm">Total Users</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <div class="chart-card">
+                    <h3>Sales Overview</h3>
+                    <p style="color: #9ca3af; margin-bottom: 20px;">
+                        in <span style="color: #FE980F; font-weight: bold;">@DateTime.Now.Year</span>
+                    </p>
+                    <div class="chart-container">
+                        <canvas id="chart-line" class="chart-canvas" height="300"></canvas>
                     </div>
                 </div>
             </div>
-            <div class="row my-4">
-                <div class="col-lg-12 col-md-6 mb-md-0 mb-4">
-                    <div class="card">
-                        <div class="card-header pb-0">
-                            <div class="row">
-                                <div class="col-lg-6 col-7">
-                                    <h5>Top 5 Best Selling Products</h5>
-                                </div>
-                            </div>
-                        </div>
-                        <div style="font-size:15px" class="card-body px-0 pb-2">
-                            <div class="table-responsive">
-                                <table id="topProductsTable" class="table align-items-center mb-0">
-                                    <thead>
-                                        <tr>
-                                            <th style="font-size:10px" class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Product Name</th>
-                                            <th style="text-align:center" class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Image</th>
-                                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Total Quantity Sold</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody style="text-align:center">
-                                        <!-- Dữ liệu được đổ ở đây -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+
+            <!-- Additional Charts Section -->
+            <div class="charts-section">
+                <div class="chart-card">
+                    <h3>Quarterly Revenue</h3>
+                    <div class="chart-container">
+                        <canvas id="quarterlyRevenueChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="info-table-container">
+                    <h3 class="section-title">Products by Category</h3>
+                    <table id="categoryTable" class="info-table">
+                        <thead>
+                            <tr>
+                                <th>Category</th>
+                                <th>Total Products</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows populated by JavaScript -->
+                        </tbody>
+                    </table>
+
+                    <h3 class="section-title">Products by Brand</h3>
+                    <table id="brandTable" class="info-table">
+                        <thead>
+                            <tr>
+                                <th>Brand</th>
+                                <th>Total Products</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Rows populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Revenue Modal -->
+            <div id="customModal" class="revenue-modal">
+                <div class="revenue-modal-content">
+                    <div class="revenue-modal-header">
+                        <span class="modal-close-btn" id="closeModal">&times;</span>
+                        <h3>Revenue Details</h3>
+                    </div>
+                    <div class="revenue-modal-body">
+                        <h4>Today's Revenue: <span class="revenue-amount" id="todayRevenue">Loading...</span></h4>
+                        <h4>Current Month: <span class="revenue-amount" id="currentMonth">Loading...</span></h4>
+                        <h4>Previous Month: <span class="revenue-amount" id="previousMonth">Loading...</span></h4>
+                        <h4>Growth: <span class="revenue-amount growth-positive" id="growth">Loading...</span></h4>
                     </div>
                 </div>
             </div>
-            <div class="row mt-4">
-                <div class="col-lg-5 mb-lg-0 mb-4">
-                    <div class="card z-index-2">
-                        <div class="card-body p-2">
-                            <h3>Monthly Orders</h3>
-                            <div class="bg-dark border-radius-md py-3 pe-1 mb-3">
-                                <div class="chart">
-                                    <canvas id="chart-bars" class="chart-canvas" height="320"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-7">
-                    <div class="card z-index-2">
-                        <div class="card-header pb-0">
-                            <h3>Sales overview</h3>
-                            <p class="text-sm">
-                                in <span class="font-weight-bold">@DateTime.Now.Year</span>
-                            </p>
-                        </div>
-                        <div class="card-body p-3">
-                            <div class="chart">
-                                <canvas id="chart-line" class="chart-canvas" height="300"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-4">
-                <div class="col-lg-5 mb-lg-0 mb-4">
-                    <div class="card z-index-2">
-                        <div class="card-body p-2">
-                            <h3>Quarterly Revenue</h3>
-                            <div class="bg-dark border-radius-md py-3 pe-1 mb-3">
-                                <div class="chart">
-                                    <canvas id="quarterlyRevenueChart" style="width: 100%; height: 100%;"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-7">
-                    <div class="card z-index-2">
-                        <div class="card-body p-3">
-                            <h3 class="section-title1">Products by Category</h3>
-                            <table id="categoryTable" class="styled-table">
-                                <thead>
-                                    <tr>
-                                        <th>Category</th>
-                                        <th>Total Products</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Rows populated by JavaScript -->
-                                </tbody>
-                            </table>
-
-                            <h3 class="section-title1">Products by Brand</h3>
-                            <table id="brandTable" class="styled-table">
-                                <thead>
-                                    <tr>
-                                        <th>Brand</th>
-                                        <th>Total Products</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Rows populated by JavaScript -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Modal for Revenue Details -->
-            <!-- Modal -->
-
-
-
+            
             @* =============================================================================================== *@
         </div>
     </main>
@@ -804,144 +719,3 @@
 
 
 
-<style>
- /* Container Styling */
-.container1 {
-    font-family: Arial, sans-serif;
-    background-color: #f5f5f5;
-    margin: 20px;
-    color: #333;
-}
-
-/* Section Title Styling */
-.section-title1 {
-    font-size: 1.5em;
-    font-weight: bold;
-    color: #333;
-    margin-top: 20px;
-    margin-bottom: 10px;
-    padding-left: 10px;
-    border-left: 4px solid #4CAF50;
-}
-
-/* Styled Table */
-.styled-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-
-.styled-table thead {
-    background-color: #4CAF50;
-    color: #fff;
-}
-
-.styled-table thead th {
-    padding: 12px;
-    font-size: 1em;
-    font-weight: bold;
-    text-align: left;
-}
-
-.styled-table tbody tr {
-    border-bottom: 1px solid #ddd;
-}
-
-.styled-table tbody tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.styled-table tbody tr:hover {
-    background-color: #eafaf1;
-}
-
-.styled-table td {
-    padding: 12px;
-    text-align: left;
-    font-size: 0.9em;
-}
-
-/* Bordered Table Cells */
-.styled-table, .styled-table th, .styled-table td {
-    border: 1px solid #ddd;
-}
-
-/* Mobile Responsiveness */
-@@media (max-width: 768px) {
-    .styled-table, .styled-table thead, .styled-table tbody, .styled-table th, .styled-table td, .styled-table tr {
-        display: block;
-    }
-    .styled-table thead tr {
-        position: absolute;
-        top: -9999px;
-        left: -9999px;
-    }
-    .styled-table tr {
-        margin: 0 0 1rem 0;
-        border-bottom: 2px solid #4CAF50;
-    }
-    .styled-table td {
-        border: none;
-        position: relative;
-        padding-left: 50%;
-        white-space: nowrap;
-    }
-    .styled-table td:before {
-        position: absolute;
-        top: 50%;
-        left: 10px;
-        width: 45%;
-        padding-right: 10px;
-        font-weight: bold;
-        transform: translateY(-50%);
-        color: #4CAF50;
-        content: attr(data-label);
-    }
-}
-
-    /* The Modal (background) */
-    .custom-modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1000; /* Sit on top */
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.7); /* Black background with opacity */
-        justify-content: center;
-        align-items: center;
-    }
-
-    /* Modal Content */
-    .custom-modal-content {
-        background-color: #fff;
-        padding: 20px;
-        border-radius: 10px;
-        width: 80%;
-        max-width: 500px;
-    }
-
-    /* Close Button */
-    .close-btn {
-        font-size: 30px;
-        color: #aaa;
-        float: right;
-        cursor: pointer;
-    }
-
-        .close-btn:hover,
-        .close-btn:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-    /* Modal Header */
-    .custom-modal-header h5 {
-        margin: 0;
-        font-size: 20px;
-    }
-
-</style>
