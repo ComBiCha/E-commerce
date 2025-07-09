@@ -22,31 +22,31 @@
         <dd class="col-sm-10">
             @if (Model.Status == 0)
             {
-                <span class="badge warranty-status-pending">Đợi duyệt</span>
+                <span class="badge warranty-status-pending">Waiting</span>
             }
             else if (Model.Status == 1)
             {
-                <span class="badge warranty-status-approved">Đã duyệt</span>
+                <span class="badge warranty-status-approved">Approved</span>
             }
             else if (Model.Status == 2)
             {
-                <span class="badge warranty-status-received">Đã tiếp nhận sản phẩm lỗi</span>
+                <span class="badge warranty-status-received">Received</span>
             }
             else if (Model.Status == 3)
             {
-                <span class="badge warranty-status-fixed">Đã khắc phục</span>
+                <span class="badge warranty-status-fixed">Fixed</span>
             }
             else if (Model.Status == 4)
             {
-                <span class="badge warranty-status-completed">Đã hoàn thành</span>
+                <span class="badge warranty-status-completed">Completed</span>
             }
             else if (Model.Status == 5)
             {
-                <span class="badge warranty-status-rejected">Bị từ chối</span>
+                <span class="badge warranty-status-rejected">Rejected</span>
             }
             else if (Model.Status == 6)
             {
-                <span class="badge warranty-status-cancelled">Đã bị huỷ</span>
+                <span class="badge warranty-status-cancelled">Cancelled</span>
             }
         </dd>
 
@@ -78,31 +78,31 @@
     <p id="warrantyStatusText" style="font-size:24px;">
         @if (Model.Status == 0)
         {
-            <span class="badge warranty-status-pending">Đợi duyệt</span>
+            <span class="badge warranty-status-pending">Waiting</span>
         }
         else if (Model.Status == 1)
         {
-            <span class="badge warranty-status-approved">Đã duyệt</span>
+            <span class="badge warranty-status-approved">Approved</span>
         }
         else if (Model.Status == 2)
         {
-            <span class="badge warranty-status-received">Đã tiếp nhận sản phẩm lỗi</span>
+            <span class="badge warranty-status-received">Received</span>
         }
         else if (Model.Status == 3)
         {
-            <span class="badge warranty-status-fixed">Đã khắc phục</span>
+            <span class="badge warranty-status-fixed">Fixed</span>
         }
         else if (Model.Status == 4)
         {
-            <span class="badge warranty-status-completed">Đã hoàn thành</span>
+            <span class="badge warranty-status-completed">Completed</span>
         }
         else if (Model.Status == 5)
         {
-            <span class="badge warranty-status-rejected">Bị từ chối</span>
+            <span class="badge warranty-status-rejected">Rejected</span>
         }
         else if (Model.Status == 6)
         {
-            <span class="badge warranty-status-cancelled">Đã bị huỷ</span>
+            <span class="badge warranty-status-cancelled">Cancelled</span>
         }
     </p>
 
@@ -142,13 +142,13 @@
             // Update status text based on the current status
             function updateStatusText(status) {
                 let statusText = '';
-                if (status == 0) statusText = "<span class='text-warning'>Đợi duyệt</span>";
-                if (status == 1) statusText = "<span class='text-success'>Đã duyệt</span>";
-                if (status == 2) statusText = "<span class='text-info'>Đã tiếp nhận sản phẩm lỗi</span>";
-                if (status == 3) statusText = "<span class='text-primary'>Đã khắc phục</span>";
-                if (status == 4) statusText = "<span class='text-light'>Đã hoàn thành</span>";
-                if (status == 5) statusText = "<span class='text-danger'>Bị từ chối</span>";
-                if (status == 5) statusText = "<span class='text-danger'>Đã bị huỷ</span>";
+                if (status == 0) statusText = "<span class='text-warning'>Waiting</span>";
+                if (status == 1) statusText = "<span class='text-success'>Approved</span>";
+                if (status == 2) statusText = "<span class='text-info'>Received</span>";
+                if (status == 3) statusText = "<span class='text-primary'>Fixed</span>";
+                if (status == 4) statusText = "<span class='text-light'>Completed</span>";
+                if (status == 5) statusText = "<span class='text-danger'>Rejected</span>";
+                if (status == 5) statusText = "<span class='text-danger'>Cancelled</span>";
 
                 $('#warrantyStatusText').html(statusText);
 

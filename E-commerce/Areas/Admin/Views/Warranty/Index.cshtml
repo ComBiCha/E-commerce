@@ -40,7 +40,7 @@
         <thead>
             <tr>
                 <th class="text-center">#</th>
-                <th>Warranty Code</th>
+                <th style="text-align:left">Warranty Code</th>
                 <th>User</th>
                 <th class="text-center">Status</th>
                 <th class="text-center">Created Date</th>
@@ -52,36 +52,36 @@
             {
                 <tr>
                     <td class="text-center">@request.Id</td>
-                    <td>@request.WarrantyCode</td>
+                        <td style="text-align:left">@request.WarrantyCode</td>
                     <td>@request.User.UserName</td>
                         <td class="text-center">
                             @if (request.Status == 0)
                             {
-                                <span class="warranty-badge warranty-status-pending">Đợi duyệt</span>
+                                <span class="warranty-badge warranty-status-pending">Pending approval</span>
                             }
                             else if (request.Status == 1)
                             {
-                                <span class="warranty-badge warranty-status-approved">Đã duyệt</span>
+                                <span class="warranty-badge warranty-status-approved">Approved</span>
                             }
                             else if (request.Status == 2)
                             {
-                                <span class="warranty-badge warranty-status-received">Đã tiếp nhận sản phẩm lỗi</span>
+                                <span class="warranty-badge warranty-status-received">Received</span>
                             }
                             else if (request.Status == 3)
                             {
-                                <span class="warranty-badge warranty-status-fixed">Đã khắc phục</span>
+                                <span class="warranty-badge warranty-status-fixed">Fixed</span>
                             }
                             else if (request.Status == 4)
                             {
-                                <span class="warranty-badge warranty-status-completed">Đã hoàn thành</span>
+                                <span class="warranty-badge warranty-status-completed">Completed</span>
                             }
                             else if (request.Status == 5)
                             {
-                                <span class="warranty-badge warranty-status-rejected">Bị từ chối</span>
+                                <span class="warranty-badge warranty-status-rejected">Rejected</span>
                             }
                             else if (request.Status == 6)
                             {
-                                <span class="warranty-badge warranty-status-cancelled">Đã bị huỷ</span>
+                                <span class="warranty-badge warranty-status-cancelled">Cancelled</span>
                             }
                         </td>
                     <td class="text-center">@request.CreatedDate.ToString("dd/MM/yyyy HH:mm:ss")</td>
