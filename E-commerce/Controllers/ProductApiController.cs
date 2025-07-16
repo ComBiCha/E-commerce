@@ -61,91 +61,126 @@ namespace E_commerce.Controllers
             return products;
         }
 
-
-
         [HttpGet("Search")]
         public async Task<IActionResult> Search(
-        string? searchTerm,
-        string? category,
-        string? brand,
-        string? sortOrder,
-        [FromQuery] List<string>? colors,
-        [FromQuery] List<string>? materials)
+            string? searchTerm,
+            string? category,
+            string? brand,
+            string? sortOrder,
+            [FromQuery] string[]? colors,
+            [FromQuery] string[]? materials)
         {
-            IQueryable<ProductModel> products = _context.Products
-                .Include(p => p.Category)
-                .Include(p => p.Brand)
-                .Include(p => p.Variations)
-                    .ThenInclude(v => v.Color)
-                .Include(p => p.Variations)
-                    .ThenInclude(v => v.Material);
+            try
+            {
+                Console.WriteLine($"🔍 Search parameters:");
+                Console.WriteLine($"  - searchTerm: {searchTerm}");
+                Console.WriteLine($"  - category: {category}");
+                Console.WriteLine($"  - brand: {brand}");
+                Console.WriteLine($"  - sortOrder: {sortOrder}");
+                Console.WriteLine($"  - colors: [{(colors != null ? string.Join(", ", colors) : "null")}]");
+                Console.WriteLine($"  - materials: [{(materials != null ? string.Join(", ", materials) : "null")}]");
 
-            // Lọc theo từ khóa, danh mục, thương hiệu
-            if (!string.IsNullOrEmpty(searchTerm))
-            {
-                products = products.Where(p => p.Name.Contains(searchTerm) || p.Category.Name.Contains(searchTerm));
-            }
-            if (!string.IsNullOrEmpty(category))
-            {
-                products = products.Where(p => p.Category.Name == category);
-            }
-            if (!string.IsNullOrEmpty(brand))
-            {
-                products = products.Where(p => p.Brand.Name == brand);
-            }
+                IQueryable<ProductModel> products = _context.Products
+                    .Include(p => p.Category)
+                    .Include(p => p.Brand)
+                    .Include(p => p.Variations)
+                        .ThenInclude(v => v.Color)
+                    .Include(p => p.Variations)
+                        .ThenInclude(v => v.Material);
 
-            // Lọc theo màu sắc
-            if (colors != null && colors.Count > 0)
-            {
-                products = products.Where(p => p.Variations.Any(v => colors.Contains(v.Color.Name)));
-            }
-
-            // Lọc theo chất liệu
-            if (materials != null && materials.Count > 0)
-            {
-                products = products.Where(p => p.Variations.Any(v => materials.Contains(v.Material.Name)));
-            }
-
-            // Sắp xếp
-            switch (sortOrder)
-            {
-                case "best_selling":
-                    products = products.OrderByDescending(p => p.Sold);
-                    break;
-                case "price_desc":
-                    products = products.OrderByDescending(p => p.Price);
-                    break;
-                case "price_asc":
-                    products = products.OrderBy(p => p.Price);
-                    break;
-                default:
-                    products = products.OrderBy(p => p.Name);
-                    break;
-            }
-
-            var result = await products.Select(p => new
-            {
-                p.Id,
-                p.Name,
-                p.Description,
-                p.Price,
-                p.Image,
-                p.Image2,
-                Category = p.Category.Name,
-                Brand = p.Brand.Name,
-                Variations = p.Variations.Select(v => new
+                // 🔹 LỌC THEO CATEGORY
+                if (!string.IsNullOrEmpty(category))
                 {
-                    v.Id,
-                    v.Size,
-                    v.Price,
-                    v.Stock,
-                    v.ImageUrl,
-                    Color = v.Color != null ? new { v.Color.Id, v.Color.Name, v.Color.HexCode } : null,
-                    Material = v.Material != null ? new { v.Material.Id, v.Material.Name } : null
-                })
-            }).ToListAsync();
+                    products = products.Where(p => p.Category.Name == category);
+                    Console.WriteLine($"✅ Applied category filter: {category}");
+                }
 
-            return Ok(result);
+                // 🔹 LỌC THEO BRAND
+                if (!string.IsNullOrEmpty(brand))
+                {
+                    products = products.Where(p => p.Brand.Name == brand);
+                    Console.WriteLine($"✅ Applied brand filter: {brand}");
+                }
+
+                // 🔹 LỌC THEO SEARCH TERM
+                if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    products = products.Where(p => p.Name.Contains(searchTerm) || p.Category.Name.Contains(searchTerm));
+                    Console.WriteLine($"✅ Applied search term: {searchTerm}");
+                }
+
+                // 🔹 LỌC THEO MÀU SẮC
+                if (colors != null && colors.Length > 0)
+                {
+                    var validColors = colors.Where(c => !string.IsNullOrWhiteSpace(c)).ToList();
+                    if (validColors.Any())
+                    {
+                        products = products.Where(p => p.Variations.Any(v => v.Color != null && validColors.Contains(v.Color.Name)));
+                        Console.WriteLine($"✅ Applied color filter: {string.Join(", ", validColors)}");
+                    }
+                }
+
+                // 🔹 LỌC THEO CHẤT LIỆU
+                if (materials != null && materials.Length > 0)
+                {
+                    var validMaterials = materials.Where(m => !string.IsNullOrWhiteSpace(m)).ToList();
+                    if (validMaterials.Any())
+                    {
+                        products = products.Where(p => p.Variations.Any(v => v.Material != null && validMaterials.Contains(v.Material.Name)));
+                        Console.WriteLine($"✅ Applied material filter: {string.Join(", ", validMaterials)}");
+                    }
+                }
+
+                // 🔹 SẮP XẾP
+                switch (sortOrder)
+                {
+                    case "best_selling":
+                        products = products.OrderByDescending(p => p.Sold);
+                        break;
+                    case "price_desc":
+                        products = products.OrderByDescending(p => p.Price);
+                        break;
+                    case "price_asc":
+                        products = products.OrderBy(p => p.Price);
+                        break;
+                    default:
+                        products = products.OrderBy(p => p.Name);
+                        break;
+                }
+
+                var result = await products.Select(p => new
+                {
+                    p.Id,
+                    p.Name,
+                    p.Description,
+                    p.Price,
+                    p.Image,
+                    p.Image2,
+                    Category = p.Category.Name,
+                    Brand = p.Brand.Name,
+                    Variations = p.Variations.Select(v => new
+                    {
+                        v.Id,
+                        v.Size,
+                        v.Price,
+                        v.Stock,
+                        v.ImageUrl,
+                        Color = v.Color != null ? new { v.Color.Id, v.Color.Name, v.Color.HexCode } : null,
+                        Material = v.Material != null ? new { v.Material.Id, v.Material.Name } : null
+                    })
+                }).ToListAsync();
+
+                Console.WriteLine($"🎉 Found {result.Count} products after filtering");
+
+                // 🔹 LUÔN TRẢ VỀ KẾT QUẢ (KỂ CẢ KHI TRỐNG)
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Search error: {ex.Message}");
+                // 🔹 TRẢ VỀ DANH SÁCH TRỐNG THAY VÌ BADREQUEST
+                return Ok(new List<object>());
+            }
         }
 
         // 2. Lấy thông tin chi tiết sản phẩm theo Id
