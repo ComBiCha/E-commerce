@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
+
 namespace E_commerce.Models
 {
     [Authorize]
@@ -26,6 +27,8 @@ namespace E_commerce.Models
         public async Task SendMessage(string receiverName, string message, string imageUrl = null)
         {
             Console.WriteLine("=== SendMessage CALLED ===");
+            Console.WriteLine($"User: {Context.User?.Identity?.Name}");
+            Console.WriteLine($"IsAuthenticated: {Context.User?.Identity?.IsAuthenticated}");
             Console.WriteLine($"Message: {message}");
             Console.WriteLine($"ImageUrl: {imageUrl}");
 
@@ -35,6 +38,7 @@ namespace E_commerce.Models
                 if (string.IsNullOrEmpty(actualSenderName))
                 {
                     Console.WriteLine("ERROR: Sender name is null or empty");
+                    await Clients.Caller.SendAsync("Error", "User not authenticated");
                     return;
                 }
 
@@ -88,14 +92,17 @@ namespace E_commerce.Models
                 _dataContext.Messages.Add(msg);
                 await _dataContext.SaveChangesAsync();
 
+                // ===== FIX: Gửi timestamp cùng với tin nhắn =====
+                string timestampString = msg.Timestamp.ToString("yyyy-MM-ddTHH:mm:ss");
+                Console.WriteLine($"Sending message with timestamp: {timestampString}");
 
-                await Clients.User(receiver.Id).SendAsync("ReceiveMessage", senderForMessage.UserName, message, imageUrl);
+                await Clients.User(receiver.Id).SendAsync("ReceiveMessage", senderForMessage.UserName, message, imageUrl, timestampString);
 
-                await Clients.User(senderForMessage.Id).SendAsync("ReceiveMessage", senderForMessage.UserName, message, imageUrl);
+                await Clients.User(senderForMessage.Id).SendAsync("ReceiveMessage", senderForMessage.UserName, message, imageUrl, timestampString);
 
-                if (actualSender.Id != senderForMessage.Id) 
+                if (actualSender.Id != senderForMessage.Id)
                 {
-                    await Clients.User(actualSender.Id).SendAsync("ReceiveMessage", senderForMessage.UserName, message, imageUrl);
+                    await Clients.User(actualSender.Id).SendAsync("ReceiveMessage", senderForMessage.UserName, message, imageUrl, timestampString);
                 }
                 if (await _userManager.IsInRoleAsync(actualSender, "User") || await _userManager.IsInRoleAsync(actualSender, "CustomerSupport"))
                 {
@@ -109,7 +116,7 @@ namespace E_commerce.Models
                     {
                         if (id != actualSender.Id && id != receiver.Id)
                         {
-                            await Clients.User(id).SendAsync("ReceiveMessage", senderForMessage.UserName, message, imageUrl);
+                            await Clients.User(id).SendAsync("ReceiveMessage", senderForMessage.UserName, message, imageUrl, timestampString);
                         }
                     }
                 }
@@ -130,7 +137,12 @@ namespace E_commerce.Models
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"ERROR in SendMessage: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 _logger.LogError(ex, "ERROR in SendMessage: {Message}", ex.Message);
+
+                // Send error to client
+                await Clients.Caller.SendAsync("Error", $"Server error: {ex.Message}");
                 throw;
             }
         }

@@ -117,7 +117,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Batches");
+                    b.ToTable("Batches", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.BrandModel", b =>
@@ -144,7 +144,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Brands");
+                    b.ToTable("Brands", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.CategoryModel", b =>
@@ -171,7 +171,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.ColorModel", b =>
@@ -190,7 +190,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Colors");
+                    b.ToTable("Colors", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.CompareModel", b =>
@@ -211,7 +211,7 @@ namespace E_commerce.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Compares");
+                    b.ToTable("Compares", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.ContactModel", b =>
@@ -240,7 +240,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Name");
 
-                    b.ToTable("Contacts");
+                    b.ToTable("Contacts", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.CouponModel", b =>
@@ -274,7 +274,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Coupons");
+                    b.ToTable("Coupons", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.CouponUsageModel", b =>
@@ -296,7 +296,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CouponUsages");
+                    b.ToTable("CouponUsages", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.MaterialModel", b =>
@@ -312,7 +312,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Materials");
+                    b.ToTable("Materials", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.Messages", b =>
@@ -341,7 +341,7 @@ namespace E_commerce.Migrations
 
                     b.HasIndex("SenderId");
 
-                    b.ToTable("Messages");
+                    b.ToTable("Messages", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.OrderDetails", b =>
@@ -379,7 +379,7 @@ namespace E_commerce.Migrations
 
                     b.HasIndex("VariationId");
 
-                    b.ToTable("OrderDetails");
+                    b.ToTable("OrderDetails", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.OrderModel", b =>
@@ -413,7 +413,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Orders", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.ProductModel", b =>
@@ -462,7 +462,7 @@ namespace E_commerce.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.ProductQuantityModel", b =>
@@ -497,7 +497,7 @@ namespace E_commerce.Migrations
 
                     b.HasIndex("VariationId");
 
-                    b.ToTable("ProductQuantities");
+                    b.ToTable("ProductQuantities", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.ProductVariationModel", b =>
@@ -534,7 +534,7 @@ namespace E_commerce.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Variations");
+                    b.ToTable("Variations", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.RatingModel", b =>
@@ -568,7 +568,7 @@ namespace E_commerce.Migrations
                     b.HasIndex("ProductId")
                         .IsUnique();
 
-                    b.ToTable("Ratings");
+                    b.ToTable("Ratings", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.ShippingModel", b =>
@@ -593,7 +593,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Shippings");
+                    b.ToTable("Shippings", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.SliderModel", b =>
@@ -620,7 +620,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Sliders");
+                    b.ToTable("Sliders", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.UserModel", b =>
@@ -649,7 +649,7 @@ namespace E_commerce.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("UserModel");
+                    b.ToTable("UserModel", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.WarrantyModel", b =>
@@ -684,7 +684,7 @@ namespace E_commerce.Migrations
 
                     b.HasIndex("VariationId");
 
-                    b.ToTable("Warranties");
+                    b.ToTable("Warranties", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.WarrantyRequestModel", b =>
@@ -722,7 +722,7 @@ namespace E_commerce.Migrations
 
                     b.HasIndex("WarrantyID");
 
-                    b.ToTable("WarrantyRequests");
+                    b.ToTable("WarrantyRequests", (string)null);
                 });
 
             modelBuilder.Entity("E_commerce.Models.WishlistModel", b =>
@@ -743,7 +743,7 @@ namespace E_commerce.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Wishlists");
+                    b.ToTable("Wishlists", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
