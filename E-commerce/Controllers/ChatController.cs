@@ -154,7 +154,7 @@ namespace E_commerce.Controllers
                     .FirstOrDefaultAsync();
 
                 if (string.IsNullOrEmpty(supportUserName))
-                    return Json(new List<string>()); 
+                    return Json(new List<string>());
             }
 
             if (role == "CustomerSupport" || role == "Admin")
@@ -233,7 +233,8 @@ namespace E_commerce.Controllers
                     .Include(m => m.Sender)
                     .Where(m => m.ReceiverId == currentUserId && !m.IsRead)
                     .GroupBy(m => m.Sender.UserName)
-                    .Select(g => new {
+                    .Select(g => new
+                    {
                         SenderName = g.Key,
                         Count = g.Count()
                     })
@@ -317,6 +318,92 @@ namespace E_commerce.Controllers
             {
                 Console.WriteLine($"❌ Error marking messages as read: {ex.Message}");
                 return StatusCode(500, "Internal server error");
+            }
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> GetTotalUnreadCount()
+        {
+            try
+            {
+                var currentUser = User.FindFirstValue(ClaimTypes.Name);
+                var role = User.FindFirstValue(ClaimTypes.Role);
+
+                if (string.IsNullOrEmpty(currentUser) || string.IsNullOrEmpty(role))
+                {
+                    return Unauthorized();
+                }
+
+                int totalUnread = 0;
+
+                if (role == "User")
+                {
+                    // User: Đếm tin nhắn chưa đọc từ CustomerSupport gửi cho user này
+                    var currentUserId = await _dataContext.Users
+                        .Where(u => u.UserName == currentUser)
+                        .Select(u => u.Id)
+                        .FirstOrDefaultAsync();
+
+                    if (string.IsNullOrEmpty(currentUserId))
+                        return Json(0);
+
+                    // Lấy CustomerSupport user ID
+                    var customerSupportUserId = await _dataContext.Users
+                        .Join(_dataContext.UserRoles, u => u.Id, ur => ur.UserId, (u, ur) => new { u, ur })
+                        .Join(_dataContext.Roles, uur => uur.ur.RoleId, r => r.Id, (uur, r) => new { uur.u, r })
+                        .Where(x => x.r.Name == "CustomerSupport")
+                        .Select(x => x.u.Id)
+                        .FirstOrDefaultAsync();
+
+                    if (!string.IsNullOrEmpty(customerSupportUserId))
+                    {
+                        totalUnread = await _dataContext.Messages
+                            .Where(m => m.ReceiverId == currentUserId && 
+                                       m.SenderId == customerSupportUserId && 
+                                       !m.IsRead)
+                            .CountAsync();
+                    }
+                }
+                else if (role == "Admin" || role == "CustomerSupport")
+                {
+                    // Admin/CustomerSupport: Đếm tổng tin nhắn chưa đọc từ tất cả users
+                    string supportUserId = "";
+
+                    if (role == "CustomerSupport")
+                    {
+                        // Nếu là CustomerSupport, dùng chính user hiện tại
+                        supportUserId = await _dataContext.Users
+                            .Where(u => u.UserName == currentUser)
+                            .Select(u => u.Id)
+                            .FirstOrDefaultAsync();
+                    }
+                    else if (role == "Admin")
+                    {
+                        // Nếu là Admin, lấy CustomerSupport user ID
+                        supportUserId = await _dataContext.Users
+                            .Join(_dataContext.UserRoles, u => u.Id, ur => ur.UserId, (u, ur) => new { u, ur })
+                            .Join(_dataContext.Roles, uur => uur.ur.RoleId, r => r.Id, (uur, r) => new { uur.u, r })
+                            .Where(x => x.r.Name == "CustomerSupport")
+                            .Select(x => x.u.Id)
+                            .FirstOrDefaultAsync();
+                    }
+
+                    if (!string.IsNullOrEmpty(supportUserId))
+                    {
+                        totalUnread = await _dataContext.Messages
+                            .Where(m => m.ReceiverId == supportUserId && 
+                                       !m.IsRead)
+                            .CountAsync();
+                    }
+                }
+
+                Console.WriteLine($"📊 GetTotalUnreadCount - User: {currentUser}, Role: {role}, Count: {totalUnread}");
+                return Json(totalUnread);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error in GetTotalUnreadCount: {ex.Message}");
+                return Json(0);
             }
         }
 

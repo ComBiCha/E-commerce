@@ -162,6 +162,41 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Biểu đồ và Bảng -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h4 class="text-center text-primary fw-bold mb-4">Revenue by Brand</h4>
+
+                            <!-- Biểu đồ -->
+                            <div class="d-flex justify-content-center">
+                                <canvas id="brandRevenueChart" width="400" height="300" style="max-width: 100%; height: auto;"></canvas>
+                            </div>
+
+                            <!-- Bảng -->
+                            <div class="mt-5">
+                                <h5 class="fw-semibold text-secondary">Percentage Revenue by Brand</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle table-bordered">
+                                        <thead class="table-light">
+                                            <tr class="text-center">
+                                            <th>Brand</th>
+                                            <th>Revenue</th>
+                                            <th>Percent (%)</th>
+                                            </tr>
+                                        </thead>
+                                    <tbody id="brandRevenueTableBody">
+                                    <!-- Dữ liệu sẽ được chèn bằng JavaScript -->
+                                    </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             @* =============================================================================================== *@
         </div>
@@ -648,6 +683,86 @@
         }
     });
 
+</script>
+
+<script>
+let brandRevenueChart;
+
+function fetchBrandRevenue() {
+const month = document.getElementById('monthSelect').value;
+const year = document.getElementById('yearSelect').value;
+
+fetch('@Url.Action("GetRevenueByBrand", "Statistic")' + `?month=${month}&year=${year}`)
+.then(response => {
+if (!response.ok) throw new Error('Network error');
+return response.json();
+})
+.then(data => {
+const totalRevenue = data.reduce((sum, item) => sum + item.revenue, 0);
+const labels = data.map(item => item.brand);
+const revenues = data.map(item => item.revenue);
+
+// Tạo biểu đồ như trước
+const ctx = document.getElementById('brandRevenueChart').getContext('2d');
+
+if (brandRevenueChart) brandRevenueChart.destroy();
+
+brandRevenueChart = new Chart(ctx, {
+type: 'pie',
+data: {
+labels: labels,
+datasets: [{
+label: 'Revenue by Brand',
+data: revenues,
+backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#33FF57', '#A833FF'],
+borderColor: ['#fff', '#fff', '#fff', '#fff', '#fff'],
+borderWidth: 1
+}]
+},
+options: {
+responsive: true,
+plugins: {
+legend: {
+position: 'top',
+labels: {
+color: 'white'
+}
+},
+tooltip: {
+callbacks: {
+label: function (context) {
+return `${context.label}: $${context.raw.toFixed(2)}`;
+}
+}
+}
+}
+}
+});
+
+// Cập nhật bảng chi tiết
+const tableBody = document.getElementById('brandRevenueTableBody');
+tableBody.innerHTML = ''; // Clear trước
+
+data.forEach(item => {
+const percent = ((item.revenue / totalRevenue) * 100).toFixed(2);
+const row = `
+<tr>
+<td>${item.brand}</td>
+<td>$${item.revenue.toFixed(2)}</td>
+<td>${percent}%</td>
+</tr>`;
+tableBody.innerHTML += row;
+});
+})
+.catch(error => console.error('Fetch error:', error));
+}
+
+// Load chart on select change
+document.getElementById('monthSelect').addEventListener('change', fetchBrandRevenue);
+document.getElementById('yearSelect').addEventListener('change', fetchBrandRevenue);
+
+// Initial load
+window.addEventListener('load', fetchBrandRevenue);
 </script>
 
 <style>

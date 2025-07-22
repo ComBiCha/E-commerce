@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ProductModel>
+﻿@using E_commerce.Models
+@model IEnumerable<ProductModel>
 <partial name="_SliderPartial" />
 <div class="row mb-3">
 	<div class="col-sm-12">
@@ -111,7 +112,7 @@
 							<span class="status">Online</span>
 						</div>
 					</div>
-					<button class="close-btn" onclick="toggleChat()">×</button>
+					<button class="close-btn" onclick="handleToggleChat()">×</button>
 				</div>
 
 				@if (User.Identity.IsAuthenticated)
@@ -190,14 +191,11 @@
 				<svg id="closeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" style="display: none;">
 					<path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="white" />
 				</svg>
-				<div class="notification-badge" id="notificationBadge">3</div>
+				<div class="notification-badge" id="notificationBadge"></div>
 			</div>
 		</div>
 	</div>
 </div>
-
-
-
 
 
 <style>
@@ -498,16 +496,36 @@
 		right: -5px;
 		width: 24px;
 		height: 24px;
-		background: #ef4444;
+    	background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
 		color: white;
 		border-radius: 50%;
-		display: flex;
+		display: none;
 		align-items: center;
 		justify-content: center;
 		font-size: 12px;
 		font-weight: 600;
 		border: 2px solid white;
+		box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+		animation: badgePulse 2s infinite;
+		transition: all 0.3s ease;
 	}
+
+	@@keyframes badgePulse {
+		0% {
+			box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+		}
+		70% {
+			box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+		}
+		100% {
+			box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+		}
+	}
+
+/* Chỉ hiển thị khi có class 'show' hoặc inline style display: flex */
+.notification-badge.show {
+    display: flex !important;
+}
 
 	/* Chat Container */
 	.chat-container {
@@ -726,8 +744,6 @@
 	.user-list-widget {
 		background-color: #151c2c;
 		border-bottom: 1px solid #2e374a;
-		max-height: 120px;
-		overflow-y: auto;
 	}
 
 	.user-list-header {
@@ -770,6 +786,26 @@
 			color: #6b7280;
 		}
 
+		/* Thêm scrollbar cho user search input */
+		.user-search-input::-webkit-scrollbar {
+			width: 4px;
+			height: 4px;
+		}
+
+		.user-search-input::-webkit-scrollbar-track {
+			background: #0f1419;
+			border-radius: 2px;
+		}
+
+		.user-search-input::-webkit-scrollbar-thumb {
+			background: #5af2b2;
+			border-radius: 2px;
+		}
+
+		.user-search-input::-webkit-scrollbar-thumb:hover {
+			background: #474747;
+		}
+
 	.search-icon {
 		position: absolute;
 		left: 8px;
@@ -789,27 +825,26 @@
 		flex-wrap: wrap;
 		gap: 8px;
 		padding: 10px;
-		max-height: 100px;
+		max-height: 50px;
 		overflow-y: auto;
+		overflow-x: hidden;
+		scrollbar-width: thin;
+		scrollbar-color: #5af2b2 #151c2c;
 	}
 
-		/* Custom scrollbar cho user list */
+		/* Custom scrollbar cho user-list-content */
 		.user-list-content::-webkit-scrollbar {
-			width: 4px;
+			width: 6px;
+			background: #151c2c;
 		}
-
-		.user-list-content::-webkit-scrollbar-track {
-			background: #1a2332;
-		}
-
 		.user-list-content::-webkit-scrollbar-thumb {
-			background: #2e374a;
-			border-radius: 2px;
+			background: linear-gradient(135deg, #474747 0%, #5af2b2 100%);
+			border-radius: 3px;
+			border: 1px solid #2e374a;
 		}
-
-			.user-list-content::-webkit-scrollbar-thumb:hover {
-				background: #5af2b2;
-			}
+		.user-list-content::-webkit-scrollbar-thumb:hover {
+			background: linear-gradient(135deg, #5af2b2 0%, #474747 100%);
+		}
 
 	.user-item-widget {
 		background-color: #1a2332;
@@ -1146,6 +1181,83 @@
 	let currentSelectedUser = "";
 	let allUsers = []; // Store all users for filtering
 	let unreadMessages = {}; // Track unread count per user
+	let totalUnreadCount = 0; // Track total unread for main badge
+
+	// ===== LOAD TOTAL UNREAD COUNT FOR MAIN BADGE =====
+	async function loadTotalUnreadCount() {
+
+		// Kiểm tra user đã đăng nhập chưa
+		if (!currentUser || currentUser === "") {
+			console.log("❌ User not authenticated, skipping unread count load");
+			totalUnreadCount = 0;
+			updateMainNotificationBadge();
+			return;
+		}
+
+		try {
+			console.log("📊 Loading total unread count...");
+			const response = await fetch("/Chat/GetTotalUnreadCount");
+			if (!response.ok) {
+				console.error("Failed to fetch total unread count:", response.status);
+				return;
+			}
+
+			const count = await response.json();
+			totalUnreadCount = count;
+			
+			console.log(`📊 Total unread count: ${count}`);
+			updateMainNotificationBadge();
+			
+		} catch (error) {
+			console.error("❌ Failed to load total unread count:", error);
+			totalUnreadCount = 0;
+        	updateMainNotificationBadge();
+		}
+	}
+
+	// ===== UPDATE MAIN NOTIFICATION BADGE =====
+	function updateMainNotificationBadge() {
+		const badge = document.getElementById("notificationBadge");
+		if (!badge) return;
+
+		// Nếu user chưa đăng nhập hoặc không có tin nhắn, ẩn badge
+		if (!currentUser || currentUser === "" || totalUnreadCount <= 0) {
+			badge.style.display = 'none';
+			console.log(`❌ Main badge hidden (user: ${currentUser}, count: ${totalUnreadCount})`);
+			return;
+		}
+
+		if (totalUnreadCount > 0) {
+			badge.textContent = totalUnreadCount > 99 ? '99+' : totalUnreadCount;
+			badge.style.display = 'flex';
+			console.log(`🔴 Main badge updated: ${totalUnreadCount} messages`);
+		}
+	}
+
+	// ===== INCREMENT TOTAL UNREAD COUNT =====
+	function incrementTotalUnreadCount() {
+
+		// Chỉ increment nếu user đã đăng nhập
+		if (!currentUser || currentUser === "") {
+			console.log("❌ User not authenticated, not incrementing count");
+			return;
+		}
+			totalUnreadCount++;
+			updateMainNotificationBadge();
+		}
+
+	// ===== CLEAR TOTAL UNREAD COUNT WHEN OPENING CHAT =====
+	function clearTotalUnreadCountForUser(userName) {
+		if (userRole === "User") {
+			// User: clear all unread from support
+			totalUnreadCount = 0;
+		} else if (userRole === "Admin" || userRole === "CustomerSupport") {
+			// Admin: subtract this user's unread count
+			const userUnreadCount = unreadMessages[userName] || 0;
+			totalUnreadCount = Math.max(0, totalUnreadCount - userUnreadCount);
+		}
+		updateMainNotificationBadge();
+	}
 
 	// ===== TOGGLE CHAT FUNCTION - ĐỊNH NGHĨA SỚM =====
 	function handleToggleChat() {
@@ -1157,12 +1269,18 @@
 
 		isOpen = !isOpen;
 
-		if (isOpen) {
+			if (isOpen) {
 			container.style.display = 'flex';
 			bubble.classList.add('bubble-open');
 			chatIcon.style.display = 'none';
 			closeIcon.style.display = 'block';
-			badge.style.display = 'none';
+
+			// Clear main badge when opening chat
+        	if (currentUser && currentUser !== "" && userRole === "User") {
+				// User: clear all unread count when opening
+				totalUnreadCount = 0;
+				updateMainNotificationBadge();
+			}
 
 			// Initialize SignalR when opening chat
 			if (!connection) {
@@ -1173,7 +1291,6 @@
 			bubble.classList.remove('bubble-open');
 			chatIcon.style.display = 'block';
 			closeIcon.style.display = 'none';
-			badge.style.display = 'flex';
 		}
 	}
 
@@ -1340,6 +1457,7 @@
 		}
 
 		// Clear unread count in UI
+		clearTotalUnreadCountForUser(userName);
 		clearUnreadCount(userName);
 
 		currentSelectedUser = userName;
@@ -1364,6 +1482,12 @@
 
 	// ===== SIGNALR INITIALIZATION =====
 	async function initializeSignalR() {
+
+		 if (!currentUser || currentUser === "") {
+        console.log("❌ User not authenticated, not initializing SignalR");
+        return;
+    	}
+
 		if (connection) return;
 
 		connection = new signalR.HubConnectionBuilder()
@@ -1373,6 +1497,8 @@
 		try {
 			await connection.start();
 			console.log("SignalR Connected in widget");
+
+			await loadTotalUnreadCount();
 
 			// Get customer support username
 			try {
@@ -1433,32 +1559,48 @@
 					}, 100);
 				}
 			} else {
-				// ===== CHỈ INCREMENT BADGE CHO TIN NHẮN MỚI REAL-TIME =====
-				if (userRole === "Admin" || userRole === "CustomerSupport") {
-					const isFromRegularUser = sender !== currentUser && sender !== customerSupportUserName;
-					const isNotCurrentlySelected = sender !== currentSelectedUser;
+				// Handle unread message counts
+                if (userRole === "User") {
+                    // User: only count messages from support
+                    if (sender === customerSupportUserName && !isOpen) {
+                        incrementTotalUnreadCount();
+                        console.log(`📢 User received message from support. Total unread: ${totalUnreadCount}`);
+                    }
+                } else if (userRole === "Admin" || userRole === "CustomerSupport") {
+                    // Admin: count messages from regular users
+                    const isFromRegularUser = sender !== currentUser && sender !== customerSupportUserName;
+                    const isNotCurrentlySelected = sender !== currentSelectedUser;
 
-					console.log(`Badge check: isFromRegularUser=${isFromRegularUser}, isNotCurrentlySelected=${isNotCurrentlySelected}`);
+                    console.log(`Badge check: isFromRegularUser=${isFromRegularUser}, isNotCurrentlySelected=${isNotCurrentlySelected}`);
 
-					if (isFromRegularUser && isNotCurrentlySelected) {
-						console.log(`📢 Adding badge for REAL-TIME message from: ${sender}`);
-						incrementUnreadCount(sender);
-					}
-				}
-
+                    if (isFromRegularUser && isNotCurrentlySelected) {
+                        console.log(`📢 Admin received message from user: ${sender}`);
+                        incrementUnreadCount(sender);
+                        
+                        // Only increment total if chat is closed or user not selected
+                        if (!isOpen || sender !== currentSelectedUser) {
+                            incrementTotalUnreadCount();
+                            console.log(`📢 Total unread count: ${totalUnreadCount}`);
+                        }
+                    }
+                }
 				updateNotificationBadge();
 			}
 		});
 
 			connection.on("UpdateUserList", function (newUserName) {
-				console.log(`Updating user list for new user: ${newUserName}`);
-				loadChatUsers();
-			});
+            console.log(`Updating user list for new user: ${newUserName}`);
+            loadChatUsers();
+            // Reload total unread count when user list updates
+            loadTotalUnreadCount();
+        });
 
-			connection.on("LoadUserList", function () {
-				console.log("Reloading user list based on server request.");
-				loadChatUsers();
-			});
+        connection.on("LoadUserList", function () {
+            console.log("Reloading user list based on server request.");
+            loadChatUsers();
+            // Reload total unread count when user list updates
+            loadTotalUnreadCount();
+        });
 
 		} catch (err) {
 			console.error("SignalR Connection Error in widget: ", err.toString());
@@ -1715,11 +1857,68 @@
 		}
 	}
 
+	// ===== HANDLE IMAGE UPLOAD AND SEND =====
+document.getElementById("imageInputWidget").addEventListener("change", async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Tạo form data để upload
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+        // Gửi ảnh lên server
+        const response = await fetch("/Chat/UploadImage", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            alert("Upload image failed!");
+            return;
+        }
+
+        const data = await response.json();
+        if (data && data.imageUrl) {
+            // Gửi ảnh qua SignalR (không cần nhập text)
+            const receiver = document.getElementById("receiverWidget").value;
+            if (!receiver) {
+                alert("Please select a user to chat with first.");
+                return;
+            }
+            if (!connection) {
+                alert("Chat connection not established. Please refresh page.");
+                return;
+            }
+            await connection.invoke("SendMessage", receiver, "", data.imageUrl);
+        }
+    } catch (err) {
+        alert("Upload image error: " + err);
+    } finally {
+        // Reset input để có thể chọn lại cùng file nếu muốn
+        e.target.value = "";
+        updateSendButtonState();
+    }
+});
+
 	// ===== EVENT LISTENERS =====
 	document.addEventListener('DOMContentLoaded', function() {
 		console.log("DOM loaded, setting up chat events");
 		console.log("Current User:", currentUser);
 		console.log("User Role:", userRole);
+
+		// Chỉ load unread count khi user đã đăng nhập
+		if (currentUser && currentUser !== "") {
+			console.log("✅ User authenticated, loading unread count");
+			loadTotalUnreadCount();
+		} else {
+			console.log("❌ User not authenticated, hiding badge");
+			// Đảm bảo badge bị ẩn khi chưa đăng nhập
+			const badge = document.getElementById("notificationBadge");
+			if (badge) {
+				badge.style.display = 'none';
+			}
+		}
 
 		const messageInput = document.getElementById("messageInputWidget");
 		const imageInput = document.getElementById("imageInputWidget");
