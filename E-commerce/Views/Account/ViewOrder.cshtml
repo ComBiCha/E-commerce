@@ -3,10 +3,11 @@
     ViewData["title"] = "Order Details";
     decimal total = 0;
     decimal subtotal = 0;
-
-
+    // 🔹 LẤY WARRANTIES TỪ VIEWBAG
+    var warranties = ViewBag.Warranties as List<WarrantyModel> ?? new List<WarrantyModel>();
 }
- @* For user *@
+
+@* For user *@
 <div class="view-order-container">
     <h3 style="font-size: 2rem; border-bottom: 1px solid black; margin-bottom: 3rem; display: inline-block;">
         Order Details
@@ -28,16 +29,19 @@
         <tbody>
             @foreach (var item in Model)
             {
-                var warrantyCode = @item.Product.Warranty?.FirstOrDefault()?.WarrantyCode ?? "No Warranty";
-                var warrantyDate = @item.Product.Warranty?.FirstOrDefault()?.ExpirationDate;
-                decimal itemSubtotal = item.Quantity * (item.Price - (item.DiscountAmount / item.Quantity)); // Tính tổng giá sau giảm cho từng item
+                // 🔹 TÌM WARRANTY CHO VARIATION NÀY
+                var warranty = warranties.FirstOrDefault(w => w.VariationId == item.VariationId);
+                var warrantyCode = warranty?.WarrantyCode ?? "No Warranty";
+                var warrantyDate = warranty?.ExpirationDate;
+
+                decimal itemSubtotal = item.Quantity * (item.Price - (item.DiscountAmount / item.Quantity));
                 subtotal += itemSubtotal;
-                total += itemSubtotal; // Cập nhật tổng tiền đã giảm
+                total += itemSubtotal;
                 <tr>
                     <input type="hidden" asp-for="@item.OrderCode" class="getId" />
                     <th>@item.Id</th>
                     <td>@item.OrderCode</td>
-                    <td>@item.UserName</td> 
+                    <td>@item.UserName</td>
                     <td>@item.Product.Name - [@item.Variation.Material.Name|@item.Variation.Color.Name|Size:@item.Variation.Size]</td>
                     <td>
                         @if (item.DiscountAmount > 0)
@@ -57,13 +61,26 @@
                     <td>
                         @if (@ViewBag.Order.Status == 5) // Hiển thị khi trạng thái đơn hàng là "Đơn hàng đã hoàn thành"
                         {
-                            <span class="text-success">
-                                @warrantyCode <br> Expiration Date: @warrantyDate
-                            </span>
+                            @if (warranty != null)
+                            {
+                                <div style="background: #e8f5e8; padding: 10px; border-radius: 8px; border: 1px solid #4caf50;">
+                                    <strong style="color: #2e7d32;">@warrantyCode</strong><br>
+                                    <small style="color: #666;">Expires: @warrantyDate?.ToString("MMM dd, yyyy")</small>
+                                    <br>
+                                    <button onclick="copyToClipboard('@warrantyCode')"
+                                            style="background: #4caf50; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 5px;">
+                                        📋 Copy Code
+                                    </button>
+                                </div>
+                            }
+                            else
+                            {
+                                <span style="color: #999; font-style: italic;">No warranty available</span>
+                            }
                         }
                         else
                         {
-                            <span class="text-muted">Not Completed</span>
+                            <span class="text-muted">Available after completion</span>
                         }
                     </td>
                 </tr>
@@ -130,13 +147,12 @@
 </div>
 
 <style>
-    .view-order-container{
+    .view-order-container {
         position: relative;
         clear: both;
         background: white;
         padding: 8rem 2rem 15rem 2rem;
     }
-   
 </style>
 
 @section Scripts {
@@ -144,7 +160,7 @@
         $(document).ready(function () {
             $('.select-update-order').change(function () {
                 var status = $(this).val();
-                var ordercode = $(this).closest('tbody').find('.getId').val(); // Lấy giá trị từ input ẩn trong cùng hàng
+                var ordercode = $(this).closest('tbody').find('.getId').val();
 
                 $.ajax({
                     type: "POST",
@@ -169,10 +185,47 @@
                 });
             });
         });
+
+        // 🔹 FUNCTION COPY WARRANTY CODE
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function () {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Copied!',
+                    text: 'Warranty code copied to clipboard',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }, function (err) {
+                console.error('Could not copy text: ', err);
+                var textArea = document.createElement("textarea");
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Copied!',
+                        text: 'Warranty code copied to clipboard',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } catch (err) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to copy warranty code',
+                    });
+                }
+                document.body.removeChild(textArea);
+            });
+        }
     </script>
     <script>
         let table = new DataTable('#orderdetailsTable', {
-        layout: {
+            layout: {
                 topStart: {
                     buttons: ['pdf', 'print']
                 }

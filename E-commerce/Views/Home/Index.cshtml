@@ -1,4 +1,5 @@
-﻿@model IEnumerable<ProductModel>
+﻿@using E_commerce.Models
+@model IEnumerable<ProductModel>
 <partial name="_SliderPartial" />
 <div class="row mb-3">
 	<div class="col-sm-12">
@@ -9,28 +10,28 @@
 				<a asp-action="Search" asp-controller="Product" asp-route-category="Women's" asp-route-brand="Handbags">
 					<div class="category-item">
 						<img src="https://media.gucci.com/dynamic/b3c8/2JGNpwpTBK+aXoa4ZC0lAOw3rktBJ0Pork1_w1ON23bK4yUSVjO2mRnucvJNyxQlt9yMi5lWQzMDdHT3_dB0kGimCufVR7CjtZ8ADVT4cPgfxFy6LM4+vuq1Af6q_ldMHZuH9Xy5vLPP2SOQyrjoLDDZSTayZdLymmuLYCeDDwDZtLRi6wUx56J_BHtcjOXHs9FItZgCLYakLqQn2u__Uv_uyp+WT_psR9ViYNwLgQvRgFdaNaAfk10DxWVRjH5f_8sMKAZtXJ9mrkTP8wSFg9X+_DATRmstuivFAFPVp1LOujRcI3SQv2EyLv+wjhkpbMDYeTSUmBMcqgo4paAol0SbA8OQJ47PEN546n5Tu7zl2oPyJw_XlrN_m7QFIV6O/HP_Portrait_Gucci-TierII-SS25-Jan25-SS25TIERII-STILLLIFE-S-21-1166_001_Default.png"
-							 alt="Women's Handbags" class="category-img" />
+						alt="Women's Handbags" class="category-img" />
 						<p>Women's Handbags</p>
 					</div>
 				</a>
 				<a asp-action="Search" asp-controller="Product" asp-route-category="Women's" asp-route-brand="Shoes">
 					<div class="category-item">
 						<img src="https://media.gucci.com/dynamic/b3c8/SQOvBtVle9rpDO1kERw6Q9OBFdoqivvibL70Ndt+pmuJJYh3DzTZxK_4wFTsDdUhEeYoMYGwQx_AinMyiyZSh7BEfJssYHyWYHq6UpRZfiDTJ58LWQOuO5kKjiMoxpbqV0G+RxyLHmx+vEtKBeKS0OZkIB7V4ad+j2ziWZKXtRUN4leMAkWzvPK_RTSzpCSOvoJE14fYX1FVqqOalABZ3dCi46IsWdacgvYP_nL5ksJd56s5RlRGk+0HTc67duxfrYxup2j5gOG_oyInhVVvRtw0HnnjEaoIX8fcY05BIi1kd1CW3998uQ+S0jUpcQ6Cez4e4Jlk2HHvD66lkfPNU9KKF8nrZm44tbBYoV1hklX1YnIxN_i7aCZmVPgH_6hu/HP_Portrait_Gucci-TierII-SS25-Jan25-SS25TIERII-STILLLIFE-S-34-1833_001_Default.png"
-							 alt="Women's Shoes" class="category-img" />
+						alt="Women's Shoes" class="category-img" />
 						<p>Women's Shoes</p>
 					</div>
 				</a>
 				<a asp-action="Search" asp-controller="Product" asp-route-category="Men's" asp-route-brand="Bags">
 					<div class="category-item">
 						<img src="https://media.gucci.com/dynamic/b3c8/D98tRV9CVh1OzP1TzI0meCd76NOVBwaQavpQMMGdImdFjg_pO7dgErq1Ag0ZPpxxevSrJ_4UAj316caxB4F7kdxtr3BR+umJH0udCT3YMvsTaiEebcTEG+bxC3gkVQw5Isy2jwDz_HJqbPmW2cP4kZGbfysk9Mw2_9WoYwCSVaIrMIQL5gkuHpTMnFZ4+hNYcLDJX6K4rOu0nMmegTLJ6nf3SbKgrv5dpvzaKjX2pxNcfGtPQQbJJ4NbxHGt6D2uleFwS4+1wJinFHXDYLFOKvJSLT7n9QIeYWmSFRB9vlPYM_mQWTzjHcG7NDK6GkvxqxfxKFE4ixFJZmVISqvm7SBooqcZq8Qc1TZURPnpGtkzLhd4gAuvkVJAyV_C2SVg/HP_Portrait_Gucci-TierII-SS25-Jan25-SS25TIERII-STILLLIFE-S-39-2034_001_Default.png"
-							 alt="Men's Bags" class="category-img" />
+						alt="Men's Bags" class="category-img" />
 						<p>Men's Bags</p>
 					</div>
 				</a>
 				<a asp-action="Search" asp-controller="Product" asp-route-category="Men's" asp-route-brand="Shoes">
 					<div class="category-item">
 						<img src="https://media.gucci.com/dynamic/b3c8/AJcKu+ZmiKZp1myrfQLXQA9si0occ8Zo_7khFzuny07Qr1EnA2wQ1tYOBy2PAL470vNHgmkropferk2O3KjPZZ3v37cirONESax6KEAQy6cW0wBEY8FZYSPerSotmD9xiBNE7wBEcZR0OAv8PUF+XJTO2ePn8CSnhvufqntVkpUY7al5YzdHcLi5qigwEj6t5wITPi1aPitsLyoHva102EA9ugYBMC6m104qsMfMTbOckf5YXs_5dv2dqN5DIaurG8BoCOyiDa0naBWz1+yYtpNJOwR2NGVp2DiOh89Bltfe3bM60cU41LrYn+b42dUnyu3w6XGVDbgq4fyjMJH57fZ1DH5c4PZ9qbwwNbJRZE79ygdS8f+nyimnTwgU+WL5/HP_Portrait_Gucci-TierII-SS25-Jan25-SS25TIERII-STILLLIFE-S-41-2125_001_Default.png"
-							 alt="Men's Shoes" class="category-img" />
+						alt="Men's Shoes" class="category-img" />
 						<p>Men's Shoes</p>
 					</div>
 				</a>
@@ -46,8 +47,8 @@
 			<div class="rtw-container">
 				<div class="rtw-wrapper fade-in">
 					<img src="https://media.gucci.com/dynamic/b3c8/cFPWOYIzI2Ux5LWZSIH0Xrg8qSntK+92Tj3COxUcUDK8HkZWm7kPDfoTOge1NjaDbdbbdgytoUjIkbh7qQ_Boiv6bNOFNAkkgCAP8p83lrPeUCA2WoP5g+fdn2lnqQgJlvirBeTZJ9ZILQVX9hgBoVwSRqMSIGARJxSHxeKY67+i25i6a4gbeWwIKqTIljktJiA2h6x__oGGaxXTJz6i9i1AGn5WGcuT8ghTzD2Z7DA+K0vuvhGqP8ZqRh7R3I4f+s1FgEwRbUt5r4dbhzJE2G8F8bFgXuCms47OJz2kiCoALD6fD30AAYS5Dpw0MSq0s8sQEDgQlurDi_3Yyxf+gQ==/HP_CinamaticLandscape_Gucci-SS25-Jan25-1-4-0469-04-F2_001_Default.png"
-						 alt="Ready to Wear Collection"
-						 class="rtw-image" />
+					alt="Ready to Wear Collection"
+					class="rtw-image" />
 					<div class="text top-text">Women</div>
 					<div class="text bottom-text">
 						<div style="font-size:12px">
@@ -64,8 +65,8 @@
 
 			<div class="rtw-wrapper fade-in">
 				<img src="https://media.gucci.com/content/HeroRegularStandard_1600x675/1736954114/HeroRegularStandard_Gucci-SS25-Jan25-1-24-0489-11-TU-F_001_Default.jpg" Replace with actual Men image URL * /
-					 alt="Ready to Wear Collection for Men"
-					 class="rtw-image" />
+				alt="Ready to Wear Collection for Men"
+				class="rtw-image" />
 				<div class="text top-text">Men</div>
 				<div class="text bottom-text">
 					<div style="font-size:12px">
@@ -83,152 +84,120 @@
 		<div class="story_items">
 			<h2 class="story_title">Featured</h2>
 			<div class="story_container">
-			<div class="story_image">
+				<div class="story_image">
 					<img src="https://media.gucci.com/content/DiaryArticleDouble_Standard_2800x1788/1737993612/DiaryArticleDouble_Gucci-SS25-Jan25-2-1-0573-08-F_001_Default.jpg"
-					 alt="story" class="story-img" />
-			</div>
-			<div class="story_text">
-		<div class="story-right-text">
-			<div class="story-title">Where Light Finds Us</div>
-			<div class="story-description">
-				Yara Shahidi and George MacKay star in the new Spring Summer 2025 campaign, an evocative story of balance and connection.
-			</div>
-			<button class="discover-more">Discover More</button>
-		</div>
-</div>
+					alt="story" class="story-img" />
+				</div>
+				<div class="story_text">
+					<div class="story-right-text">
+						<div class="story-title">Where Light Finds Us</div>
+						<div class="story-description">
+							Yara Shahidi and George MacKay star in the new Spring Summer 2025 campaign, an evocative story of balance and connection.
+						</div>
+						<button class="discover-more">Discover More</button>
+					</div>
+				</div>
 			</div>
 		</div>
 
+		<!-- Sửa phần chat widget này: -->
+		<div id="chatWidget">
+			<!-- Chat Container -->
+			<div id="chatContainer" class="chat-container" style="display: none;">
+				<div class="chat-header">
+					<div class="header-info">
+						<div class="avatar">CS</div>
+						<div class="header-text">
+							<h4 id="chatTitle">Customer Support</h4>
+							<span class="status">Online</span>
+						</div>
+					</div>
+					<button class="close-btn" onclick="handleToggleChat()">×</button>
+				</div>
+
+				@if (User.Identity.IsAuthenticated)
+				{
+					<!-- User List cho Admin/Support -->
+					<div class="user-list-widget" id="userListWidget" style="display: none;">
+						<div class="user-list-header">
+							<span>Select User to Chat:</span>
+							<!-- Search Box -->
+							<div class="user-search-container">
+								<input type="text" id="userSearchInput" placeholder="Search users..." class="user-search-input" />
+								<svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+									<circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2" fill="none" />
+									<path d="m21 21-4.35-4.35" stroke="currentColor" stroke-width="2" />
+								</svg>
+							</div>
+						</div>
+						<div class="user-list-content" id="userListContent">
+							<!-- Users loaded here -->
+						</div>
+					</div>
+
+					<div class="chat-messages" id="chatMessages">
+						<!-- Default message -->
+						<div class="message bot">
+							<div class="message-content">
+								<p>Hello! How can I help you today?</p>
+								<span class="timestamp">
+									<script>document.write(new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}))</script>
+								</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- Chat input form -->
+					<div class="chat-input">
+						<input type="file" id="imageInputWidget" accept="image/*" style="display: none;" />
+						<label for="imageInputWidget" class="file-input-btn">📎</label>
+						<input type="text" id="messageInputWidget" placeholder="Type your message..." class="message-input" />
+						<button type="button" id="sendButtonWidget" class="send-btn">
+							<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+								<path d="M2 21L23 12L2 3V10L17 12L2 14V21Z" fill="currentColor" />
+							</svg>
+						</button>
+						<input type="hidden" id="receiverWidget" />
+					</div>
+				}
+				else
+				{
+					<!-- Login Required Message -->
+					<div class="login-required-container">
+						<div class="login-icon">
+							<svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+								<path d="M12 12C14.7614 12 17 9.76142 17 7C17 4.23858 14.7614 2 12 2C9.23858 2 7 4.23858 7 7C7 9.76142 9.23858 12 12 12Z" fill="#5af2b2" />
+								<path d="M12 14C8.13401 14 5 17.134 5 21C5 21.5523 5.44772 22 6 22H18C18.5523 22 19 21.5523 19 21C19 17.134 15.866 14 12 14Z" fill="#5af2b2" />
+							</svg>
+						</div>
+						<h3>Sign In Required</h3>
+						<p>You need to sign in to use our chat support feature.</p>
+						<div class="login-buttons">
+							<a href="/Account/Login" class="login-btn">Sign In</a>
+							<a href="/Account/Create" class="register-btn">Sign Up</a>
+						</div>
+					</div>
+				}
+			</div>
+
+			<!-- Chat Bubble - Hiển thị cho tất cả -->
+			<div class="chat-bubble" id="chatBubble" onclick="handleToggleChat()">
+				<svg id="chatIcon" width="24" height="24" viewBox="0 0 24 24" fill="none">
+					<path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2ZM20 16H5.17L4 17.17V4H20V16Z" fill="white" />
+					<circle cx="8" cy="10" r="1" fill="white" />
+					<circle cx="12" cy="10" r="1" fill="white" />
+					<circle cx="16" cy="10" r="1" fill="white" />
+				</svg>
+				<svg id="closeIcon" width="24" height="24" viewBox="0 0 24 24" fill="none" style="display: none;">
+					<path d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z" fill="white" />
+				</svg>
+				<div class="notification-badge" id="notificationBadge"></div>
+			</div>
+		</div>
 	</div>
 </div>
 
 
-
-@* @foreach (var item in Model) *@
-@* { *@
-@* 	<div class="col-sm-3"> *@
-@* 		<div class="product-image-wrapper"> *@
-@* 			<div class="single-products"> *@
-@* 				<div class="productinfo text-center"> *@
-@* <a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" ><img src="~/media/products/@item.Image" alt="@item.Name" width="100%" /></a> *@
-@* <h2>$@item.Price</h2> *@
-@* <p>@item.Name</p> *@
-@* 							<p>Category: @item.Category.Name</p> *@
-@* <p>Brand: @item.Brand.Name</p> *@
-@* @if (item.Quantity > 0)
-									{
-										<a asp-action="Details" asp-controller="Product" asp-route-Id="@item.Id" class="btn btn-default add-to-cart"><i class="fa fa-shopping-cart"></i>View Details</a>
-									}
-									else
-									{
-										<a class="btn btn-default add-to-cart"><i class="fa fa-minus-square"></i>Sold Out</a>
-									} *@
-@* @if (User.Identity?.IsAuthenticated ?? false)
-									{
-										<ul class="nav nav-pills nav-justified">
-											<li><button class="btn btn-default add-btn-wishlist"><i class="fa fa-plus-square"></i><a asp-action="AddWishList" asp-controller="Home" asp-route-Id="@item.Id"> Add Wishlist</a></button></li>
-											<li><button class="btn btn-default add-btn-compare" data-product_id="@item.Id"><i class="fa fa-plus-square"></i> Add compare</button></li>
-										</ul>
-									} *@
-@* 				</div> *@
-@* 			</div> *@
-@* 		</div> *@
-@* 	</div> *@
-@* } *@
-
-@* 	</div><!--features_items--> *@
-@* 		<div class="pagination"> *@
-@* 			@if (ViewBag.Page > 1) *@
-@* 			{ *@
-@* 				<a asp-action="Index" asp-route-page="1" class="first">First</a> <!-- Nút "First" --> *@
-@* 				<a asp-action="Index" asp-route-page="@(ViewBag.Page - 1)" class="prev">Previous</a> *@
-@* 			} *@
-
-@* 			@for (var i = 1; i <= ViewBag.TotalPages; i++) *@
-@* 			{ *@
-@* 				<a asp-action="Index" asp-route-page="@i" class="@(i == ViewBag.Page ? "active" : "")">@i</a> *@
-@* 			} *@
-
-@* 			@if (ViewBag.Page < ViewBag.TotalPages) *@
-@* 			{ *@
-@* 				<a asp-action="Index" asp-route-page="@(ViewBag.Page + 1)" class="next">Next</a> *@
-@* 				<a asp-action="Index" asp-route-page="@ViewBag.TotalPages" class="last">Last</a> <!-- Nút "Last" --> *@
-@* 			} *@
-@* 		</div> *@
-
-
-
-@section Scripts {
-	@* <script>
-		$(document).ready(function () {
-			$('.add-btn-wishlist').click(function () {
-				var Id = $(this).data("product_id");
-
-				$.ajax({
-					type: "POST",
-					url: "@Url.Action("AddWishList", "Home")",
-					data: { Id: Id },
-
-					success: function (result) {
-						if (result) {
-							Swal.fire("Added to wishlist successfully.");
-						}
-					},
-					error: function () {
-						Swal.fire("Error when adding to wishlist!");
-					}
-				});
-			});
-		});
-	</script> *@
-	<script>
-		$(document).ready(function () {
-			$('.add-btn-compare').click(function () {
-				var Id = $(this).data("product_id");
-
-				$.ajax({
-					type: "POST",
-					url: "@Url.Action("AddCompare", "Home")",
-					data: { Id: Id },
-
-					success: function (result) {
-						if (result) {
-							Swal.fire("Added to compare successfully.");
-						}
-					},
-					error: function () {
-						Swal.fire("Error when adding to compare!");
-					}
-				});
-			});
-		});
-
-		// ------------------ Ready to wear ---------------
-
-		document.addEventListener("DOMContentLoaded", function () {
-			const wrappers = document.querySelectorAll(".rtw-wrapper");
-			let currentIndex = 0;
-
-			function showNextWrapper() {
-				// Xóa lớp active của wrapper hiện tại
-				wrappers[currentIndex].classList.remove("active");
-
-				// Chuyển sang wrapper tiếp theo
-				currentIndex = (currentIndex + 1) % wrappers.length;
-
-				// Thêm lớp active vào wrapper mới
-				wrappers[currentIndex].classList.add("active");
-			}
-
-			// Hiển thị wrapper đầu tiên khi tải trang
-			wrappers[currentIndex].classList.add("active");
-
-			// Thiết lập khoảng thời gian 7 giây để chuyển đổi
-			setInterval(showNextWrapper, 7000);
-		});
-
-	</script>
-}
 <style>
 
 	.product-image-wrapper {
@@ -489,31 +458,1525 @@
 		padding: 5px 0;
 	}
 
-	
-	/* .pagination {
-			text-align: center;
-			margin-top: 20px;
+	/* ===== CHAT WIDGET STYLING ===== */
+
+	/* Chat Bubble */
+	.chat-bubble {
+		position: fixed;
+		bottom: 20px;
+		right: 20px;
+		width: 60px;
+		height: 60px;
+		background: linear-gradient(135deg, #ffe4bf 0%, #06180b 100%);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		box-shadow: 0 8px 25px rgb(231,231,231,0.4);
+		transition: all 0.3s ease;
+		z-index: 9999;
+		animation: pulse 2s infinite;
+		border: none;
+	}
+
+		.chat-bubble:hover {
+			transform: scale(1.1);
+			box-shadow: 0 12px 35px rgb(114, 212, 156, 0.6);
 		}
 
-			.pagination a {
-				padding: 8px 16px;
-				margin: 0 4px;
-				background-color: #f1f1f1;
-				color: #333;
-				text-decoration: none;
-				border-radius: 4px;
-			}
+		.chat-bubble.bubble-open {
+			background: linear-gradient(135deg, #ffe4bf 0%, #06180b 100%);
+			animation: none;
+		}
 
-				.pagination a:hover {
-					background-color: #ddd;
-				}
+	.notification-badge {
+		position: absolute;
+		top: -5px;
+		right: -5px;
+		width: 24px;
+		height: 24px;
+    	background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+		color: white;
+		border-radius: 50%;
+		display: none;
+		align-items: center;
+		justify-content: center;
+		font-size: 12px;
+		font-weight: 600;
+		border: 2px solid white;
+		box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+		animation: badgePulse 2s infinite;
+		transition: all 0.3s ease;
+	}
 
-			.pagination .active {
-				background-color: #4CAF50;
-				color: white;
-			}
+	@@keyframes badgePulse {
+		0% {
+			box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+		}
+		70% {
+			box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+		}
+		100% {
+			box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+		}
+	}
 
-			.pagination .prev, .pagination .next {
-				font-weight: bold;
-			}
+/* Chỉ hiển thị khi có class 'show' hoặc inline style display: flex */
+.notification-badge.show {
+    display: flex !important;
+}
+
+	/* Chat Container */
+	.chat-container {
+		position: fixed;
+		bottom: 100px;
+		right: 20px;
+		width: 380px;
+		height: 525px;
+		background: linear-gradient(135deg, #1a2332 0%, #0f1419 100%);
+		border-radius: 15px;
+		border: 1px solid #2e374a;
+		box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+		flex-direction: column;
+		z-index: 9998;
+		animation: slideInUp 0.3s ease;
+	}
+
+	/* Chat Header */
+	.chat-header {
+		background: linear-gradient(140deg, #474747 10%, #5af2b2 100%);
+		padding: 20px;
+		border-radius: 15px 15px 0 0;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		color: white;
+	}
+
+	.header-info {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+	}
+
+	.avatar {
+		width: 40px;
+		height: 40px;
+		background: rgba(255, 255, 255, 0.2);
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: 600;
+		font-size: 14px;
+	}
+
+	.header-text h4 {
+		margin: 0;
+		font-size: 16px;
+		font-weight: 600;
+	}
+
+	.status {
+		font-size: 12px;
+		opacity: 0.9;
+		display: flex;
+		align-items: center;
+		gap: 6px;
+	}
+
+		.status::before {
+			content: '';
+			width: 8px;
+			height: 8px;
+			background: #22c55e;
+			border-radius: 50%;
+			display: inline-block;
+		}
+
+	.close-btn {
+		background: none;
+		border: none;
+		color: white;
+		font-size: 24px;
+		cursor: pointer;
+		width: 30px;
+		height: 30px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border-radius: 50%;
+		transition: background 0.2s ease;
+	}
+
+		.close-btn:hover {
+			background: rgba(255, 255, 255, 0.1);
+		}
+
+	/* Chat Messages */
+	.chat-messages {
+		flex: 1;
+		padding: 20px;
+		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+		gap: 15px;
+		background-color: #0f1419;
+		height: 300px;
+	}
+
+		.chat-messages::-webkit-scrollbar {
+			width: 6px;
+		}
+
+		.chat-messages::-webkit-scrollbar-track {
+			background: #1a2332;
+		}
+
+		.chat-messages::-webkit-scrollbar-thumb {
+			background: #2e374a;
+			border-radius: 3px;
+		}
+
+	.message {
+		display: flex;
+		max-width: 80%;
+	}
+
+		.message.user {
+			align-self: flex-end;
+		}
+
+		.message.bot {
+			align-self: flex-start;
+		}
+
+	.message-content {
+		padding: 12px 16px;
+		border-radius: 18px;
+		position: relative;
+	}
+
+	.user .message-content {
+		background: linear-gradient(140deg, #474747 10% 10%, #5af2b2 100%);
+		color: white;
+		border-bottom-right-radius: 4px;
+	}
+
+	.bot .message-content {
+		background: #1a2332;
+		color: #e2e8f0;
+		border: 1px solid #2e374a;
+		border-bottom-left-radius: 4px;
+	}
+
+	.message-content p {
+		margin: 0;
+		line-height: 1.4;
+		font-size: 14px;
+	}
+
+	.timestamp {
+		font-size: 11px;
+		opacity: 0.7;
+		margin-top: 4px;
+		display: block;
+	}
+
+	/* Chat Input */
+	.chat-input {
+		padding: 20px;
+		background-color: #151c2c;
+		border-radius: 0 0 15px 15px;
+		display: flex;
+		gap: 12px;
+		border-top: 1px solid #2e374a;
+	}
+
+	.message-input {
+		flex: 1;
+		background-color: #1a2332;
+		border: 1px solid #2e374a;
+		color: white;
+		padding: 12px 16px;
+		border-radius: 25px;
+		font-size: 14px;
+		outline: none;
+		transition: border-color 0.3s ease;
+	}
+
+		.message-input:focus {
+			border-color: #5af2b2;
+		}
+
+		.message-input::placeholder {
+			color: #9ca3af;
+		}
+
+	.send-btn {
+		width: 44px;
+		height: 44px;
+		background: linear-gradient(140deg, #474747 10% 10%, #5af2b2 100%);
+		border: none;
+		border-radius: 50%;
+		color: white;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s ease;
+	}
+
+		.send-btn:hover {
+			transform: scale(1.05);
+			box-shadow: 0 12px 35px rgb(114, 212, 156, 0.6);
+		}
+
+	.chat-bubble {
+		bottom: 30px;
+		right: 30px;
+		width: 60px;
+		height: 60px;
+	}
+
+	/* User List Widget styles */
+	.user-list-widget {
+		background-color: #151c2c;
+		border-bottom: 1px solid #2e374a;
+	}
+
+	.user-list-header {
+		padding: 10px 15px;
+		background-color: #1a2332;
+		color: #5af2b2;
+		font-size: 12px;
+		font-weight: 600;
+		border-bottom: 1px solid #2e374a;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 10px;
+	}
+
+	.user-search-container {
+		position: relative;
+		flex: 1;
+		max-width: 150px;
+	}
+
+	.user-search-input {
+		width: 100%;
+		padding: 6px 12px 6px 30px;
+		background-color: #0f1419;
+		border: 1px solid #2e374a;
+		border-radius: 15px;
+		color: #e2e8f0;
+		font-size: 11px;
+		outline: none;
+		transition: all 0.3s ease;
+	}
+
+		.user-search-input:focus {
+			border-color: #5af2b2;
+			box-shadow: 0 0 0 2px rgba(90, 242, 178, 0.1);
+		}
+
+		.user-search-input::placeholder {
+			color: #6b7280;
+		}
+
+		/* Thêm scrollbar cho user search input */
+		.user-search-input::-webkit-scrollbar {
+			width: 4px;
+			height: 4px;
+		}
+
+		.user-search-input::-webkit-scrollbar-track {
+			background: #0f1419;
+			border-radius: 2px;
+		}
+
+		.user-search-input::-webkit-scrollbar-thumb {
+			background: #5af2b2;
+			border-radius: 2px;
+		}
+
+		.user-search-input::-webkit-scrollbar-thumb:hover {
+			background: #474747;
+		}
+
+	.search-icon {
+		position: absolute;
+		left: 8px;
+		top: 50%;
+		transform: translateY(-50%);
+		color: #6b7280;
+		pointer-events: none;
+	}
+
+	.user-search-input:focus + .search-icon {
+		color: #5af2b2;
+	}
+
+	/* User List Content với scroll */
+	.user-list-content {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+		padding: 10px;
+		max-height: 50px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		scrollbar-width: thin;
+		scrollbar-color: #5af2b2 #151c2c;
+	}
+
+		/* Custom scrollbar cho user-list-content */
+		.user-list-content::-webkit-scrollbar {
+			width: 6px;
+			background: #151c2c;
+		}
+		.user-list-content::-webkit-scrollbar-thumb {
+			background: linear-gradient(135deg, #474747 0%, #5af2b2 100%);
+			border-radius: 3px;
+			border: 1px solid #2e374a;
+		}
+		.user-list-content::-webkit-scrollbar-thumb:hover {
+			background: linear-gradient(135deg, #5af2b2 0%, #474747 100%);
+		}
+
+	.user-item-widget {
+		background-color: #1a2332;
+		color: #e2e8f0;
+		padding: 6px 12px;
+		border-radius: 15px;
+		cursor: pointer;
+		font-size: 12px;
+		transition: all 0.3s ease;
+		border: 1px solid #2e374a;
+		white-space: nowrap;
+		animation: fadeInUser 0.3s ease;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		position: relative;
+		min-height: 32px;
+	}
+
+	@@keyframes fadeInUser {
+		from
+
+	{
+		opacity: 0;
+		transform: scale(0.8);
+	}
+
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+
+	}
+
+	.user-item-widget:hover {
+		background-color: rgba(90, 242, 178, 0.1);
+		color: #5af2b2;
+		transform: translateY(-1px);
+	}
+
+	.user-item-widget.active {
+		background: linear-gradient(140deg, #474747 10%, #5af2b2 100%);
+		color: white;
+		box-shadow: 0 2px 8px rgba(90, 242, 178, 0.3);
+	}
+
+	/* Hidden state for filtered users */
+	.user-item-widget.hidden {
+		display: none;
+	}
+
+	.user-name {
+		flex: 1;
+		text-overflow: ellipsis;
+		overflow: hidden;
+		white-space: nowrap;
+	}
+
+	/* User Notification Badge */
+	.user-notification-badge {
+		background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+		color: white;
+		border-radius: 50%;
+		min-width: 18px;
+		height: 18px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 10px;
+		font-weight: 700;
+		margin-left: 8px;
+		border: 2px solid #1a2332;
+		box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+		animation: pulse 2s infinite;
+	}
+
+		.user-notification-badge .badge-count {
+			min-width: 12px;
+			text-align: center;
+		}
+
+	/* Pulse animation for badges */
+	@@keyframes pulse {
+		0%
+
+	{
+		box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+	}
+
+	70% {
+		box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+	}
+
+	100% {
+		box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+	}
+
+	}
+
+	/* Active user styling */
+	.user-item-widget.active {
+		background: linear-gradient(140deg, #474747 10%, #5af2b2 100%);
+		color: white;
+		box-shadow: 0 2px 8px rgba(90, 242, 178, 0.3);
+	}
+
+		.user-item-widget.active .user-notification-badge {
+			border-color: white;
+		}
+
+	/* Hover effects */
+	.user-item-widget:hover {
+		background-color: rgba(90, 242, 178, 0.1);
+		color: #5af2b2;
+		transform: translateY(-1px);
+	}
+
+		.user-item-widget:hover .user-notification-badge {
+			transform: scale(1.1);
+		}
+
+	/* File input button */
+	.file-input-btn {
+		width: 35px;
+		height: 35px;
+		background-color: #1a2332;
+		border: 1px solid #2e374a;
+		border-radius: 6px;
+		color: #e2e8f0;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s ease;
+		font-size: 16px;
+		margin-bottom: 0px !important;
+		margin-top: 7px;
+	}
+
+		.file-input-btn:hover {
+			background-color: #2e374a;
+			color: #5af2b2;
+		}
+
+	/* Message widget styles */
+	.message-widget {
+		display: flex;
+		max-width: 80%;
+		animation: messageSlideIn 0.3s ease;
+	}
+
+	@@keyframes messageSlideIn {
+		from
+
+	{
+		opacity: 0;
+		transform: translateY(10px);
+	}
+
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+
+	}
+
+	.message-widget.user {
+		align-self: flex-end;
+	}
+
+	.message-widget.bot {
+		align-self: flex-start;
+	}
+
+	.message-content-widget {
+		padding: 10px 14px;
+		border-radius: 15px;
+		position: relative;
+		word-wrap: break-word;
+	}
+
+	.user .message-content-widget {
+		background: linear-gradient(140deg, #474747 10%, #5af2b2 100%);
+		color: white;
+		border-bottom-right-radius: 4px;
+	}
+
+	.bot .message-content-widget {
+		background: #1a2332;
+		color: #e2e8f0;
+		border: 1px solid #2e374a;
+		border-bottom-left-radius: 4px;
+	}
+
+	.message-content-widget p {
+		margin: 0;
+		line-height: 1.4;
+		font-size: 13px;
+	}
+
+	.timestamp-widget {
+		font-size: 10px;
+		opacity: 0.7;
+		margin-top: 4px;
+		display: block;
+		font-weight: 400;
+	}
+
+	/* Highlight older messages */
+	.message-widget.older .timestamp-widget {
+		opacity: 0.8;
+		font-weight: 500;
+		color: #9ca3af;
+	}
+
+	.message-widget.yesterday .timestamp-widget {
+		color: #ffffff;
+	}
+
+	.message-widget.old .timestamp-widget {
+		color: #ffffff;
+	}
+
+	/* Login Required Container */
+	.login-required-container {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 40px 20px;
+		text-align: center;
+		background-color: #0f1419;
+		color: white;
+	}
+
+	.login-icon {
+		margin-bottom: 20px;
+		opacity: 0.8;
+	}
+
+	.login-required-container h3 {
+		font-size: 18px;
+		font-weight: 600;
+		margin-bottom: 12px;
+		color: #e2e8f0;
+	}
+
+	.login-required-container p {
+		font-size: 14px;
+		color: #9ca3af;
+		margin-bottom: 30px;
+		line-height: 1.5;
+	}
+
+	.login-buttons {
+		display: flex;
+		gap: 12px;
+		flex-direction: column;
+		width: 100%;
+		max-width: 200px;
+	}
+
+	.login-btn, .register-btn {
+		padding: 12px 24px;
+		border-radius: 25px;
+		text-decoration: none;
+		font-weight: 600;
+		font-size: 14px;
+		text-align: center;
+		transition: all 0.3s ease;
+		display: block;
+	}
+
+	.login-btn {
+		background: linear-gradient(140deg, #474747 10%, #5af2b2 100%);
+		color: white;
+	}
+
+		.login-btn:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 8px 20px rgba(90, 242, 178, 0.3);
+			color: white;
+			text-decoration: none;
+		}
+
+	.register-btn {
+		background: transparent;
+		color: #5af2b2;
+		border: 2px solid #5af2b2;
+	}
+
+		.register-btn:hover {
+			background: #5af2b2;
+			color: #1a2332;
+			text-decoration: none;
+			transform: translateY(-2px);
+		}
+
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
+<script>
+	// ===== READY TO WEAR SLIDER SCRIPT =====
+	document.addEventListener("DOMContentLoaded", function () {
+		const wrappers = document.querySelectorAll(".rtw-wrapper");
+		let currentIndex = 0;
+
+		function showNextWrapper() {
+			// Xóa lớp active của wrapper hiện tại
+			wrappers[currentIndex].classList.remove("active");
+
+			// Chuyển sang wrapper tiếp theo
+			currentIndex = (currentIndex + 1) % wrappers.length;
+
+			// Thêm lớp active vào wrapper mới
+			wrappers[currentIndex].classList.add("active");
+		}
+
+		// Hiển thị wrapper đầu tiên khi tải trang
+		if (wrappers.length > 0) {
+			wrappers[currentIndex].classList.add("active");
+			// Thiết lập khoảng thời gian 7 giây để chuyển đổi
+			setInterval(showNextWrapper, 7000);
+		}
+	});
+
+	// ===== CHAT WIDGET VARIABLES =====
+	let isOpen = false;
+	let connection = null;
+	let currentUser = "@(ViewBag.UserName ?? "")";
+	let userRole = "@(ViewBag.Role ?? "")";
+	let customerSupportUserName = "";
+	let currentSelectedUser = "";
+	let allUsers = []; // Store all users for filtering
+	let unreadMessages = {}; // Track unread count per user
+	let totalUnreadCount = 0; // Track total unread for main badge
+
+	// ===== LOAD TOTAL UNREAD COUNT FOR MAIN BADGE =====
+	async function loadTotalUnreadCount() {
+
+		// Kiểm tra user đã đăng nhập chưa
+		if (!currentUser || currentUser === "") {
+			console.log("❌ User not authenticated, skipping unread count load");
+			totalUnreadCount = 0;
+			updateMainNotificationBadge();
+			return;
+		}
+
+		try {
+			console.log("📊 Loading total unread count...");
+			const response = await fetch("/Chat/GetTotalUnreadCount");
+			if (!response.ok) {
+				console.error("Failed to fetch total unread count:", response.status);
+				return;
+			}
+
+			const count = await response.json();
+			totalUnreadCount = count;
+			
+			console.log(`📊 Total unread count: ${count}`);
+			updateMainNotificationBadge();
+			
+		} catch (error) {
+			console.error("❌ Failed to load total unread count:", error);
+			totalUnreadCount = 0;
+        	updateMainNotificationBadge();
+		}
+	}
+
+	// ===== UPDATE MAIN NOTIFICATION BADGE =====
+	function updateMainNotificationBadge() {
+		const badge = document.getElementById("notificationBadge");
+		if (!badge) return;
+
+		// Nếu user chưa đăng nhập hoặc không có tin nhắn, ẩn badge
+		if (!currentUser || currentUser === "" || totalUnreadCount <= 0) {
+			badge.style.display = 'none';
+			console.log(`❌ Main badge hidden (user: ${currentUser}, count: ${totalUnreadCount})`);
+			return;
+		}
+
+		if (totalUnreadCount > 0) {
+			badge.textContent = totalUnreadCount > 99 ? '99+' : totalUnreadCount;
+			badge.style.display = 'flex';
+			console.log(`🔴 Main badge updated: ${totalUnreadCount} messages`);
+		}
+	}
+
+	// ===== INCREMENT TOTAL UNREAD COUNT =====
+	function incrementTotalUnreadCount() {
+
+		// Chỉ increment nếu user đã đăng nhập
+		if (!currentUser || currentUser === "") {
+			console.log("❌ User not authenticated, not incrementing count");
+			return;
+		}
+			totalUnreadCount++;
+			updateMainNotificationBadge();
+		}
+
+	// ===== CLEAR TOTAL UNREAD COUNT WHEN OPENING CHAT =====
+	function clearTotalUnreadCountForUser(userName) {
+		if (userRole === "User") {
+			// User: clear all unread from support
+			totalUnreadCount = 0;
+		} else if (userRole === "Admin" || userRole === "CustomerSupport") {
+			// Admin: subtract this user's unread count
+			const userUnreadCount = unreadMessages[userName] || 0;
+			totalUnreadCount = Math.max(0, totalUnreadCount - userUnreadCount);
+		}
+		updateMainNotificationBadge();
+	}
+
+	// ===== TOGGLE CHAT FUNCTION - ĐỊNH NGHĨA SỚM =====
+	function handleToggleChat() {
+		const container = document.getElementById('chatContainer');
+		const bubble = document.getElementById('chatBubble');
+		const chatIcon = document.getElementById('chatIcon');
+		const closeIcon = document.getElementById('closeIcon');
+		const badge = document.getElementById('notificationBadge');
+
+		isOpen = !isOpen;
+
+			if (isOpen) {
+			container.style.display = 'flex';
+			bubble.classList.add('bubble-open');
+			chatIcon.style.display = 'none';
+			closeIcon.style.display = 'block';
+
+			// Clear main badge when opening chat
+        	if (currentUser && currentUser !== "" && userRole === "User") {
+				// User: clear all unread count when opening
+				totalUnreadCount = 0;
+				updateMainNotificationBadge();
+			}
+
+			// Initialize SignalR when opening chat
+			if (!connection) {
+				initializeSignalR();
+			}
+		} else {
+			container.style.display = 'none';
+			bubble.classList.remove('bubble-open');
+			chatIcon.style.display = 'block';
+			closeIcon.style.display = 'none';
+		}
+	}
+
+	// ===== UNREAD MESSAGES TRACKING =====
+	function initializeUnreadCount(userName) {
+		if (!unreadMessages[userName]) {
+			unreadMessages[userName] = 0;
+		}
+	}
+
+	function updateUserNotificationBadge(userName, count) {
+		console.log(`Updating badge for ${userName} with count: ${count}`);
+
+		const badge = document.getElementById(`badge-${userName}`);
+		if (!badge) {
+			console.log(`Badge not found for user: ${userName}`);
+			return;
+		}
+
+		const countSpan = badge.querySelector('.badge-count');
+		if (!countSpan) {
+			console.log(`Count span not found for user: ${userName}`);
+			return;
+		}
+
+		if (count > 0) {
+			countSpan.textContent = count > 99 ? '99+' : count;
+			badge.style.display = 'flex';
+			console.log(`✅ Badge shown for ${userName}: ${count} messages`);
+		} else {
+			badge.style.display = 'none';
+			console.log(`❌ Badge hidden for ${userName}`);
+		}
+	}
+
+	function incrementUnreadCount(userName) {
+		if (!unreadMessages[userName]) {
+			unreadMessages[userName] = 0;
+		}
+		unreadMessages[userName]++;
+		updateUserNotificationBadge(userName, unreadMessages[userName]);
+		console.log(`📩 New message from ${userName}. Total unread: ${unreadMessages[userName]}`);
+	}
+
+	function clearUnreadCount(userName) {
+		if (unreadMessages[userName]) {
+			unreadMessages[userName] = 0;
+			updateUserNotificationBadge(userName, 0);
+			console.log(`✅ Cleared unread count for ${userName}`);
+		}
+	}
+
+	// ===== LOAD UNREAD COUNTS FROM DATABASE =====
+	async function loadUnreadCounts() {
+		try {
+			console.log("📊 Loading unread counts from database...");
+			const response = await fetch("/Chat/GetUnreadCounts");
+			if (!response.ok) {
+				console.error("Failed to fetch unread counts:", response.status);
+				return;
+			}
+
+			const unreadData = await response.json();
+			console.log("📊 Unread data from database:", unreadData);
+
+			Object.keys(unreadData).forEach(userName => {
+				const count = unreadData[userName];
+				if (count > 0) {
+					unreadMessages[userName] = count;
+					updateUserNotificationBadge(userName, count);
+					console.log(`🔴 Set badge for ${userName}: ${count} unread messages`);
+				}
+			});
+
+			console.log("📊 Final unread messages object:", unreadMessages);
+		} catch (error) {
+			console.error("❌ Failed to load unread counts:", error);
+		}
+	}
+
+	// ===== RENDER USER LIST =====
+	function renderUserList(users) {
+		const userListContent = document.getElementById("userListContent");
+		if (!userListContent) return;
+
+		userListContent.innerHTML = "";
+
+		users.forEach(user => {
+			const userDiv = document.createElement("div");
+			userDiv.className = "user-item-widget";
+			userDiv.setAttribute("data-user", user);
+
+			userDiv.innerHTML = `
+				<span class="user-name">${user}</span>
+				<div class="user-notification-badge" id="badge-${user}" style="display: none;">
+					<span class="badge-count">0</span>
+				</div>
+			`;
+
+			if (user === currentSelectedUser) {
+				userDiv.classList.add("active");
+			}
+
+			userDiv.addEventListener("click", () => selectUser(user));
+			userListContent.appendChild(userDiv);
+		});
+	}
+
+	// ===== SEARCH USERS =====
+	function searchUsers(searchTerm) {
+		console.log("=== Search Debug ===");
+		console.log("Search term:", searchTerm);
+		console.log("All users:", allUsers);
+
+		// If search is empty, show all users
+		if (!searchTerm || searchTerm.trim() === "") {
+			console.log("Empty search, showing all users");
+			renderUserList(allUsers);
+			return;
+		}
+
+		const filteredUsers = allUsers.filter(user => {
+			const match = user.toLowerCase().includes(searchTerm.toLowerCase());
+			console.log(`User: ${user}, Match: ${match}`);
+			return match;
+		});
+
+		console.log("Filtered users:", filteredUsers);
+		console.log("=== End Search Debug ===");
+
+		renderUserList(filteredUsers);
+
+		// If no users found, show message
+		if (filteredUsers.length === 0) {
+			const userListContent = document.getElementById("userListContent");
+			userListContent.innerHTML = `
+				<div style="padding: 10px; color: #6b7280; font-size: 11px; text-align: center; width: 100%;">
+					No users found for "${searchTerm}"
+				</div>
+			`;
+		}
+	}
+
+		// ===== SELECT USER TO CHAT WITH =====
+	async function selectUser(userName) {
+		console.log(`Selecting user: ${userName}`);
+
+		// ===== MARK MESSAGES AS READ VIA API =====
+		try {
+			const response = await fetch("/Chat/MarkMessagesAsRead", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify(userName)
+			});
+
+			if (response.ok) {
+				const result = await response.json();
+				console.log(`✅ Marked ${result.markedCount} messages as read for ${userName}`);
+			}
+		} catch (error) {
+			console.error("❌ Failed to mark messages as read:", error);
+		}
+
+		// Clear unread count in UI
+		clearTotalUnreadCountForUser(userName);
+		clearUnreadCount(userName);
+
+		currentSelectedUser = userName;
+		document.getElementById("receiverWidget").value = userName;
+		document.getElementById("chatTitle").textContent = `Chat with ${userName}`;
+
+		console.log(`Updated currentSelectedUser to: ${currentSelectedUser}`);
+
+		// Update UI - remove active from all, add to selected
+		document.querySelectorAll(".user-item-widget").forEach(el => {
+			el.classList.remove("active");
+		});
+
+		const selectedElement = document.querySelector(`.user-item-widget[data-user="${userName}"]`);
+		if (selectedElement) {
+			selectedElement.classList.add("active");
+		}
+
+		// Load chat history for selected user
+		loadChatHistory(userName);
+	}
+
+	// ===== SIGNALR INITIALIZATION =====
+	async function initializeSignalR() {
+
+		 if (!currentUser || currentUser === "") {
+        console.log("❌ User not authenticated, not initializing SignalR");
+        return;
+    	}
+
+		if (connection) return;
+
+		connection = new signalR.HubConnectionBuilder()
+			.withUrl("/chatHub")
+			.build();
+
+		try {
+			await connection.start();
+			console.log("SignalR Connected in widget");
+
+			await loadTotalUnreadCount();
+
+			// Get customer support username
+			try {
+				const csResponse = await fetch("/Chat/GetCustomerSupportUserName");
+				if (csResponse.ok) {
+					customerSupportUserName = await csResponse.json();
+					console.log("Customer Support UserName:", customerSupportUserName);
+				}
+			} catch (error) {
+				console.error("Failed to fetch Customer Support UserName:", error);
+			}
+
+			// Setup for different user roles
+			if (userRole === "User") {
+				document.getElementById("receiverWidget").value = customerSupportUserName;
+				document.getElementById("chatTitle").textContent = "Customer Support";
+				loadChatHistory(customerSupportUserName);
+			} else if (userRole === "Admin" || userRole === "CustomerSupport") {
+				console.log("Setting up for Admin/Support role");
+				await loadChatUsers();
+				const userListWidget = document.getElementById("userListWidget");
+				if (userListWidget) {
+					userListWidget.style.display = "block";
+				}
+			}
+
+			// ===== SIGNALR EVENT HANDLERS =====
+			connection.on("ReceiveMessage", function (sender, message, imageUrl, messageTimestamp = null) {
+			console.log("🔔 ReceiveMessage triggered!");
+			console.log(`From: ${sender}, Message: ${message}`);
+			console.log(`Current user: ${currentUser}, Role: ${userRole}`);
+			console.log(`Selected user: ${currentSelectedUser}`);
+
+			const receiverValue = document.getElementById("receiverWidget")?.value;
+			let shouldDisplay = false;
+
+			if (userRole === "User") {
+				shouldDisplay = (sender === currentUser) ||
+							   (sender === customerSupportUserName);
+			} else if (userRole === "Admin" || userRole === "CustomerSupport") {
+				shouldDisplay = (sender === currentUser) ||
+							   (sender === customerSupportUserName) ||
+							   (sender === currentSelectedUser) ||
+							   (sender === receiverValue);
+			}
+
+			console.log(`Should display message: ${shouldDisplay}`);
+
+			if (shouldDisplay) {
+				// Display message in chat
+				addMessage(sender, message, imageUrl, messageTimestamp);
+				console.log("✅ Message displayed in chat");
+
+				const messagesList = document.getElementById("chatMessages");
+				if (messagesList) {
+					setTimeout(() => {
+						messagesList.scrollTop = messagesList.scrollHeight;
+					}, 100);
+				}
+			} else {
+				// Handle unread message counts
+                if (userRole === "User") {
+                    // User: only count messages from support
+                    if (sender === customerSupportUserName && !isOpen) {
+                        incrementTotalUnreadCount();
+                        console.log(`📢 User received message from support. Total unread: ${totalUnreadCount}`);
+                    }
+                } else if (userRole === "Admin" || userRole === "CustomerSupport") {
+                    // Admin: count messages from regular users
+                    const isFromRegularUser = sender !== currentUser && sender !== customerSupportUserName;
+                    const isNotCurrentlySelected = sender !== currentSelectedUser;
+
+                    console.log(`Badge check: isFromRegularUser=${isFromRegularUser}, isNotCurrentlySelected=${isNotCurrentlySelected}`);
+
+                    if (isFromRegularUser && isNotCurrentlySelected) {
+                        console.log(`📢 Admin received message from user: ${sender}`);
+                        incrementUnreadCount(sender);
+                        
+                        // Only increment total if chat is closed or user not selected
+                        if (!isOpen || sender !== currentSelectedUser) {
+                            incrementTotalUnreadCount();
+                            console.log(`📢 Total unread count: ${totalUnreadCount}`);
+                        }
+                    }
+                }
+				updateNotificationBadge();
+			}
+		});
+
+			connection.on("UpdateUserList", function (newUserName) {
+            console.log(`Updating user list for new user: ${newUserName}`);
+            loadChatUsers();
+            // Reload total unread count when user list updates
+            loadTotalUnreadCount();
+        });
+
+        connection.on("LoadUserList", function () {
+            console.log("Reloading user list based on server request.");
+            loadChatUsers();
+            // Reload total unread count when user list updates
+            loadTotalUnreadCount();
+        });
+
+		} catch (err) {
+			console.error("SignalR Connection Error in widget: ", err.toString());
+			setTimeout(initializeSignalR, 5000); // Retry after 5 seconds
+		}
+	}
+
+	// ===== LOAD CHAT USERS =====
+	async function loadChatUsers() {
+		try {
+			const response = await fetch("/Chat/GetChatUsers");
+			if (!response.ok) {
+				console.error("Failed to fetch users, status:", response.status);
+				return;
+			}
+
+			const users = await response.json();
+			console.log("Loaded users from API:", users);
+
+			allUsers = [...users];
+			console.log("allUsers array set to:", allUsers);
+
+			renderUserList(users);
+
+			// Initialize unread counts
+			users.forEach(user => {
+				initializeUnreadCount(user);
+			});
+
+			// Load unread counts from database
+			await loadUnreadCounts();
+
+			// Auto-select first user logic...
+			if (userRole !== "User" && users.length > 0) {
+				if (!currentSelectedUser || currentSelectedUser === "" || !users.includes(currentSelectedUser)) {
+					console.log(`Auto-selecting first user: ${users[0]}`);
+					selectUser(users[0]);
+				} else {
+					console.log(`Keeping current selected user: ${currentSelectedUser}`);
+					document.getElementById("receiverWidget").value = currentSelectedUser;
+				}
+			}
+		} catch (error) {
+			console.error("Failed to load chat users:", error);
+		}
+	}
+
+	// ===== LOAD CHAT HISTORY =====
+	async function loadChatHistory(username) {
+		try {
+			const response = await fetch(`/Chat/GetChatHistory?receiver=${username}`);
+			if (!response.ok) return;
+
+			const messages = await response.json();
+			const messagesList = document.getElementById("chatMessages");
+			if (!messagesList) return;
+
+			messagesList.innerHTML = "";
+
+			messages.forEach(msg => {
+				console.log("Loading message:", msg);
+				addMessage(msg.sender, msg.content, msg.imageUrl, msg.timestamp || msg.sentTime || msg.createdAt);
+			});
+
+			messagesList.scrollTop = messagesList.scrollHeight;
+		} catch (error) {
+			console.error("Error loading chat history:", error);
+		}
+	}
+
+	// ===== SEND MESSAGE =====
+	async function sendMessageWidget() {
+		console.log("sendMessageWidget called!");
+
+		if (!currentUser || currentUser === "") {
+			alert("Please login to use chat feature.");
+			return;
+		}
+
+		if (!connection) {
+			console.error("SignalR not connected");
+			alert("Chat connection not established. Please refresh page.");
+			return;
+		}
+
+		const receiver = document.getElementById("receiverWidget").value;
+		console.log("Receiver:", receiver);
+
+		if (!receiver) {
+			alert("Please select a user to chat with first.");
+			return;
+		}
+
+		const messageInput = document.getElementById("messageInputWidget");
+		const imageInput = document.getElementById("imageInputWidget");
+
+		if (!messageInput) {
+			console.error("Message input not found!");
+			return;
+		}
+
+		const message = messageInput.value.trim();
+		console.log("Message:", message);
+
+		let imageUrl = "";
+
+		if (!message && !imageUrl) {
+			console.log("No message or image to send");
+			return;
+		}
+
+		try {
+			console.log("Sending message via SignalR...");
+
+			// Clear input immediately for better UX
+			messageInput.value = "";
+			if (imageInput) imageInput.value = "";
+			updateSendButtonState();
+
+			// Send via SignalR
+			await connection.invoke("SendMessage", receiver, message, imageUrl);
+			console.log("Message sent successfully!");
+
+		} catch (err) {
+			console.error("SignalR error:", err.toString());
+			alert("Failed to send message. Please try again.");
+
+			// Restore message on error
+			messageInput.value = message;
+			updateSendButtonState();
+		}
+	}
+
+	// ===== ADD MESSAGE TO CHAT =====
+	function addMessage(sender, message, imageUrl, messageTimestamp = null) {
+		const msgDiv = document.createElement("div");
+
+		if (messageTimestamp) {
+			const msgDate = new Date(messageTimestamp);
+			const today = new Date();
+			const daysDiff = Math.floor((today - msgDate) / (1000 * 60 * 60 * 24));
+
+			if (daysDiff === 1) {
+				msgDiv.classList.add("yesterday");
+			} else if (daysDiff > 1) {
+				msgDiv.classList.add("old");
+			}
+		}
+
+		let isMyMessage = false;
+
+		if (userRole === "User") {
+			isMyMessage = (sender === currentUser);
+		} else if (userRole === "Admin" || userRole === "CustomerSupport") {
+			isMyMessage = (sender === currentUser) ||
+						 (sender === customerSupportUserName);
+		}
+
+		msgDiv.classList.add("message-widget", isMyMessage ? "user" : "bot");
+
+		let html = "";
+
+		if (!isMyMessage) {
+			if (userRole === "User") {
+				if (sender === customerSupportUserName) {
+					html += `<strong>Customer Support</strong><br>`;
+				} else {
+					html += `<strong>${sender}</strong><br>`;
+				}
+			} else {
+				html += `<strong>${sender}</strong><br>`;
+			}
+		}
+
+		if (message) html += `<p>${message}</p>`;
+		if (imageUrl) html += `<img src="${imageUrl}" alt="Image" style="max-width:150px; border-radius:8px; margin-top:6px;" />`;
+
+		let timestamp;
+		if (messageTimestamp) {
+			timestamp = formatMessageTimestamp(messageTimestamp);
+		} else {
+			timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+		}
+
+		html += `<span class="timestamp-widget">${timestamp}</span>`;
+
+		msgDiv.innerHTML = `<div class="message-content-widget">${html}</div>`;
+
+		const messagesList = document.getElementById("chatMessages");
+		if (messagesList) {
+			messagesList.appendChild(msgDiv);
+			messagesList.scrollTop = messagesList.scrollHeight;
+
+			msgDiv.style.opacity = '0';
+			msgDiv.style.transform = 'translateY(10px)';
+			setTimeout(() => {
+				msgDiv.style.transition = 'all 0.3s ease';
+				msgDiv.style.opacity = '1';
+				msgDiv.style.transform = 'translateY(0)';
+			}, 50);
+		}
+	}
+
+	// ===== SMART TIMESTAMP FORMATTING =====
+	function formatMessageTimestamp(messageTimestamp) {
+		const msgDate = new Date(messageTimestamp);
+		const today = new Date();
+		const yesterday = new Date(today);
+		yesterday.setDate(yesterday.getDate() - 1);
+
+		const msgDateOnly = new Date(msgDate.getFullYear(), msgDate.getMonth(), msgDate.getDate());
+		const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+		const yesterdayOnly = new Date(yesterday.getFullYear(), yesterday.getMonth(), yesterday.getDate());
+
+		const time = msgDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+		if (msgDateOnly.getTime() === todayOnly.getTime()) {
+			return time;
+		} else if (msgDateOnly.getTime() === yesterdayOnly.getTime()) {
+			return `Yesterday ${time}`;
+		} else {
+			const daysDiff = Math.floor((todayOnly - msgDateOnly) / (1000 * 60 * 60 * 24));
+
+			if (daysDiff < 7) {
+				const dayName = msgDate.toLocaleDateString([], {weekday: 'short'});
+				return `${dayName} ${time}`;
+			} else {
+				const dateString = msgDate.toLocaleDateString([], {month: 'short', day: 'numeric'});
+				return `${dateString} ${time}`;
+			}
+		}
+	}
+
+	// ===== UPDATE SEND BUTTON STATE =====
+	function updateSendButtonState() {
+		const messageInput = document.getElementById("messageInputWidget");
+		const imageInput = document.getElementById("imageInputWidget");
+		const sendButton = document.getElementById("sendButtonWidget");
+
+		if (messageInput && sendButton) {
+			const msg = messageInput.value.trim();
+			const hasImage = imageInput && imageInput.files.length > 0;
+			sendButton.disabled = !(msg || hasImage);
+		}
+	}
+
+	// ===== UPDATE NOTIFICATION BADGE =====
+	function updateNotificationBadge() {
+		const badge = document.getElementById("notificationBadge");
+		if (badge && !isOpen) {
+			let currentCount = parseInt(badge.textContent) || 0;
+			badge.textContent = currentCount + 1;
+			badge.style.display = 'flex';
+		}
+	}
+
+	// ===== HANDLE IMAGE UPLOAD AND SEND =====
+document.getElementById("imageInputWidget").addEventListener("change", async function (e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Tạo form data để upload
+    const formData = new FormData();
+    formData.append("image", file);
+
+    try {
+        // Gửi ảnh lên server
+        const response = await fetch("/Chat/UploadImage", {
+            method: "POST",
+            body: formData
+        });
+
+        if (!response.ok) {
+            alert("Upload image failed!");
+            return;
+        }
+
+        const data = await response.json();
+        if (data && data.imageUrl) {
+            // Gửi ảnh qua SignalR (không cần nhập text)
+            const receiver = document.getElementById("receiverWidget").value;
+            if (!receiver) {
+                alert("Please select a user to chat with first.");
+                return;
+            }
+            if (!connection) {
+                alert("Chat connection not established. Please refresh page.");
+                return;
+            }
+            await connection.invoke("SendMessage", receiver, "", data.imageUrl);
+        }
+    } catch (err) {
+        alert("Upload image error: " + err);
+    } finally {
+        // Reset input để có thể chọn lại cùng file nếu muốn
+        e.target.value = "";
+        updateSendButtonState();
+    }
+});
+
+	// ===== EVENT LISTENERS =====
+	document.addEventListener('DOMContentLoaded', function() {
+		console.log("DOM loaded, setting up chat events");
+		console.log("Current User:", currentUser);
+		console.log("User Role:", userRole);
+
+		// Chỉ load unread count khi user đã đăng nhập
+		if (currentUser && currentUser !== "") {
+			console.log("✅ User authenticated, loading unread count");
+			loadTotalUnreadCount();
+		} else {
+			console.log("❌ User not authenticated, hiding badge");
+			// Đảm bảo badge bị ẩn khi chưa đăng nhập
+			const badge = document.getElementById("notificationBadge");
+			if (badge) {
+				badge.style.display = 'none';
+			}
+		}
+
+		const messageInput = document.getElementById("messageInputWidget");
+		const imageInput = document.getElementById("imageInputWidget");
+		const sendButton = document.getElementById("sendButtonWidget");
+
+		console.log("Elements found:", { messageInput, imageInput, sendButton });
+
+		if (messageInput) {
+			messageInput.addEventListener("input", updateSendButtonState);
+			messageInput.addEventListener("keypress", function(e) {
+				console.log("Key pressed:", e.key);
+				if (e.key === 'Enter' && !e.shiftKey) {
+					e.preventDefault();
+					console.log("Enter pressed, sending message...");
+					sendMessageWidget();
+				}
+			});
+		}
+
+		if (imageInput) {
+			imageInput.addEventListener("change", updateSendButtonState);
+		}
+
+		if (sendButton) {
+			sendButton.addEventListener("click", function(e) {
+				e.preventDefault();
+				console.log("Send button clicked");
+				sendMessageWidget();
+			});
+		}
+
+		const userSearchInput = document.getElementById("userSearchInput");
+		if (userSearchInput) {
+			console.log("Search input found, setting up events");
+
+			userSearchInput.addEventListener("input", function(e) {
+				const searchTerm = e.target.value;
+				console.log("Search input changed:", searchTerm);
+				searchUsers(searchTerm);
+			});
+
+			userSearchInput.addEventListener("keydown", function(e) {
+				if (e.key === "Escape") {
+					console.log("Escape pressed, clearing search");
+					e.target.value = "";
+					searchUsers("");
+				}
+			});
+
+			userSearchInput.addEventListener("keypress", function(e) {
+				if (e.key === "Enter") {
+					e.preventDefault();
+				}
+			});
+		} else {
+			console.log("Search input NOT found");
+		}
+
+		updateSendButtonState();
+	});
+</script>

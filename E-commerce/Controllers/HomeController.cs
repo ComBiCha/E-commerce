@@ -46,6 +46,19 @@ namespace E_commerce.Controllers
 
         public async Task<IActionResult> Index(int page = 1)
         {
+            if (User.Identity.IsAuthenticated)
+            {
+                ViewBag.UserName = User.Identity.Name;
+                var role = User.FindFirstValue(ClaimTypes.Role);
+                ViewBag.Role = role ?? "User";
+
+                // Debug log
+                Console.WriteLine($"Chat Debug - UserName: {ViewBag.UserName}, Role: {ViewBag.Role}");
+            }
+            else
+            {
+                Console.WriteLine("Chat Debug - User not authenticated");
+            }
             int pageSize = 9;  // S? l??ng s?n ph?m trên m?i trang
             int totalProducts = await _datacontext.Products.CountAsync();  // T?ng s? s?n ph?m
             var products = await _datacontext.Products

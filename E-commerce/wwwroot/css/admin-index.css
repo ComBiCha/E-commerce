@@ -1136,25 +1136,16 @@ div.dt-container .dt-length select,
 /*------------------------------------------------ Statistics ----------------------------------------------------*/
 /* ===== DASHBOARD STATISTICS PAGE STYLING ===== */
 
-/* Main container styling */
-.dashboard-container {
-    background-color: #0f1419;
-    min-height: 100vh;
-    padding: 20px;
-}
-
 .dashboard-content {
     background-color: #182237;
     border-radius: 15px;
-    padding: 30px;
-    margin-top: 20px;
 }
 
 /* Stats cards styling */
 .stats-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 25px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
     margin-bottom: 40px;
 }
 

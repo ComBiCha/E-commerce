@@ -309,28 +309,36 @@ namespace E_commerce.Controllers
 
             var userEmail = order.UserName;
             var user = await _dataContext.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
-            decimal discountRate = user?.GetDiscountRate() ?? 0m; // Lấy mức giảm giá từ UserModel
+            decimal discountRate = user?.GetDiscountRate() ?? 0m;
             decimal productTotal = await _dataContext.OrderDetails
                 .Where(o => o.OrderCode == ordercode)
-                .SumAsync(o => o.Price * o.Quantity); // Tính tổng giá sản phẩm
+                .SumAsync(o => o.Price * o.Quantity);
 
-            decimal discountAmount = productTotal * discountRate; // Số tiền giảm giá
+            decimal discountAmount = productTotal * discountRate;
 
             ViewBag.Order = order;
-            ViewBag.DiscountRate = discountRate; // Gửi Discount Rate sang View
-            ViewBag.DiscountAmount = discountAmount; // Số tiền giảm giá
+            ViewBag.DiscountRate = discountRate;
+            ViewBag.DiscountAmount = discountAmount;
             ViewBag.ProductTotal = productTotal;
 
-            var DetailsOrder = await _dataContext.OrderDetails
+            // 🔹 LẤY ORDER DETAILS
+            var orderDetails = await _dataContext.OrderDetails
                 .Include(o => o.Product)
-                    .ThenInclude(p => p.Warranty)
                 .Include(o => o.Variation)
                 .Include(o => o.Variation.Material)
                 .Include(o => o.Variation.Color)
                 .Where(o => o.OrderCode == ordercode)
                 .ToListAsync();
 
-            return View(DetailsOrder);
+            // 🔹 LẤY WARRANTIES CỦA ORDER CODE
+            var warranties = await _dataContext.Warranties
+                .Where(w => w.OrderCode == ordercode)
+                .ToListAsync();
+
+            // 🔹 TẠO VIEWMODEL ĐỂ GỬI WARRANTIES
+            ViewBag.Warranties = warranties;
+
+            return View(orderDetails);
         }
 
         public async Task<IActionResult> MyWarranties()
@@ -620,10 +628,6 @@ namespace E_commerce.Controllers
                 TempData["error"] = "Error processing PayPal refund: " + ex.Message;
             }
         }
-
-
-
-
 
     }
 }

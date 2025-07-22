@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
 using PayPal.Api;
+using System.Text.Json;
 
 namespace E_commerce.Controllers
 {
@@ -62,16 +63,8 @@ namespace E_commerce.Controllers
                 Console.WriteLine($"Coupon Discount: ${couponDiscount}");
                 Console.WriteLine($"Total Discount: ${totalDiscount}");
 
-                // Tạo đơn hàng
-                var order = new OrderModel
-                {
-                    OrderCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper(),
-                    CreatedDate = DateTime.Now,
-                    UserName = request.UserEmail,
-                    Status = 0, // Chờ thanh toán
-                    Address = request.ShippingAddress.GetFullAddress(),
-                    ShippingCost = (decimal)request.ShippingPrice
-                };
+                // 🔹 TẠO ORDER CODE NHƯNG CHƯA LƯU VÀO DATABASE
+                var orderCode = Guid.NewGuid().ToString().Substring(0, 10).ToUpper();
 
                 // Convert CartItems từ API request
                 var cartItems = request.CartItems.Select(item => new CartItemModel
@@ -87,44 +80,65 @@ namespace E_commerce.Controllers
                 Console.WriteLine($"Mobile API - CartItems count: {cartItems.Count}");
                 Console.WriteLine($"Mobile API - Payment method: {request.PaymentMethod}");
                 Console.WriteLine($"Mobile API - User email: {request.UserEmail}");
-                Console.WriteLine($"Mobile API - Shipping address: {order.Address}");
 
-                // 🔹 LƯU CART ITEMS VÀ DISCOUNT INFO VÀO CACHE
-                await SaveOrderCartItems(order.OrderCode, cartItems, (decimal)request.ShippingPrice, membershipDiscount, couponDiscount, request.ShippingAddress, request.CouponCode);
+                // 🔹 LƯU CART ITEMS VÀ DISCOUNT INFO VÀO CACHE TRƯỚC KHI THANH TOÁN
+                await SaveOrderCartItems(orderCode, cartItems, (decimal)request.ShippingPrice, membershipDiscount, couponDiscount, request.ShippingAddress, request.CouponCode, request.UserEmail);
 
                 // Xử lý thanh toán theo phương thức
                 string redirectUrl;
 
                 if (request.PaymentMethod.ToLower() == "cod")
                 {
-                    // COD - Xử lý trực tiếp
-                    order.Status = 1; // Chờ xác nhận
-                    order.PaymentIntentId = "COD";
+                    // 🔹 COD - TẠO ORDER NGAY LẬP TỨC (vì đã confirmed)
+                    var order = new OrderModel
+                    {
+                        OrderCode = orderCode,
+                        CreatedDate = DateTime.Now,
+                        UserName = request.UserEmail,
+                        Status = 1, // Chờ xác nhận
+                        Address = request.ShippingAddress.GetFullAddress(),
+                        ShippingCost = (decimal)request.ShippingPrice,
+                        PaymentIntentId = "COD"
+                    };
 
                     _datacontext.Orders.Add(order);
                     await _datacontext.SaveChangesAsync();
 
                     // Lưu order details với cả 2 loại discount
-                    await ProcessOrderDetails(order.OrderCode, cartItems, request.UserEmail, membershipDiscount, couponDiscount, request.CouponCode);
+                    await ProcessOrderDetails(orderCode, cartItems, request.UserEmail, membershipDiscount, couponDiscount, request.CouponCode);
 
                     // Gửi email xác nhận cho COD
-                    await SendOrderConfirmationEmail(order.OrderCode, cartItems, request.UserEmail, (decimal)request.ShippingPrice, membershipDiscount, couponDiscount, request.ShippingAddress);
+                    await SendOrderConfirmationEmail(orderCode, cartItems, request.UserEmail, (decimal)request.ShippingPrice, membershipDiscount, couponDiscount, request.ShippingAddress);
 
-                    redirectUrl = $"/mobile/order-success?orderCode={order.OrderCode}";
+                    // Xóa cache sau khi xử lý COD
+                    await RemoveOrderCartItems(orderCode);
+
+                    redirectUrl = $"/mobile/order-success?orderCode={orderCode}";
                 }
                 else
                 {
-                    // Stripe/PayPal - Sử dụng payment service
-                    redirectUrl = await ProcessMobilePayment(request.PaymentMethod, order, cartItems, (decimal)request.ShippingPrice, totalDiscount);
+                    // 🔹 STRIPE/PAYPAL - CHỈ TẠO PAYMENT URL, KHÔNG TẠO ORDER
+                    if (request.PaymentMethod.ToLower() == "stripe")
+                    {
+                        redirectUrl = await CreateStripePaymentSession(orderCode, cartItems, (decimal)request.ShippingPrice, totalDiscount);
+                    }
+                    else if (request.PaymentMethod.ToLower() == "paypal")
+                    {
+                        redirectUrl = await CreatePayPalPayment(orderCode, cartItems, (decimal)request.ShippingPrice, totalDiscount);
+                    }
+                    else
+                    {
+                        throw new NotImplementedException($"Payment method {request.PaymentMethod} not implemented for mobile");
+                    }
                 }
 
                 return Ok(new
                 {
                     success = true,
                     redirectUrl = redirectUrl,
-                    orderCode = order.OrderCode,
+                    orderCode = orderCode,
                     paymentMethod = request.PaymentMethod,
-                    shippingAddress = order.Address,
+                    shippingAddress = request.ShippingAddress.GetFullAddress(),
                     membershipDiscount = membershipDiscount,
                     couponDiscount = couponDiscount,
                     totalDiscount = totalDiscount
@@ -137,45 +151,20 @@ namespace E_commerce.Controllers
             }
         }
 
-        private async Task<string> ProcessMobilePayment(string paymentMethod, OrderModel order, List<CartItemModel> cartItems, decimal shippingPrice, decimal discountAmount)
-        {
-            // 🔹 SET SHIPPING COST TRƯỚC KHI LƯU
-            order.ShippingCost = shippingPrice;
-
-            // Lưu order trước
-            _datacontext.Orders.Add(order);
-            await _datacontext.SaveChangesAsync();
-
-            // Tạo payment URL theo phương thức
-            if (paymentMethod.ToLower() == "stripe")
-            {
-                return await ProcessMobileStripePayment(order, cartItems, shippingPrice, discountAmount);
-            }
-            else if (paymentMethod.ToLower() == "paypal")
-            {
-                return await ProcessMobilePayPalPayment(order, cartItems, shippingPrice, discountAmount);
-            }
-
-            throw new NotImplementedException($"Payment method {paymentMethod} not implemented for mobile");
-        }
-
-        private async Task<string> ProcessMobileStripePayment(OrderModel order, List<CartItemModel> cartItems, decimal shippingPrice, decimal discountAmount)
+        // 🔹 TẠO STRIPE SESSION NHƯNG KHÔNG TẠO ORDER
+        private async Task<string> CreateStripePaymentSession(string orderCode, List<CartItemModel> cartItems, decimal shippingPrice, decimal discountAmount)
         {
             var domain = "http://localhost:5139/";
 
-            // 🔹 LƯU SHIPPING COST VÀO ORDER
-            order.ShippingCost = shippingPrice;
-            order.Status = 0; // Chờ thanh toán
-
             var options = new Stripe.Checkout.SessionCreateOptions
             {
-                SuccessUrl = domain + $"api/ApiCheckout/MobilePaymentSuccess?session_id={{CHECKOUT_SESSION_ID}}&orderCode={order.OrderCode}",
-                CancelUrl = domain + $"api/ApiCheckout/MobilePaymentCancel?orderCode={order.OrderCode}",
+                SuccessUrl = domain + $"api/ApiCheckout/MobilePaymentSuccess?session_id={{CHECKOUT_SESSION_ID}}&orderCode={orderCode}",
+                CancelUrl = domain + $"api/ApiCheckout/MobilePaymentCancel?orderCode={orderCode}",
                 LineItems = new List<Stripe.Checkout.SessionLineItemOptions>(),
                 Mode = "payment",
                 Metadata = new Dictionary<string, string>
                 {
-                    { "ordercode", order.OrderCode },
+                    { "ordercode", orderCode },
                     { "mobile", "true" }
                 }
             };
@@ -236,100 +225,271 @@ namespace E_commerce.Controllers
             return session.Url;
         }
 
-        private async Task<string> ProcessMobilePayPalPayment(OrderModel order, List<CartItemModel> cartItems, decimal shippingPrice, decimal discountAmount)
-        {
-            decimal totalAmount = cartItems.Sum(x => x.Quantity * x.Price) + shippingPrice - discountAmount;
-            var domain = "http://localhost:5139/";
-
-            order.ShippingCost = shippingPrice;
-            order.Status = 0;
-
-            // Tạo PayPal SDK instance
-            var config = new Dictionary<string, string>
-            {
-                { "mode", "sandbox" },
-                { "clientId", "Ad7D6abQz4m4Ja4g-VxgwDZK_BkSgyjpmwQGjK7Yu_IOfsN2dhbRDMQ4qJmWYdxvcGK1IVK1TLg2qFZo" },
-                { "clientSecret", "ELfi3XeppHttGOyn5NSnh4n9L07FYbOknmJR46PeeppLHWfXVN2UE93uDUyFjSuK1ZVKMI-0_ZZ_jf73" }
-            };
-
-            var accessToken = new PayPal.Api.OAuthTokenCredential(config["clientId"], config["clientSecret"]).GetAccessToken();
-            var apiContext = new PayPal.Api.APIContext(accessToken)
-            {
-                Config = config
-            };
-
-            var payment = new PayPal.Api.Payment
-            {
-                intent = "sale",
-                payer = new PayPal.Api.Payer { payment_method = "paypal" },
-                transactions = new List<PayPal.Api.Transaction>
-                {
-                    new PayPal.Api.Transaction
-                    {
-                        amount = new PayPal.Api.Amount
-                        {
-                            total = totalAmount.ToString("F2"),
-                            currency = "USD"
-                        },
-                        description = $"Mobile Order {order.OrderCode}"
-                    }
-                },
-                redirect_urls = new PayPal.Api.RedirectUrls
-                {
-                    return_url = domain + $"api/ApiCheckout/MobilePaymentSuccess?orderCode={order.OrderCode}",
-                    cancel_url = domain + $"api/ApiCheckout/MobilePaymentCancel?orderCode={order.OrderCode}",
-                }
-            };
-
-            var createdPayment = payment.Create(apiContext);
-
-            // Lưu Payment ID vào Order
-            order.PaymentIntentId = createdPayment.id;
-            _datacontext.Orders.Update(order);
-            await _datacontext.SaveChangesAsync();
-
-            var redirectUrl = createdPayment.links.FirstOrDefault(l => l.rel == "approval_url")?.href;
-            return redirectUrl ?? throw new Exception("Không tìm thấy URL chuyển hướng PayPal");
-        }
-
-        [HttpGet("MobilePaymentSuccess")]
-        public async Task<IActionResult> MobilePaymentSuccess(string session_id, string orderCode)
+        private async Task<string> CreatePayPalPayment(string orderCode, List<CartItemModel> cartItems, decimal shippingPrice, decimal discountAmount)
         {
             try
             {
-                Console.WriteLine($"Mobile payment success - OrderCode: {orderCode}, SessionId: {session_id}");
+                decimal totalAmount = cartItems.Sum(x => x.Quantity * x.Price) + shippingPrice - discountAmount;
+                var domain = "http://localhost:5139/";
 
-                // Lấy order từ database
-                var order = await _datacontext.Orders.FirstOrDefaultAsync(o => o.OrderCode == orderCode);
-                if (order == null)
+                Console.WriteLine($"🔹 PayPal HTTP Payment Debug:");
+                Console.WriteLine($"   - Order Code: {orderCode}");
+                Console.WriteLine($"   - Total Amount: ${totalAmount:F2}");
+
+                if (totalAmount <= 0.01m)
                 {
-                    Console.WriteLine($"Order not found: {orderCode}");
-                    return Content(GenerateErrorHtml("Order not found"), "text/html");
+                    throw new Exception($"Amount too small for PayPal: {totalAmount}");
                 }
 
-                // Cập nhật trạng thái order
-                order.Status = 1; // Đã thanh toán
-                order.PaymentIntentId = session_id ?? order.PaymentIntentId;
+                using var httpClient = new HttpClient();
+
+                // 🔹 BƯỚC 1: LẤY ACCESS TOKEN
+                var clientId = "Ad7D6abQz4m4Ja4g-VxgwDZK_BkSgyjpmwQGjK7Yu_IOfsN2dhbRDMQ4qJmWYdxvcGK1IVK1TLg2qFZo";
+                var clientSecret = "ELfi3XeppHttGOyn5NSnh4n9L07FYbOknmJR46PeeppLHWfXVN2UE93uDUyFjSuK1ZVKMI-0_ZZ_jf73";
+
+                var tokenRequest = new FormUrlEncodedContent(new[]
+                {
+            new KeyValuePair<string, string>("grant_type", "client_credentials")
+        });
+
+                var authString = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authString);
+
+                Console.WriteLine($"🔹 Getting PayPal access token...");
+                var tokenResponse = await httpClient.PostAsync("https://api.sandbox.paypal.com/v1/oauth2/token", tokenRequest);
+                var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
+
+                if (!tokenResponse.IsSuccessStatusCode)
+                {
+                    throw new Exception($"Failed to get PayPal token: {tokenContent}");
+                }
+
+                var tokenData = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(tokenContent);
+                var accessToken = tokenData.GetProperty("access_token").GetString();
+                Console.WriteLine($"🔹 Access token obtained: {accessToken?.Substring(0, 20)}...");
+
+                // 🔹 BƯỚC 2: TẠO PAYMENT VỚI URL ENCODING FIX
+                httpClient.DefaultRequestHeaders.Clear();
+                httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+                httpClient.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+                // 🔹 SỬA: ENCODE URL ĐÚNG CÁCH, KHÔNG DÙNG TEMPLATE PLACEHOLDERS
+                var returnUrl = $"{domain}api/ApiCheckout/MobilePaymentSuccess?orderCode={orderCode}";
+                var cancelUrl = $"{domain}api/ApiCheckout/MobilePaymentCancel?orderCode={orderCode}";
+
+                Console.WriteLine($"🔹 Return URL: {returnUrl}");
+                Console.WriteLine($"🔹 Cancel URL: {cancelUrl}");
+
+                var paymentData = new
+                {
+                    intent = "sale",
+                    payer = new
+                    {
+                        payment_method = "paypal"
+                    },
+                    transactions = new[]
+                    {
+                new
+                {
+                    amount = new
+                    {
+                        total = totalAmount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture),
+                        currency = "USD"
+                    },
+                    description = $"Mobile Order {orderCode}"
+                }
+            },
+                    redirect_urls = new
+                    {
+                        return_url = returnUrl,
+                        cancel_url = cancelUrl
+                    }
+                };
+
+                // 🔹 SỬA: SỬ DỤNG JsonSerializerOptions ĐỂ TRÁNH UNICODE ENCODING
+                var paymentJson = System.Text.Json.JsonSerializer.Serialize(paymentData, new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping // 🔹 QUAN TRỌNG!
+                });
+                Console.WriteLine($"🔹 Payment JSON Request:");
+                Console.WriteLine(paymentJson);
+
+                var paymentRequest = new StringContent(paymentJson, Encoding.UTF8, "application/json");
+
+                Console.WriteLine($"🔹 Sending payment request to PayPal...");
+                var paymentResponse = await httpClient.PostAsync("https://api.sandbox.paypal.com/v1/payments/payment", paymentRequest);
+                var paymentContent = await paymentResponse.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"🔹 Payment Response Status: {paymentResponse.StatusCode}");
+                Console.WriteLine($"🔹 Payment Response:");
+                Console.WriteLine(paymentContent);
+
+                if (!paymentResponse.IsSuccessStatusCode)
+                {
+                    throw new Exception($"PayPal API Error [{paymentResponse.StatusCode}]: {paymentContent}");
+                }
+
+                var paymentResult = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(paymentContent);
+                var paymentId = paymentResult.GetProperty("id").GetString();
+                Console.WriteLine($"🔹 Payment ID: {paymentId}");
+
+                // 🔹 LƯU PAYMENT ID
+                await SavePaymentId(orderCode, paymentId);
+
+                // 🔹 LẤY APPROVAL URL
+                var links = paymentResult.GetProperty("links");
+                string approvalUrl = null;
+
+                foreach (var link in links.EnumerateArray())
+                {
+                    var rel = link.GetProperty("rel").GetString();
+                    var href = link.GetProperty("href").GetString();
+                    Console.WriteLine($"🔹 Link: {rel} -> {href}");
+
+                    if (rel == "approval_url")
+                    {
+                        approvalUrl = href;
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(approvalUrl))
+                {
+                    throw new Exception("Approval URL not found in PayPal response");
+                }
+
+                Console.WriteLine($"🔹 ✅ PayPal payment created successfully!");
+                Console.WriteLine($"🔹 ✅ Approval URL: {approvalUrl}");
+
+                return approvalUrl;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ PayPal HTTP error: {ex.Message}");
+                Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
+                throw new Exception($"PayPal payment failed: {ex.Message}");
+            }
+        }
+
+        [HttpGet("MobilePaymentSuccess")]
+        public async Task<IActionResult> MobilePaymentSuccess(string session_id, string orderCode, string paymentId, string PayerID)
+        {
+            try
+            {
+                Console.WriteLine($"🔹 Mobile payment success - OrderCode: {orderCode}, SessionId: {session_id}, PaymentId: {paymentId}, PayerID: {PayerID}");
 
                 // 🔹 LẤY CART ITEMS VÀ DISCOUNT INFO ĐÃ LƯU
                 var orderData = await GetOrderCartItems(orderCode);
-                if (orderData != null)
+                if (orderData == null)
                 {
-                    // Cập nhật địa chỉ cho order
-                    if (orderData.ShippingAddress != null)
+                    Console.WriteLine($"❌ Order data not found: {orderCode}");
+                    return Content(GenerateErrorHtml("Order data not found"), "text/html");
+                }
+
+                // 🔹 XỬ LÝ PAYPAL SUCCESS NẾU CÓ paymentId VÀ PayerID
+                if (!string.IsNullOrEmpty(paymentId) && !string.IsNullOrEmpty(PayerID))
+                {
+                    try
                     {
-                        order.Address = orderData.ShippingAddress.GetFullAddress();
+                        Console.WriteLine($"🔹 Processing PayPal payment execution...");
+
+                        // 🔹 EXECUTE PAYPAL PAYMENT BẰNG HTTP CLIENT
+                        using var httpClient = new HttpClient();
+
+                        var clientId = "Ad7D6abQz4m4Ja4g-VxgwDZK_BkSgyjpmwQGjK7Yu_IOfsN2dhbRDMQ4qJmWYdxvcGK1IVK1TLg2qFZo";
+                        var clientSecret = "ELfi3XeppHttGOyn5NSnh4n9L07FYbOknmJR46PeeppLHWfXVN2UE93uDUyFjSuK1ZVKMI-0_ZZ_jf73";
+
+                        // Get token
+                        var tokenRequest = new FormUrlEncodedContent(new[]
+                        {
+                    new KeyValuePair<string, string>("grant_type", "client_credentials")
+                });
+
+                        var authString = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
+                        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", authString);
+
+                        var tokenResponse = await httpClient.PostAsync("https://api.sandbox.paypal.com/v1/oauth2/token", tokenRequest);
+                        var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
+
+                        if (!tokenResponse.IsSuccessStatusCode)
+                        {
+                            throw new Exception($"Token error: {tokenContent}");
+                        }
+
+                        var tokenData = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(tokenContent);
+                        var accessToken = tokenData.GetProperty("access_token").GetString();
+
+                        // Execute payment
+                        httpClient.DefaultRequestHeaders.Clear();
+                        httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                        var executeData = new
+                        {
+                            payer_id = PayerID
+                        };
+
+                        var executeJson = System.Text.Json.JsonSerializer.Serialize(executeData);
+                        var executeRequest = new StringContent(executeJson, Encoding.UTF8, "application/json");
+
+                        var executeResponse = await httpClient.PostAsync($"https://api.sandbox.paypal.com/v1/payments/payment/{paymentId}/execute", executeRequest);
+                        var executeContent = await executeResponse.Content.ReadAsStringAsync();
+
+                        Console.WriteLine($"🔹 PayPal execute response: {executeResponse.StatusCode}");
+                        Console.WriteLine($"🔹 PayPal execute content: {executeContent}");
+
+                        if (!executeResponse.IsSuccessStatusCode)
+                        {
+                            throw new Exception($"PayPal execution failed: {executeContent}");
+                        }
+
+                        var executeResult = System.Text.Json.JsonSerializer.Deserialize<JsonElement>(executeContent);
+                        var state = executeResult.GetProperty("state").GetString();
+
+                        if (state?.ToLower() != "approved")
+                        {
+                            Console.WriteLine($"❌ PayPal payment not approved: {state}");
+                            return Content(GenerateErrorHtml("PayPal payment not approved"), "text/html");
+                        }
+
+                        Console.WriteLine($"🔹 ✅ PayPal payment executed successfully: {state}");
                     }
+                    catch (Exception paypalEx)
+                    {
+                        Console.WriteLine($"❌ PayPal execution error: {paypalEx.Message}");
+                        return Content(GenerateErrorHtml($"PayPal error: {paypalEx.Message}"), "text/html");
+                    }
+                }
 
-                    _datacontext.Orders.Update(order);
-                    await _datacontext.SaveChangesAsync();
+                // 🔹 BÂY GIỜ MỚI TẠO ORDER SAU KHI THANH TOÁN THÀNH CÔNG
+                var order = new OrderModel
+                {
+                    OrderCode = orderCode,
+                    CreatedDate = DateTime.Now,
+                    UserName = orderData.UserEmail,
+                    Status = 1, // Đã thanh toán
+                    Address = orderData.ShippingAddress.GetFullAddress(),
+                    ShippingCost = orderData.ShippingPrice,
+                    PaymentIntentId = session_id ?? paymentId ?? "PAID"
+                };
 
-                    // Xử lý order details với cả 2 loại discount
-                    await ProcessOrderDetails(orderCode, orderData.CartItems, order.UserName, orderData.MembershipDiscount, orderData.CouponDiscount, orderData.CouponCode);
-                    await SendOrderConfirmationEmail(orderCode, orderData.CartItems, order.UserName, orderData.ShippingPrice, orderData.MembershipDiscount, orderData.CouponDiscount, orderData.ShippingAddress);
+                _datacontext.Orders.Add(order);
+                await _datacontext.SaveChangesAsync();
 
-                    // Xóa cache sau khi xử lý
-                    await RemoveOrderCartItems(orderCode);
+                Console.WriteLine($"✅ Order created successfully: {orderCode}");
+
+                // Xử lý order details với cả 2 loại discount
+                await ProcessOrderDetails(orderCode, orderData.CartItems, orderData.UserEmail, orderData.MembershipDiscount, orderData.CouponDiscount, orderData.CouponCode);
+                await SendOrderConfirmationEmail(orderCode, orderData.CartItems, orderData.UserEmail, orderData.ShippingPrice, orderData.MembershipDiscount, orderData.CouponDiscount, orderData.ShippingAddress);
+
+                // Xóa cache sau khi xử lý
+                await RemoveOrderCartItems(orderCode);
+
+                // Xóa payment cache nếu có
+                var paymentFilePath = $"temp_payment_{orderCode}.txt";
+                if (System.IO.File.Exists(paymentFilePath))
+                {
+                    System.IO.File.Delete(paymentFilePath);
                 }
 
                 // Tạo HTML page để redirect về app
@@ -338,13 +498,88 @@ namespace E_commerce.Controllers
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Mobile payment success error: {ex.Message}");
+                Console.WriteLine($"❌ Mobile payment success error: {ex.Message}");
                 var errorHtml = GenerateErrorHtml(ex.Message);
                 return Content(errorHtml, "text/html");
             }
         }
+
+        [HttpGet("MobilePaymentCancel")]
+        public async Task<IActionResult> MobilePaymentCancel(string orderCode)
+        {
+            try
+            {
+                // 🔹 XÓA CACHE KHI CANCEL
+                await RemoveOrderCartItems(orderCode);
+
+                var paymentFilePath = $"temp_payment_{orderCode}.txt";
+                if (System.IO.File.Exists(paymentFilePath))
+                {
+                    System.IO.File.Delete(paymentFilePath);
+                }
+
+                Console.WriteLine($"✅ Cleaned up cancelled order: {orderCode}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error cleaning up cancelled order: {ex.Message}");
+            }
+
+            var html = $@"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Payment Cancelled</title>
+                    <meta name='viewport' content='width=device-width, initial-scale=1'>
+                    <style>
+                        body {{ font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }}
+                        .container {{ max-width: 400px; margin: 50px auto; background: white; padding: 30px; border-radius: 10px; text-align: center; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }}
+                        .cancel-icon {{ color: #ff9800; font-size: 60px; margin-bottom: 20px; }}
+                        h2 {{ color: #333; margin-bottom: 10px; }}
+                        p {{ color: #666; margin: 10px 0; }}
+                        button {{ background: #ff9800; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; font-size: 16px; }}
+                    </style>
+                </head>
+                <body>
+                    <div class='container'>
+                        <div class='cancel-icon'>⚠</div>
+                        <h2>Payment Cancelled</h2>
+                        <p>Order Code: {orderCode}</p>
+                        <p>You can close this window and try again.</p>
+                        <button onclick='window.close()'>Close Window</button>
+                    </div>
+                    <script>
+                        setTimeout(function() {{
+                            window.close();
+                        }}, 5000);
+                    </script>
+                </body>
+                </html>";
+
+            return Content(html, "text/html");
+        }
+
+        // 🔹 LƯU PAYMENT ID VÀO CACHE
+        private async Task SavePaymentId(string orderCode, string paymentId)
+        {
+            var filePath = $"temp_payment_{orderCode}.txt";
+            await System.IO.File.WriteAllTextAsync(filePath, paymentId);
+            Console.WriteLine($"💾 Saved payment ID for order: {orderCode}");
+        }
+
+        // 🔹 LẤY PAYMENT ID TỪ CACHE
+        private async Task<string> GetPaymentId(string orderCode)
+        {
+            var filePath = $"temp_payment_{orderCode}.txt";
+            if (System.IO.File.Exists(filePath))
+            {
+                return await System.IO.File.ReadAllTextAsync(filePath);
+            }
+            return null;
+        }
+
         // 🔹 LƯU CART ITEMS VÀO CACHE (sử dụng MemoryCache hoặc Redis)
-        private async Task SaveOrderCartItems(string orderCode, List<CartItemModel> cartItems, decimal shippingPrice, decimal membershipDiscount, decimal couponDiscount, ShippingAddressModel shippingAddress, string couponCode)
+        private async Task SaveOrderCartItems(string orderCode, List<CartItemModel> cartItems, decimal shippingPrice, decimal membershipDiscount, decimal couponDiscount, ShippingAddressModel shippingAddress, string couponCode, string userEmail)
         {
             var orderData = new OrderCartData
             {
@@ -355,6 +590,7 @@ namespace E_commerce.Controllers
                 CouponDiscount = couponDiscount,
                 ShippingAddress = shippingAddress,
                 CouponCode = couponCode,
+                UserEmail = userEmail, // 🔹 THÊM USER EMAIL
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -362,7 +598,7 @@ namespace E_commerce.Controllers
             var json = System.Text.Json.JsonSerializer.Serialize(orderData);
             await System.IO.File.WriteAllTextAsync($"temp_order_{orderCode}.json", json);
 
-            Console.WriteLine($"Saved cart items and discounts for order: {orderCode}");
+            Console.WriteLine($"💾 Saved cart items and discounts for order: {orderCode}");
         }
 
         // 🔹 LẤY CART ITEMS TỪ CACHE
@@ -375,13 +611,13 @@ namespace E_commerce.Controllers
                 {
                     var json = await System.IO.File.ReadAllTextAsync(filePath);
                     var orderData = System.Text.Json.JsonSerializer.Deserialize<OrderCartData>(json);
-                    Console.WriteLine($"Retrieved cart items for order: {orderCode}, Items count: {orderData.CartItems.Count}");
+                    Console.WriteLine($"📥 Retrieved cart items for order: {orderCode}, Items count: {orderData.CartItems.Count}");
                     return orderData;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error getting order cart items: {ex.Message}");
+                Console.WriteLine($"❌ Error getting order cart items: {ex.Message}");
             }
             return null;
         }
@@ -395,12 +631,12 @@ namespace E_commerce.Controllers
                 if (System.IO.File.Exists(filePath))
                 {
                     System.IO.File.Delete(filePath);
-                    Console.WriteLine($"Removed cache for order: {orderCode}");
+                    Console.WriteLine($"🗑️ Removed cache for order: {orderCode}");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error removing order cache: {ex.Message}");
+                Console.WriteLine($"❌ Error removing order cache: {ex.Message}");
             }
         }
 
@@ -466,29 +702,6 @@ namespace E_commerce.Controllers
             </div>
         </body>
         </html>";
-        }
-
-        [HttpGet("MobilePaymentCancel")]
-        public IActionResult MobilePaymentCancel(string orderCode)
-        {
-            var html = $@"
-                <!DOCTYPE html>
-                <html>
-                <head>
-                    <title>Payment Cancelled</title>
-                    <meta name='viewport' content='width=device-width, initial-scale=1'>
-                </head>
-                <body>
-                    <div style='text-align: center; padding: 50px; font-family: Arial;'>
-                        <h2>Payment Cancelled</h2>
-                        <p>Order Code: {orderCode}</p>
-                        <p>You can close this window and try again.</p>
-                        <button onclick='window.close()'>Close</button>
-                    </div>
-                </body>
-                </html>";
-
-            return Content(html, "text/html");
         }
 
         private async Task ProcessOrderDetails(string orderCode, List<CartItemModel> cartItems, string userEmail, decimal membershipDiscount, decimal couponDiscount, string couponCode)
@@ -567,12 +780,9 @@ namespace E_commerce.Controllers
 
                 // 🔹 SỬA: Chỉ cập nhật Product.Sold, KHÔNG trừ Product.Quantity
                 variation.Product.Sold += cart.Quantity;
-                // ❌ XÓA: variation.Product.Quantity -= cart.Quantity; 
-                // ❌ XÓA: variation.Stock -= cart.Quantity;
 
                 // 🔹 SỬA: Chỉ update Product, không update variation
                 _datacontext.Update(variation.Product);
-                // ❌ XÓA: _datacontext.Update(variation);
             }
 
             var user = await _datacontext.Users.FirstOrDefaultAsync(u => u.Email == userEmail);
@@ -598,7 +808,7 @@ namespace E_commerce.Controllers
                     coupon.UsedCount += 1;
                     _datacontext.Update(coupon);
 
-                    Console.WriteLine($"Saved coupon usage - User: {user.Email}, Coupon: {couponCode}, Discount: ${couponDiscount}");
+                    Console.WriteLine($"✅ Saved coupon usage - User: {user.Email}, Coupon: {couponCode}, Discount: ${couponDiscount}");
                 }
             }
 
@@ -608,7 +818,7 @@ namespace E_commerce.Controllers
                 int pointsToAdd = (int)(grandTotal * 0.01m); // 1% của tổng tiền
                 user.Points += pointsToAdd;
                 _datacontext.Update(user);
-                Console.WriteLine($"Added {pointsToAdd} points to user {userEmail}");
+                Console.WriteLine($"✅ Added {pointsToAdd} points to user {userEmail}");
             }
 
             await _datacontext.SaveChangesAsync();
@@ -658,10 +868,11 @@ namespace E_commerce.Controllers
                 emailBody.AppendLine("Best regards");
 
                 await _emailSender.SendEmailAsync(userEmail, "Order Successfully - Mobile App", emailBody.ToString());
+                Console.WriteLine($"✅ Sent confirmation email to: {userEmail}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error sending email: {ex.Message}");
+                Console.WriteLine($"❌ Error sending email: {ex.Message}");
             }
         }
     }
@@ -686,8 +897,8 @@ namespace E_commerce.Controllers
         public int Quantity { get; set; }
         public string ImageUrl { get; set; }
     }
-    // Thêm vào cuối file ApiCheckoutController.cs
 
+    // 🔹 CẬP NHẬT OrderCartData CLASS
     public class OrderCartData
     {
         public string OrderCode { get; set; }
@@ -697,8 +908,10 @@ namespace E_commerce.Controllers
         public decimal CouponDiscount { get; set; } // Discount từ coupon
         public ShippingAddressModel ShippingAddress { get; set; }
         public string CouponCode { get; set; }
+        public string UserEmail { get; set; } // 🔹 THÊM USER EMAIL
         public DateTime CreatedAt { get; set; }
     }
+
     public class ShippingAddressModel
     {
         public string City { get; set; }

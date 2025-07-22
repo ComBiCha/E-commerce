@@ -831,7 +831,6 @@ namespace E_commerce.Controllers
             }
         }
 
-        // 🔹 API LẤY CHI TIẾT ORDER
         [HttpGet("GetOrderDetails")]
         public async Task<IActionResult> GetOrderDetails(string orderCode, string email)
         {
@@ -849,33 +848,45 @@ namespace E_commerce.Controllers
 
                 var orderDetails = await _dataContext.OrderDetails
                     .Include(od => od.Product)
-                        .ThenInclude(p => p.Warranty)
                     .Include(od => od.Variation)
                         .ThenInclude(v => v.Material)
                     .Include(od => od.Variation)
                         .ThenInclude(v => v.Color)
                     .Where(od => od.OrderCode == orderCode)
-                    .Select(od => new
+                    .ToListAsync();
+
+                // 🔹 LẤY TẤT CẢ WARRANTIES CỦA ORDER CODE
+                var warranties = await _dataContext.Warranties
+                    .Where(w => w.OrderCode == orderCode)
+                    .ToListAsync();
+
+                var orderDetailsWithWarranty = orderDetails.Select(od => {
+                    // 🔹 TÌM WARRANTY CHO VARIATION NÀY
+                    var warranty = warranties.FirstOrDefault(w => w.VariationId == od.VariationId);
+
+                    return new
                     {
                         id = od.Id,
                         productId = od.ProductId,
                         variationId = od.VariationId,
                         productName = od.Product.Name,
-                        price = od.Price,                    // 🔹 Giá gốc
+                        price = od.Price,
                         quantity = od.Quantity,
-                        discountAmount = od.DiscountAmount,  // 🔹 Tổng discount cho item này
-                        finalPrice = od.Price - (od.DiscountAmount / od.Quantity), // 🔹 Giá cuối cho 1 item
-                        subtotal = od.Quantity * (od.Price - (od.DiscountAmount / od.Quantity)), // 🔹 Tổng tiền đã giảm
+                        discountAmount = od.DiscountAmount,
+                        finalPrice = od.Price - (od.DiscountAmount / od.Quantity),
+                        subtotal = od.Quantity * (od.Price - (od.DiscountAmount / od.Quantity)),
                         imageUrl = od.Variation.ImageUrl,
                         material = od.Variation.Material.Name,
                         color = od.Variation.Color.Name,
                         size = od.Variation.Size,
-                        warrantyCode = od.Product.Warranty.FirstOrDefault().WarrantyCode,
-                        warrantyExpirationDate = od.Product.Warranty.FirstOrDefault().ExpirationDate
-                    })
-                    .ToListAsync();
+                        // 🔹 THÔNG TIN WARRANTY
+                        warrantyCode = warranty?.WarrantyCode,
+                        warrantyExpirationDate = warranty?.ExpirationDate,
+                        hasWarranty = warranty != null
+                    };
+                }).ToList();
 
-                var productTotal = orderDetails.Sum(od => od.subtotal);
+                var productTotal = orderDetailsWithWarranty.Sum(od => od.subtotal);
                 var grandTotal = productTotal + order.ShippingCost;
 
                 var result = new
@@ -897,7 +908,7 @@ namespace E_commerce.Controllers
                         productTotal = productTotal,
                         grandTotal = grandTotal
                     },
-                    orderDetails = orderDetails
+                    orderDetails = orderDetailsWithWarranty
                 };
 
                 return Ok(result);
@@ -1057,6 +1068,211 @@ namespace E_commerce.Controllers
             }
         }
 
+        [HttpGet("GetUserWarranties")]
+        public async Task<IActionResult> GetUserWarranties(string email)
+        {
+            try
+            {
+                Console.WriteLine($"GetUserWarranties called with email: {email}");
+
+                var user = await _userManager.FindByEmailAsync(email);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found" });
+
+                var warranties = await _dataContext.WarrantyRequests
+                    .Where(wr => wr.UserId == user.Id)
+                    .Include(wr => wr.Warranty)
+                        .ThenInclude(w => w.Product)
+                    .OrderByDescending(wr => wr.CreatedDate)
+                    .Select(wr => new
+                    {
+                        id = wr.Id,
+                        warrantyCode = wr.WarrantyCode,
+                        productName = wr.Warranty.Product.Name,
+                        productImage = wr.Warranty.Product.Image,
+                        reason = wr.Reason,
+                        status = wr.Status,
+                        statusName = GetWarrantyStatusName(wr.Status),
+                        statusColor = GetWarrantyStatusColor(wr.Status),
+                        canCancel = wr.Status == 0 || wr.Status == 1, // Chỉ có thể hủy khi đang chờ duyệt hoặc đã duyệt
+                        createdDate = wr.CreatedDate,
+                        updatedDate = wr.UpdatedDate,
+                        warrantyExpirationDate = wr.Warranty.ExpirationDate
+                    })
+                    .ToListAsync();
+
+                return Ok(new { success = true, warranties = warranties });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"GetUserWarranties error: {ex.Message}");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("RequestWarranty")]
+        public async Task<IActionResult> RequestWarranty([FromBody] RequestWarrantyRequest request)
+        {
+            try
+            {
+                Console.WriteLine($"RequestWarranty called with email: {request.Email}, warrantyCode: {request.WarrantyCode}");
+
+                var user = await _userManager.FindByEmailAsync(request.Email);
+                if (user == null)
+                    return NotFound(new { success = false, message = "User not found" });
+
+                // Kiểm tra warranty code
+                var warranty = await _dataContext.Warranties
+                    .Include(w => w.Product)
+                    .FirstOrDefaultAsync(w => w.WarrantyCode == request.WarrantyCode);
+
+                if (warranty == null)
+                    return BadRequest(new { success = false, message = "Invalid warranty code" });
+
+                // 🔹 SỬA LẠI: Chỉ kiểm tra request đang active (chưa hoàn thành/hủy/từ chối)
+                var existingActiveRequest = await _dataContext.WarrantyRequests
+                    .FirstOrDefaultAsync(wr => wr.WarrantyCode == request.WarrantyCode &&
+                                              wr.UserId == user.Id &&
+                                              wr.Status != 4 && // Không phải Completed
+                                              wr.Status != 5 && // Không phải Rejected  
+                                              wr.Status != 6);  // Không phải Canceled
+
+                if (existingActiveRequest != null)
+                {
+                    string statusMessage = existingActiveRequest.Status switch
+                    {
+                        0 => "You have a pending warranty request for this product",
+                        1 => "You have an approved warranty request for this product that is in progress",
+                        2 => "Your product has been received and is being processed",
+                        3 => "Your product is currently under repair",
+                        _ => "You have an active warranty request for this product"
+                    };
+
+                    return BadRequest(new { success = false, message = statusMessage });
+                }
+
+                // 🔹 KIỂM tra thời hạn warranty (nếu cần)
+                if (warranty.ExpirationDate != default(DateTime) && warranty.ExpirationDate < DateTime.Now)
+                {
+                    return BadRequest(new { success = false, message = "This warranty has expired" });
+                }
+
+
+                // Tạo warranty request mới
+                var warrantyRequest = new WarrantyRequestModel
+                {
+                    WarrantyCode = request.WarrantyCode,
+                    UserId = user.Id,
+                    Reason = request.Reason,
+                    Status = 0, // Pending
+                    WarrantyID = warranty.Id,
+                    CreatedDate = DateTime.Now,
+                    UpdatedDate = DateTime.Now
+                };
+
+                _dataContext.WarrantyRequests.Add(warrantyRequest);
+                await _dataContext.SaveChangesAsync();
+
+                Console.WriteLine("✅ Warranty request submitted successfully");
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Warranty request submitted successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ RequestWarranty error: {ex.Message}");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("CancelWarranty")]
+        public async Task<IActionResult> CancelWarranty([FromBody] CancelWarrantyRequest request)
+        {
+            try
+            {
+                Console.WriteLine($"🔄 CancelWarranty called with email: {request.Email}, warrantyId: {request.WarrantyId}");
+
+                var user = await _userManager.FindByEmailAsync(request.Email);
+                if (user == null)
+                {
+                    Console.WriteLine("❌ User not found");
+                    return NotFound(new { success = false, message = "User not found" });
+                }
+
+                var warrantyRequest = await _dataContext.WarrantyRequests
+                    .FirstOrDefaultAsync(wr => wr.Id == request.WarrantyId && wr.UserId == user.Id);
+
+                if (warrantyRequest == null)
+                {
+                    Console.WriteLine("❌ Warranty request not found");
+                    return NotFound(new { success = false, message = "Warranty request not found" });
+                }
+
+                Console.WriteLine($"🔍 Found warranty request - Status: {warrantyRequest.Status}");
+
+                // Chỉ có thể hủy khi status = 0 (Pending) hoặc 1 (Approved)
+                if (warrantyRequest.Status != 0 && warrantyRequest.Status != 1)
+                {
+                    Console.WriteLine($"❌ Cannot cancel warranty with status: {warrantyRequest.Status}");
+                    return BadRequest(new { success = false, message = "This warranty request cannot be canceled at this stage" });
+                }
+
+                warrantyRequest.Status = 6; // Canceled
+                warrantyRequest.UpdatedDate = DateTime.Now;
+
+                _dataContext.WarrantyRequests.Update(warrantyRequest);
+                await _dataContext.SaveChangesAsync();
+
+                Console.WriteLine("✅ Warranty request canceled successfully");
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Warranty request has been canceled successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ CancelWarranty error: {ex.Message}");
+                Console.WriteLine($"❌ StackTrace: {ex.StackTrace}");
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+        }
+
+        // Helper methods cho warranty status
+        private static string GetWarrantyStatusName(int status)
+        {
+            return status switch
+            {
+                0 => "Pending",
+                1 => "Approved",
+                2 => "Product Received",
+                3 => "Under Repair",
+                4 => "Completed",
+                5 => "Rejected",
+                6 => "Canceled",
+                _ => "Unknown"
+            };
+        }
+
+        private static string GetWarrantyStatusColor(int status)
+        {
+            return status switch
+            {
+                0 => "warning",
+                1 => "success",
+                2 => "info",
+                3 => "primary",
+                4 => "dark",
+                5 => "danger",
+                6 => "danger",
+                _ => "secondary"
+            };
+        }
+
         // Helper methods
         private static string GetOrderStatusName(int status)
         {
@@ -1167,5 +1383,17 @@ namespace E_commerce.Controllers
     {
         public string Email { get; set; }
         public string OrderCode { get; set; }
+    }
+    public class RequestWarrantyRequest
+    {
+        public string Email { get; set; }
+        public string WarrantyCode { get; set; }
+        public string Reason { get; set; }
+    }
+
+    public class CancelWarrantyRequest
+    {
+        public string Email { get; set; }
+        public int WarrantyId { get; set; } 
     }
 }

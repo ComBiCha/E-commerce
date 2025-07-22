@@ -2,93 +2,6 @@
     var role = ViewBag.Role as string;
     var currentUser = ViewBag.UserName as string;
 }
-<style>
-    .chat-container {
-        max-width: 1000px;
-        margin: 80px auto;
-        background-color: #fff;
-        border-radius: 15px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        display: flex;
-        height: 600px;
-        overflow: hidden;
-    }
-
-    .user-item.new-message {
-        font-weight: bold;
-        background-color: #ffeeba;
-    }
-
-    .user-list {
-        width: 30%;
-        border-right: 1px solid #ccc;
-        overflow-y: auto;
-        background: #f1f1f1;
-        padding: 10px;
-    }
-
-    .user-item {
-        padding: 12px;
-        cursor: pointer;
-        border-bottom: 1px solid #ddd;
-        border-radius: 5px;
-        margin-bottom: 5px;
-    }
-
-        .user-item:hover, .user-item.active {
-            background-color: #007bff;
-            color: #fff;
-            font-weight: bold;
-        }
-
-    .chat-content {
-        width: 70%;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .chat-header {
-        padding: 15px;
-        background-color: #007bff;
-        color: white;
-        font-size: 1.3rem;
-        font-weight: 500;
-    }
-
-    .chat-body {
-        flex: 1;
-        overflow-y: auto;
-        padding: 20px;
-        background-color: #f8f9fa;
-    }
-
-    .chat-message {
-        margin-bottom: 15px;
-        max-width: 70%;
-        padding: 12px 16px;
-        border-radius: 20px;
-        clear: both;
-        word-wrap: break-word;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .message-left {
-        background-color: #dee2e6;
-        float: left;
-    }
-
-    .message-right {
-        background-color: #cfe2ff;
-        float: right;
-        text-align: right;
-    }
-
-    .chat-footer {
-        padding: 15px;
-        background-color: #f1f3f5;
-        border-top: 1px solid #ddd;
-    }
-</style>
 
 <div class="chat-container">
     @* Ẩn danh sách người dùng nếu là khách hàng *@
@@ -118,63 +31,58 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@@microsoft/signalr@latest/dist/browser/signalr.min.js"></script>
     <script>
+                // Thêm debug cho authentication:
+        console.log("Current User:", currentUser);
+        console.log("User Role:", userRole);
+        console.log("Is Authenticated:", currentUser !== "");
+        //lấy tên và role của người dùng đăng nhập hiện tại
         const currentUser = "@currentUser"; 
         const role = "@role";               
         let customerSupportUserName = "";   
         let currentSelectedUser = "";       
 
+        //kết nối SignalR (chạy trước tiên)
         const connection = new signalR.HubConnectionBuilder()
             .withUrl("/chatHub")
             .build();
 
-        connection.start().then(async function () {
-            console.log("SignalR Connected");
-
-            try {
-                const csRes = await fetch("/Chat/GetCustomerSupportUserName");
-                customerSupportUserName = await csRes.json();
-                console.log("Customer Support UserName fetched:", customerSupportUserName);
-            } catch (error) {
-                console.error("Failed to fetch Customer Support UserName:", error);
-            }
-
-            if (role === "User") {
-                document.getElementById("receiver").value = customerSupportUserName;
-                document.getElementById("chatHeader").textContent = "Chatting with: Customer Service Agent";
-                document.getElementById("chatFooter").classList.remove("d-none");
-                loadChatHistory(customerSupportUserName);
-            } else {
-                loadChatUsers();
-            }
-        }).catch(function (err) {
-            console.error("SignalR Connection Error: ", err.toString());
-        });
-
+        //Lắng nghe các sự kiện từ server
+        //Nhận tin nhắn từ người gửi
         connection.on("ReceiveMessage", function (sender, message, imageUrl) {
             console.log(`Received message from ${sender}: ${message} (Image: ${imageUrl})`);
             console.log(`Current user (logged in): ${currentUser}, Selected chat (UI): ${currentSelectedUser}, Role: ${role}`);
 
             let shouldDisplayInCurrentChat = false;
 
+            //logic hiển thị tin nhắn
             if (role === "User") {
                 if (sender === currentUser || sender === customerSupportUserName) {
                     shouldDisplayInCurrentChat = true;
                 }
-            } else {
+            }
+            //nếu là role khác ngoài user
+            else {
                 const isMyOwnSentMessage = (sender === currentUser) || (role === "Admin" && sender === customerSupportUserName);
                 const isFromCurrentSelectedPartner = (sender === currentSelectedUser);
+                //là tin nhắn mình gửi
                 if (isMyOwnSentMessage && document.getElementById("receiver").value === currentSelectedUser) {
                     shouldDisplayInCurrentChat = true;
-                } else if (isFromCurrentSelectedPartner) {
+                } 
+                //người đang nhắn với admin gửi
+                else if (isFromCurrentSelectedPartner) {
                     shouldDisplayInCurrentChat = true;
                 }
             }
             if (shouldDisplayInCurrentChat) {
+                //hiển thị tin nhắn
                 addMessageToList(sender, message, imageUrl);
-            } else {
+            } 
+            //highlight tin nhắn
+            else {
                 highlightNewMessage(sender);
             }
         });
+
 
         connection.on("UpdateUserList", function (newUserName) {
             console.log(`Updating user list for new user: ${newUserName}`);
@@ -187,8 +95,81 @@
         });
 
 
+        connection.start().then(async function () {
+            console.log("SignalR Connected");
+
+            try {
+                // lấy thông tin về CustomerSupport (acc chính)
+                const csRes = await fetch("/Chat/GetCustomerSupportUserName");
+                customerSupportUserName = await csRes.json();
+console.log("Customer Support UserName fetched:", customerSupportUserName);
+            } catch (error) {
+                console.error("Failed to fetch Customer Support UserName:", error);
+            }
+
+            if (role === "User") {
+                // Hiển thị đang chat với customer support
+                document.getElementById("receiver").value = customerSupportUserName;
+                document.getElementById("chatHeader").textContent = "Chatting with: Customer Service Agent";
+                document.getElementById("chatFooter").classList.remove("d-none");
+                //Hiển thị lịch sử chat với customer support
+                loadChatHistory(customerSupportUserName);
+            } else {
+                //Nếu là role khác ngoài user thì chạy hàm này
+                loadChatUsers();
+            }
+        }).catch(function (err) {
+            console.error("SignalR Connection Error: ", err.toString());
+        });
+        
+        //Hiển thị lịch sử tin nhắn
+        async function loadChatHistory(username) {
+            try {
+                const res = await fetch(`/Chat/GetChatHistory?receiver=${username}`);
+                const messages = await res.json();
+                const list = document.getElementById("messagesList");
+                list.innerHTML = "";
+                messages.forEach(m => addMessageToList(m.sender, m.content, m.imageUrl));
+                list.scrollTop = list.scrollHeight;
+            } catch (error) {
+                console.error("Error loading chat history:", error);
+            }
+        }
+
+        // thêm tin nhắn vào giao diện
+        function addMessageToList(sender, message, imageUrl) {
+            const msgDiv = document.createElement("div");
+            let isMyMessage = false;
+
+            if (role === "User") {
+                isMyMessage = (sender === currentUser);
+            } else {
+                if (sender === currentUser || (role === "Admin" && sender === customerSupportUserName)) {
+                    isMyMessage = true;
+                }
+            }
+
+            msgDiv.classList.add("chat-message", isMyMessage ? "message-right" : "message-left");
+            let html = "";
+
+            if (!isMyMessage) {
+                if (role === "User" && sender === customerSupportUserName) {
+                    html += `<strong>Customer Support</strong><br>`;
+                } else {
+                    html += `<strong>${sender}</strong><br>`;
+                }
+            }
+
+            if (message) html += `<span>${message}</span><br>`;
+            if (imageUrl) html += `<img src="${imageUrl}" alt="Image" style="max-width:200px; border-radius:10px; margin-top: 5px;" />`;
+            msgDiv.innerHTML = html;
+            document.getElementById("messagesList").appendChild(msgDiv);
+            document.getElementById("messagesList").scrollTop = document.getElementById("messagesList").scrollHeight;
+        }
+// Vị trí admin, lấy danh sách những người đã nhắn tin cho customer support
         async function loadChatUsers() {
             try {
+                //trả về danh sách người dùng đã nhắn tin cho customer support
                 const res = await fetch("/Chat/GetChatUsers");
                 const users = await res.json();
                 const userList = document.getElementById("userList");
@@ -200,7 +181,7 @@
                     if (b === currentSelectedUser) return 1;
                     return 0;
                 });
-
+                //sửa giao diện để có thể nhấn vào 1 người và nhắn với họ
                 users.forEach(u => {
                     const div = document.createElement("div");
                     div.className = "user-item";
@@ -209,16 +190,22 @@
                     if (u === currentSelectedUser) {
                         div.classList.add("active");
                     }
+                    //Nhấn vào để gọi hàm selectUser
                     div.addEventListener("click", (event) => selectUser(u, event));
                     userList.appendChild(div);
                 });
+
+                // role khác user
                 if (role !== "User" && users.length > 0) {
                     if (currentSelectedUser === "" || !users.includes(currentSelectedUser)) {
                         selectUser(users[0], null);
-                    } else {
+                    }
+                    // đã chọn được người để nhắn
+                    else {
                         const selectedElement = document.querySelector(`.user-item[data-user="${currentSelectedUser}"]`);
                         if (selectedElement) {
                             selectedElement.classList.add("active");
+                            //set người nhận tin nhắn là người mình chọn hiện tại
                             document.getElementById("receiver").value = currentSelectedUser;
                             document.getElementById("chatHeader").textContent = "Chatting with: " + currentSelectedUser;
                             document.getElementById("chatFooter").classList.remove("d-none");
@@ -231,6 +218,7 @@
             }
         }
 
+        //Chọn người để nhắn
         function selectUser(userName, event) {
             const receiverInput = document.getElementById("receiver");
             const chatHeader = document.getElementById("chatHeader");
@@ -239,7 +227,7 @@
             currentSelectedUser = userName;
 
             receiverInput.value = userName;
-            chatHeader.textContent = "Chatting with: " + userName;
+chatHeader.textContent = "Chatting with: " + userName;
 
             document.querySelectorAll(".user-item").forEach(el => {
                 el.classList.remove("active", "new-message");
@@ -257,9 +245,11 @@
             }
 
             chatFooter.classList.remove("d-none");
+            //hiển thị lịch sử nhắn với người được chọn
             loadChatHistory(userName);
         }
 
+        //gửi tin nhắn
         async function sendMessage() {
             const receiver = document.getElementById("receiver").value;
             if (!receiver) {
@@ -294,6 +284,7 @@
             }
 
             try {
+                //Gọi tới ChatHub.cs /SendMessage
                 await connection.invoke("SendMessage", receiver, message, imageUrl);
             } catch (err) {
                 console.error("SignalR error:", err.toString());
@@ -310,11 +301,12 @@
             document.getElementById("sendButton").disabled = !(msg || img.files.length > 0);
         }
 
+        //Highlight tin nhắn mới
         function highlightNewMessage(sender) {
             const userItems = document.querySelectorAll(".user-item");
             let found = false;
             userItems.forEach(item => {
-                if (item.textContent === sender) {
+if (item.textContent === sender) {
                     item.classList.add("new-message");
                     found = true;
                 }
@@ -327,50 +319,5 @@
 
         document.getElementById("messageInput").addEventListener("input", updateSendButtonState);
         document.getElementById("imageInput").addEventListener("change", updateSendButtonState);
-
-        async function loadChatHistory(username) {
-            try {
-                const res = await fetch(`/Chat/GetChatHistory?receiver=${username}`);
-                const messages = await res.json();
-                const list = document.getElementById("messagesList");
-                list.innerHTML = "";
-                messages.forEach(m => addMessageToList(m.sender, m.content, m.imageUrl));
-                list.scrollTop = list.scrollHeight; 
-            } catch (error) {
-                console.error("Error loading chat history:", error);
-            }
-        }
-
-        function addMessageToList(sender, message, imageUrl) {
-            const msgDiv = document.createElement("div");
-            let isMyMessage = false;
-
-            if (role === "User") {
-                isMyMessage = (sender === currentUser);
-            } else {
-                if (sender === currentUser || (role === "Admin" && sender === customerSupportUserName)) {
-                    isMyMessage = true;
-                }
-            }
-
-            msgDiv.classList.add("chat-message", isMyMessage ? "message-right" : "message-left");
-            let html = "";
-
-            if (!isMyMessage) {
-                if (role === "User" && sender === customerSupportUserName) {
-                    html += `<strong>Customer Support</strong><br>`;
-                } else {
-                    html += `<strong>${sender}</strong><br>`;
-                }
-            }
-
-            if (message) html += `<span>${message}</span><br>`;
-            if (imageUrl) html += `<img src="${imageUrl}" alt="Image" style="max-width:200px; border-radius:10px; margin-top: 5px;" />`;
-            msgDiv.innerHTML = html;
-            document.getElementById("messagesList").appendChild(msgDiv);
-            document.getElementById("messagesList").scrollTop = document.getElementById("messagesList").scrollHeight;
-        }
     </script>
-}
-}
 }
