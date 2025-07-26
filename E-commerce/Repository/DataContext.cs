@@ -36,18 +36,19 @@ namespace E_commerce.Repository
 
         public DbSet<Messages> Messages { get; set; }
         public DbSet<UserAddressModel> UserAddresses { get; set; }
+        public DbSet<UserVoucher> UserVouchers { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-        
+
             // Cấu hình relationship cho Messages
             modelBuilder.Entity<Messages>()
                 .HasOne(m => m.Sender)
                 .WithMany(u => u.SentMessages)
                 .HasForeignKey(m => m.SenderId)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+
             modelBuilder.Entity<Messages>()
                 .HasOne(m => m.Receiver)
                 .WithMany(u => u.ReceivedMessages)

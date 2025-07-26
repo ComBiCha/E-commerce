@@ -22,5 +22,6 @@ namespace E_commerce.Models
         public ICollection<Messages> SentMessages { get; set; }
         public ICollection<Messages> ReceivedMessages { get; set; }
         public ICollection<UserAddressModel> Addresses { get; set; } // 🔹 THÊM ADDRESSES
+        public int SpinCount { get; set; } = 0;
     }
 }

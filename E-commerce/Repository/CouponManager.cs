@@ -57,7 +57,7 @@ namespace E_commerce.Repository
             }
 
             var hasUsed = await _dataContext.CouponUsages
-                .AnyAsync(cu => cu.UserId == userId && cu.CouponId == coupon.Id);
+                .AnyAsync(cu => cu.UserId == userId && cu.CouponCode == coupon.Code);
             if (hasUsed)
             {
                 _logger.LogWarning("User {UserId} has already used coupon: {CouponCode}", userId, couponCode);
@@ -78,7 +78,7 @@ namespace E_commerce.Repository
             _dataContext.CouponUsages.Add(new CouponUsageModel
             {
                 UserId = userId,
-                CouponId = coupon.Id,
+                CouponCode = coupon.Code,
                 UsedAt = DateTime.Now
             });
             await _dataContext.SaveChangesAsync();

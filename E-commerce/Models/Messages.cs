@@ -10,6 +10,8 @@ namespace E_commerce.Models
         public string? Content { get; set; }
         public string? ImageUrl { get; set; } 
         public DateTime Timestamp { get; set; }
+        public bool IsRead { get; set; } = false;
+
         public AppUserModel Sender { get; set; }
         public AppUserModel Receiver { get; set; }
 
