@@ -22,23 +22,23 @@
     </div>
 
     <div class="voucher-area">
-        <div class="gacha-desc">
-            <b>Hướng dẫn:</b><br>
-            - 1 đơn đặt hàng thành công = <span class="gacha-point">1 điểm</span><br>
-            - 1 lần quay = <span class="gacha-point">1 điểm</span><br>
-            - Tích điểm để nhận thêm lượt quay và voucher hấp dẫn!
-        </div>
+    <div class="gacha-desc">
+        <b>Instructions:</b><br>
+        - 1 successful order = <span class="gacha-point">1 point</span><br>
+        - 1 spin = <span class="gacha-point">1 point</span><br>
+        - Collect points to get more spins and attractive vouchers!
+    </div>
 
-        <div class="voucher-board" id="voucher-board">
-            <h3>🎫 Voucher của bạn</h3>
-            <div class="voucher-list" id="voucher-list">
-                <div style="color:#888;font-size:1.5rem;">Chưa có voucher nào</div>
-            </div>
+    <div class="voucher-board" id="voucher-board">
+        <h3>🎫 Your Vouchers</h3>
+        <div class="voucher-list" id="voucher-list">
+            <div style="color:#888;font-size:1.5rem;">No vouchers yet</div>
         </div>
-        <div class="spin-info">
-            <span id="spin-count">Lượt quay: 3</span>
-        </div>
-        <button id="spin-btn">Spin</button>
+    </div>
+    <div class="spin-info">
+        <span id="spin-count">Spins left: 3</span>
+    </div>
+    <button id="spin-btn">Spin</button>
 </div>
 </div>
 
@@ -322,35 +322,111 @@
     80% { opacity: 1; top: 40px; }
     100% { opacity: 0; top: 70px; }
 }
+
+/* Popup voucher chi tiết */
+.coupon-detail-popup {
+    position: fixed; z-index: 9999; left: 0; top: 0; width: 100vw; height: 100vh;
+    background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center;
+    animation: fadeInBg 0.3s;
+}
+.coupon-detail-content {
+    background: linear-gradient(135deg, #fffbe6 70%, #e0f7fa 100%);
+    border-radius: 22px;
+    padding: 40px 48px 32px 48px;
+    min-width: 350px;
+    max-width: 95vw;
+    box-shadow: 0 12px 48px #0004, 0 0 0 8px #5af2b244;
+    font-size: 1.25rem;
+    animation: popupShow 0.2s;
+    position: relative;
+    color: #222;
+}
+.coupon-detail-content h2 {
+    margin-top: 0;
+    color: #ff5252;
+    font-size: 2.1rem;
+    margin-bottom: 22px;
+    letter-spacing: 1px;
+    text-align: center;
+}
+.coupon-detail-content div {
+    margin-bottom: 13px;
+    font-size: 1.18rem;
+}
+.coupon-detail-content b {
+    color: #009688;
+    font-size: 1.22em;
+    font-weight: bold;
+}
+.coupon-detail-content button.close-coupon-detail {
+    margin-top: 28px;
+    background: #ff5252;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 32px;
+    font-size: 1.15rem;
+    cursor: pointer;
+    transition: background 0.2s;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: bold;
+    box-shadow: 0 2px 8px #ff525288;
+}
+.coupon-detail-content button.close-coupon-detail:hover {
+    background: #ff7979;
+}
+@@keyframes popupShow {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
 </style>
 
 <script>
-const prizes = [
-    "10% OFF", "20% OFF", "Free Shipping", "No Luck", "5% OFF", "50K Voucher", "Try Again", "15% OFF", "100K Voucher"
-];
+let prizes = [];
+let boxOrder = []; // <-- Để rỗng ban đầu
+
+async function fetchVouchers() {
+    const res = await fetch('/Coupon/GetAvailableCoupons');
+    let vouchers = await res.json();
+    const randoms = ["No Luck", "Try Again"];
+    while (vouchers.length < 9) {
+        vouchers.push(randoms[Math.floor(Math.random() * randoms.length)]);
+    }
+    prizes = vouchers.slice(0, 9);
+    boxOrder = [...Array(prizes.length).keys()]; // <-- Khởi tạo lại sau khi có prizes
+}
+
+async function setupPrizesAndBoxes() {
+    await fetchVouchers();
+}
+
+setupPrizesAndBoxes();
 
 let opened = false;
 let canPick = false;
-let spinCount = 3;
+let spinCount = 0;
 
-let boxOrder = [...Array(prizes.length).keys()];
 // Mảng lưu voucher của từng hộp theo vị trí ban đầu
 let currentVouchers = [];
 
 const spinBtn = document.getElementById('spin-btn');
-document.getElementById('spin-count').textContent = `Lượt quay: ${spinCount}`;
+document.getElementById('spin-count').textContent = `Number of spins: ${spinCount}`;
 
-function renderBoxes() {
-    const containers = Array.from(document.querySelectorAll('.gift-box-container'));
-    containers.forEach((container, idx) => {
-        container.innerHTML = '';
-        const box = document.createElement('div');
-        box.className = 'gift-box';
-        box.innerHTML = '<div class="gift-lid"></div><div class="gift-ribbon"></div>';
-        container.appendChild(box);
-    });
+// Hàm cập nhật số lượt quay từ backend
+async function updateSpinCount() {
+    const res = await fetch('/Coupon/GetSpinCount');
+    const data = await res.json();
+    spinCount = data.spinCount;
+    document.getElementById('spin-count').textContent = `Spins left: ${spinCount}`;
 }
-renderBoxes();
+
+// Gọi khi trang vừa load
+window.addEventListener('DOMContentLoaded', () => {
+    updateSpinCount();
+    loadVoucherBoard();
+});
 
 spinBtn.onclick = function() {
     if (spinCount <= 0) {
@@ -367,6 +443,8 @@ spinBtn.onclick = function() {
     // 1. Mở tất cả hộp, hiện voucher và gán data-voucher
     const containers = Array.from(document.querySelectorAll('.gift-box-container'));
     const boxes = containers.map(c => c.querySelector('.gift-box'));
+    console.log('prizes:', prizes.length);
+    console.log('boxes:', boxes.length);
     boxes.forEach((box, idx) => {
         box.classList.add('opened');
         box.innerHTML = `<div class="gift-lid"></div><div class="gift-ribbon"></div>
@@ -461,11 +539,13 @@ function setBoxClickEvents() {
                 })
                 .then(res => res.json())
                 .then(data => {
-                    showVoucher(prize);
-                    addVoucherToBoard(prize);
+                    if (data.success) {
+                        showVoucher(prize);
+                        loadVoucherBoard(); // <-- Thay vì addVoucherToBoard(prize)
+                    } else {
+                        showToast(data.message);
+                    }
                 });
-            } else {
-                showVoucher(prize);
             }
         };
     });
@@ -533,4 +613,67 @@ function showToast(msg) {
     toast.style.opacity = '1';
     setTimeout(() => { toast.style.opacity = '0'; }, 1800);
 }
+
+// Gọi lại sau khi load voucher board
+function loadVoucherBoard() {
+    fetch('/Coupon/MyVouchers')
+        .then(res => res.json())
+        .then(data => {
+            const list = document.getElementById('voucher-list');
+            list.innerHTML = '';
+            if (!data.length) {
+                list.innerHTML = '<div style="color:#888;font-size:1.5rem;">Chưa có voucher nào</div>';
+                return;
+            }
+            data.forEach(v => {
+                const item = document.createElement('div');
+                item.className = 'voucher-item';
+                const dt = new Date(v.receivedAt);
+                item.innerHTML = `<div><b>${v.couponCode}</b></div>
+                    <div class="voucher-time">Received at: ${dt.toLocaleDateString('en-GB')} ${dt.toLocaleTimeString('en-GB')}</div>`;
+                list.appendChild(item);
+            });
+            bindVoucherClick();
+        });
+}
+
+function showCouponDetail(code) {
+    fetch(`/Coupon/GetCouponDetail?code=${encodeURIComponent(code)}`)
+        .then(res => res.json())
+        .then(coupon => {
+            if (!coupon) return;
+            const html = `
+                <div class="coupon-detail-popup">
+                    <div class="coupon-detail-content">
+                        <h2>🎁 Voucher Details</h2>
+                        <div><b>Code:</b> ${coupon.code}</div>
+                        <div><b>Discount:</b> ${coupon.isPercentage ? coupon.discountAmount + '%' : coupon.discountAmount.toLocaleString() + 'đ'}</div>
+                        <div><b>Min order:</b> ${coupon.minOrderValue ? coupon.minOrderValue.toLocaleString() + 'đ' : 'None'}</div>
+                        <div><b>Expiry:</b> ${new Date(coupon.expiryDate).toLocaleDateString('en-GB')}</div>
+                        <button class="close-coupon-detail">Close</button>
+                    </div>
+                </div>
+            `;
+            let popup = document.createElement('div');
+            popup.innerHTML = html;
+            document.body.appendChild(popup);
+
+            popup.querySelector('.close-coupon-detail').onclick = () => popup.remove();
+            popup.onclick = e => { if (e.target === popup) popup.remove(); };
+        });
+}
+
+function bindVoucherClick() {
+    document.querySelectorAll('.voucher-item').forEach(item => {
+        item.onclick = function() {
+            const code = this.querySelector('b').textContent.trim();
+            showCouponDetail(code);
+        };
+    });
+}
+
+
+
+// Gọi khi trang vừa load
+window.addEventListener('DOMContentLoaded', loadVoucherBoard);
 </script>

@@ -1,4 +1,5 @@
-﻿using E_commerce.Models;
+﻿using System.Security.Claims;
+using E_commerce.Models;
 using E_commerce.Models.ViewModel;
 using E_commerce.Repository;
 using Microsoft.AspNetCore.Authorization;
@@ -257,27 +258,46 @@ namespace E_commerce.Controllers
 		}
 
         [HttpPost]
-        public async Task<IActionResult> ApplyCoupon(string couponCode)
-        {
-            // Lấy giỏ hàng từ session
-            List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
-            decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
+		public async Task<IActionResult> ApplyCoupon(string couponCode)
+		{
+			// Lấy giỏ hàng từ session
+			List<CartItemModel> cartItems = HttpContext.Session.GetJson<List<CartItemModel>>("Cart") ?? new List<CartItemModel>();
+			decimal grandTotal = cartItems.Sum(x => x.Quantity * x.Price);
 
-            // Áp dụng coupon
-            var (success, message, discount) = await _couponManager.ApplyCouponAsync(couponCode, grandTotal);
-            if (success)
-            {
-                HttpContext.Session.SetString("DiscountAmount", discount.ToString());
-                HttpContext.Session.SetString("CouponCode", couponCode);
-                TempData["success"] = message;
-            }
-            else
-            {
-                TempData["error"] = message;
-            }
+			// Lấy userId hiện tại
+			var userId = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
 
-            return RedirectToAction("Index");
-        }
+			// Kiểm tra user còn voucher này không
+			var userVoucher = await _dataContext.UserVouchers
+				.Where(v => v.UserId == userId && v.CouponCode == couponCode && !v.IsUsed)
+				.OrderBy(v => v.ReceivedAt)
+				.FirstOrDefaultAsync();
+
+			if (userVoucher == null)
+			{
+				TempData["error"] = "You do not own this voucher or it has already been used!";
+				return RedirectToAction("Index");
+			}
+
+			// Áp dụng coupon
+			var (success, message, discount) = await _couponManager.ApplyCouponAsync(couponCode, grandTotal);
+			if (success)
+			{
+				// Đánh dấu voucher đã dùng (hoặc xóa nếu muốn)
+				_dataContext.UserVouchers.Remove(userVoucher); // hoặc userVoucher.IsUsed = true;
+				await _dataContext.SaveChangesAsync();
+
+				HttpContext.Session.SetString("DiscountAmount", discount.ToString());
+				HttpContext.Session.SetString("CouponCode", couponCode);
+				TempData["success"] = message;
+			}
+			else
+			{
+				TempData["error"] = message;
+			}
+
+			return RedirectToAction("Index");
+		}
 
         public IActionResult RemoveCoupon()
         {

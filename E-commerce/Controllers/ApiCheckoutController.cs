@@ -798,7 +798,7 @@ namespace E_commerce.Controllers
                     var couponUsage = new CouponUsageModel
                     {
                         UserId = user.Id,
-                        CouponId = coupon.Id,
+                        CouponCode = coupon.Code,
                         UsedAt = DateTime.Now
                     };
 

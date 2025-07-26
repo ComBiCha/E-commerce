@@ -103,6 +103,8 @@ namespace E_commerce.Areas.Admin.Controllers
                             .SumAsync(od => (od.Price * od.Quantity) - od.DiscountAmount);
 
                         user.Points += Convert.ToInt32(totalAmount);
+                        user.SpinCount += 1;
+
                         await _dataContext.SaveChangesAsync();
                     }
                 }

@@ -128,7 +128,7 @@ namespace E_commerce.Controllers
 
                 // 🔹 KIỂM TRA USER ĐÃ DÙNG COUPON NÀY CHƯA
                 var userCouponUsage = await _dataContext.CouponUsages
-                    .FirstOrDefaultAsync(ucu => ucu.UserId == user.Id && ucu.CouponId == coupon.Id);
+                    .FirstOrDefaultAsync(ucu => ucu.UserId == user.Id && ucu.CouponCode == coupon.Code);
 
                 if (userCouponUsage != null)
                 {
